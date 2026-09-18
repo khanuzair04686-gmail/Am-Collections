@@ -181,26 +181,26 @@ class CartManager {
 
     // Populate Items
     drawerContainer.innerHTML = this.items.map(item => `
-      <div class="flex items-center gap-3 p-3 bg-neutral-900/80 rounded-xl border border-neutral-800/80 hover:border-amber-500/30 transition-all">
-        <div class="w-16 h-16 rounded-lg bg-neutral-950 flex-shrink-0 overflow-hidden border border-neutral-800">
-          <img src="${item.image}" alt="${item.brand} ${item.model}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'" />
+      <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-200 hover:border-neutral-300 shadow-sm transition-all">
+        <div class="w-16 h-16 rounded-lg bg-neutral-50 flex-shrink-0 overflow-hidden border border-neutral-200 p-1 flex items-center justify-center">
+          <img src="${item.image}" alt="${item.brand} ${item.model}" class="w-full h-full object-contain" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'" />
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between gap-1">
-            <span class="text-xs font-semibold uppercase tracking-wider text-amber-400/90">${item.brand}</span>
-            <button onclick="cartManager.removeItem('${item.id}')" class="text-neutral-500 hover:text-red-400 transition-colors p-1" title="Remove item">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-500">${item.brand}</span>
+            <button onclick="cartManager.removeItem('${item.id}')" class="text-neutral-400 hover:text-red-500 transition-colors p-1" title="Remove item">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
           </div>
-          <h4 class="text-sm font-medium text-neutral-200 truncate" title="${item.model}">${item.model}</h4>
+          <h4 class="text-xs font-semibold text-neutral-900 truncate" title="${item.model}">${item.model}</h4>
           <div class="flex items-center justify-between mt-2">
-            <div class="text-amber-400 font-bold text-sm">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
-            <div class="flex items-center bg-neutral-950 border border-neutral-800 rounded-lg overflow-hidden">
-              <button onclick="cartManager.updateQuantity('${item.id}', -1)" class="w-7 h-7 flex items-center justify-center text-neutral-300 hover:bg-neutral-800 transition-colors">
+            <div class="text-neutral-900 font-bold text-sm">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+            <div class="flex items-center bg-neutral-100 border border-neutral-200 rounded-md overflow-hidden">
+              <button onclick="cartManager.updateQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-neutral-600 hover:bg-neutral-200 transition-colors text-xs font-bold">
                 -
               </button>
-              <span class="w-7 text-center text-xs font-semibold text-neutral-100">${item.quantity}</span>
-              <button onclick="cartManager.updateQuantity('${item.id}', 1)" class="w-7 h-7 flex items-center justify-center text-neutral-300 hover:bg-neutral-800 transition-colors">
+              <span class="w-6 text-center text-xs font-semibold text-neutral-800">${item.quantity}</span>
+              <button onclick="cartManager.updateQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-neutral-600 hover:bg-neutral-200 transition-colors text-xs font-bold">
                 +
               </button>
             </div>

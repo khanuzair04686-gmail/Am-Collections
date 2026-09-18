@@ -1,10 +1,11 @@
-// AM COLLECTION - Main Application Controller
+// AM COLLECTION - Main Application Controller (Production Indian E-Commerce)
 
 let liveProducts = (typeof PRODUCTS_DATA !== 'undefined') ? [...PRODUCTS_DATA] : [];
 let activeCategory = 'all';
 let searchQuery = '';
 let currentSort = 'featured';
 let activeQuickViewProduct = null;
+window.pendingCheckoutAction = null;
 
 // Customer Privilege Authentication State
 let currentCustomer = null;
@@ -14,12 +15,119 @@ try {
   currentCustomer = null;
 }
 
+// Wishlist State
+function getWishlist() {
+  try {
+    return JSON.parse(localStorage.getItem('amc_wishlist') || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function isWishlisted(productId) {
+  return getWishlist().includes(productId);
+}
+
+function toggleWishlist(productId, e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  let list = getWishlist();
+  const idx = list.indexOf(productId);
+  if (idx > -1) {
+    list.splice(idx, 1);
+    showToast('Removed from your Wishlist', 'info');
+  } else {
+    list.push(productId);
+    showToast('Added to your Wishlist ❤️', 'success');
+  }
+  localStorage.setItem('amc_wishlist', JSON.stringify(list));
+  updateWishlistUI();
+  renderProducts();
+}
+
+function updateWishlistUI() {
+  const count = getWishlist().length;
+  document.querySelectorAll('.wishlist-count-badge').forEach(el => {
+    el.textContent = count;
+    if (count > 0) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+}
+
+function openWishlistModal() {
+  const modal = document.getElementById('wishlist-modal');
+  const container = document.getElementById('wishlist-items-container');
+  if (!modal || !container) return;
+
+  const list = getWishlist();
+  const wishlistedProducts = liveProducts.filter(p => list.includes(p.id));
+
+  if (wishlistedProducts.length === 0) {
+    container.innerHTML = `
+      <div class="py-12 text-center">
+        <div class="w-14 h-14 rounded-full bg-neutral-100 flex items-center justify-center mx-auto text-neutral-400 mb-3">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        </div>
+        <p class="text-sm font-semibold text-neutral-800">Your Wishlist is Empty</p>
+        <p class="text-xs text-neutral-500 mt-1">Explore our Master Copy collection and tap the heart icon to save timepieces.</p>
+        <button onclick="closeWishlistModal(); window.location.href='#catalog';" class="btn-primary mt-4 px-5 py-2 text-xs">
+          Explore Watches
+        </button>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-1">
+        ${wishlistedProducts.map(p => `
+          <div class="bg-white border border-neutral-200 rounded-xl p-3 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div class="relative aspect-square w-full bg-white flex items-center justify-center mb-2 cursor-pointer" onclick="closeWishlistModal(); openQuickView('${p.id}')">
+              <img src="${p.image}" alt="${p.model}" class="w-full h-full object-contain" />
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-500">${p.brand}</span>
+              <h4 class="text-xs font-semibold text-neutral-900 line-clamp-1">${p.model}</h4>
+              <div class="text-xs font-bold text-neutral-900 mt-1">₹${p.price.toLocaleString('en-IN')}</div>
+            </div>
+            <div class="flex items-center gap-2 mt-3 pt-2 border-t border-neutral-100">
+              <button onclick="addToCart('${p.id}'); closeWishlistModal(); openCartDrawer();" class="flex-1 btn-primary py-1.5 text-[11px]">
+                Add to Bag
+              </button>
+              <button onclick="toggleWishlist('${p.id}'); openWishlistModal();" class="p-1.5 text-neutral-400 hover:text-red-500 transition-colors" title="Remove">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWishlistModal() {
+  const modal = document.getElementById('wishlist-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize Cart UI
   cartManager.renderCartUI();
 
   // Initialize Customer Auth UI
   updateCustomerHeaderUI();
+
+  // Initialize Wishlist UI
+  updateWishlistUI();
 
   // Render Initial Products
   renderProducts();
@@ -91,10 +199,24 @@ function applyBrandingSettings(settings) {
 function setupEventListeners() {
   // Search Input
   const searchInput = document.getElementById('search-input');
+  const searchClear = document.getElementById('search-clear-btn');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value.trim().toLowerCase();
+      if (searchClear) {
+        if (searchQuery.length > 0) searchClear.classList.remove('hidden');
+        else searchClear.classList.add('hidden');
+      }
       renderProducts();
+    });
+  }
+  if (searchClear && searchInput) {
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      searchClear.classList.add('hidden');
+      renderProducts();
+      searchInput.focus();
     });
   }
 
@@ -111,13 +233,13 @@ function setupEventListeners() {
   document.querySelectorAll('.category-filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.category-filter-btn').forEach(b => {
-        b.classList.remove('bg-amber-500', 'text-black', 'border-amber-400');
-        b.classList.add('bg-neutral-900', 'text-neutral-300', 'border-neutral-800');
+        b.classList.remove('bg-[#111111]', 'text-white', 'border-[#111111]');
+        b.classList.add('bg-white', 'text-neutral-700', 'border-neutral-200');
       });
 
       const target = e.currentTarget;
-      target.classList.remove('bg-neutral-900', 'text-neutral-300', 'border-neutral-800');
-      target.classList.add('bg-amber-500', 'text-black', 'border-amber-400');
+      target.classList.remove('bg-white', 'text-neutral-700', 'border-neutral-200');
+      target.classList.add('bg-[#111111]', 'text-white', 'border-[#111111]');
 
       activeCategory = target.getAttribute('data-category');
       renderProducts();
@@ -136,26 +258,33 @@ function setupEventListeners() {
   const cartBackdrop = document.getElementById('cart-backdrop');
   if (cartBackdrop) cartBackdrop.addEventListener('click', closeCartDrawer);
 
-  // COD Checkout Modal Trigger
+  // COD Checkout Modal Trigger (WITH AUTHENTICATION GUARD)
   const codTriggerBtn = document.getElementById('cart-checkout-cod-btn');
   if (codTriggerBtn) {
     codTriggerBtn.addEventListener('click', () => {
       closeCartDrawer();
+      if (!currentCustomer) {
+        window.pendingCheckoutAction = { type: 'checkout', tab: 'cod' };
+        showToast('Please sign in or create an account to proceed with your order.', 'info');
+        openAuthModal('signin');
+        return;
+      }
       openCheckoutModal('cod');
     });
   }
 
-  // WhatsApp Checkout Modal / Direct Action from Cart
+  // WhatsApp Checkout Modal / Action (WITH AUTHENTICATION GUARD)
   const cartWaBtn = document.getElementById('cart-checkout-wa-btn');
   if (cartWaBtn) {
     cartWaBtn.addEventListener('click', () => {
-      const items = cartManager.getItems();
-      if (items.length === 0) {
-        showToast('Your cart is empty. Add a watch to order!', 'info');
+      closeCartDrawer();
+      if (!currentCustomer) {
+        window.pendingCheckoutAction = { type: 'checkout', tab: 'wa' };
+        showToast('Please sign in or create an account to proceed with your order.', 'info');
+        openAuthModal('signin');
         return;
       }
-      closeCartDrawer();
-      openCheckoutModal('whatsapp');
+      openCheckoutModal('wa');
     });
   }
 
@@ -163,72 +292,19 @@ function setupEventListeners() {
   const checkoutCloseBtn = document.getElementById('checkout-modal-close');
   if (checkoutCloseBtn) checkoutCloseBtn.addEventListener('click', closeCheckoutModal);
 
-  // Success Modal Close
-  const successCloseBtn = document.getElementById('order-success-close');
-  if (successCloseBtn) {
-    successCloseBtn.addEventListener('click', () => {
-      document.getElementById('order-success-modal').classList.add('hidden');
+  // Quick View Modal Close
+  const qvCloseBtn = document.getElementById('quick-view-close-btn');
+  if (qvCloseBtn) qvCloseBtn.addEventListener('click', closeQuickViewModal);
+
+  // Quick View Backdrop click
+  const qvModal = document.getElementById('quick-view-modal');
+  if (qvModal) {
+    qvModal.addEventListener('click', (e) => {
+      if (e.target === qvModal) closeQuickViewModal();
     });
   }
 
-  // Quick View Close
-  const quickViewClose = document.getElementById('quick-view-close');
-  if (quickViewClose) {
-    quickViewClose.addEventListener('click', closeQuickViewModal);
-  }
-
-  // COD Checkout Form Submission
-  const codForm = document.getElementById('cod-checkout-form');
-  if (codForm) {
-    codForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      handleCodFormSubmit();
-    });
-  }
-
-  // WhatsApp Order Form Submission
-  const waForm = document.getElementById('whatsapp-order-form');
-  if (waForm) {
-    waForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      handleWhatsAppFormSubmit();
-    });
-  }
-
-  // Coupon Form
-  const couponForm = document.getElementById('cart-coupon-form');
-  if (couponForm) {
-    couponForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const codeInput = document.getElementById('coupon-input');
-      const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
-      if (code === 'WELCOME500' || code === 'LUXURY10') {
-        cartManager.saveCoupon(code);
-        showToast(`Promo code "${code}" applied successfully! 🎁`, 'success');
-        if (codeInput) codeInput.value = '';
-      } else {
-        showToast('Invalid coupon code. Try WELCOME500 or LUXURY10', 'error');
-      }
-    });
-  }
-
-  // Store WhatsApp Setting Dialog
-  const phoneSettingBtn = document.getElementById('settings-wa-btn');
-  if (phoneSettingBtn) {
-    phoneSettingBtn.addEventListener('click', handleStorePhoneChange);
-  }
-
-  // Floating WhatsApp Support
-  const floatingWa = document.getElementById('floating-whatsapp');
-  if (floatingWa) {
-    floatingWa.addEventListener('click', () => {
-      const phone = checkoutManager.getStorePhone();
-      const text = encodeURIComponent("Hello AM COLLECTION! I have an inquiry regarding your luxury master copy watches.");
-      window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
-    });
-  }
-
-  // Keyboard Escape
+  // Escape key closes modals
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeCartDrawer();
@@ -237,38 +313,70 @@ function setupEventListeners() {
       closeAuthModal();
       closeProfileModal();
       closeMyOrdersModal();
-      const successModal = document.getElementById('order-success-modal');
-      if (successModal) successModal.classList.add('hidden');
+      closeWishlistModal();
     }
   });
 
-  // Click outside to close user dropdown
-  document.addEventListener('click', (e) => {
-    const container = document.getElementById('user-account-container');
-    const dropdown = document.getElementById('user-dropdown-menu');
-    if (container && dropdown && !container.contains(e.target)) {
-      dropdown.classList.add('hidden');
-    }
+  // COD Order Form Submit
+  const codForm = document.getElementById('checkout-cod-form');
+  if (codForm) codForm.addEventListener('submit', handleCodFormSubmit);
+
+  // WhatsApp Order Form Submit
+  const waForm = document.getElementById('checkout-wa-form');
+  if (waForm) waForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleWhatsAppFormSubmit();
   });
+
+  // Cart Coupon Form
+  const couponForm = document.getElementById('cart-coupon-form');
+  if (couponForm) {
+    couponForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+      if (!code) return;
+      
+      if (code === 'WELCOME500' || code === 'PRIVILEGE500') {
+        cartManager.saveCoupon(code);
+        showToast(`Promo code '${code}' applied! ₹500 discount added.`, 'success');
+      } else {
+        showToast('Invalid promo code. Use WELCOME500 for ₹500 OFF.', 'error');
+      }
+    });
+  }
+
+  // Customer Privilege Auth Forms
+  const regForm = document.getElementById('customer-register-form');
+  if (regForm) regForm.addEventListener('submit', handleCustomerRegister);
+
+  const signinForm = document.getElementById('customer-signin-form');
+  if (signinForm) signinForm.addEventListener('submit', handleCustomerLogin);
+
+  const profileForm = document.getElementById('customer-profile-form');
+  if (profileForm) profileForm.addEventListener('submit', handleProfileUpdate);
 }
 
-// Render Products Grid
+// 4-Column Responsive Product Card Renderer
 function renderProducts() {
   const container = document.getElementById('products-grid');
-  const countEl = document.getElementById('products-count-badge');
+  const countBadge = document.getElementById('products-count-badge');
   if (!container) return;
 
-  // Filter
-  let filtered = liveProducts.filter(product => {
-    const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
-    const matchesSearch = !searchQuery || 
-      product.brand.toLowerCase().includes(searchQuery) ||
-      product.model.toLowerCase().includes(searchQuery) ||
-      product.movement.toLowerCase().includes(searchQuery) ||
-      product.description.toLowerCase().includes(searchQuery);
+  // Filter by category
+  let filtered = [...liveProducts];
+  if (activeCategory !== 'all') {
+    filtered = filtered.filter(p => p.category === activeCategory);
+  }
 
-    return matchesCategory && matchesSearch;
-  });
+  // Filter by search query
+  if (searchQuery) {
+    filtered = filtered.filter(p => 
+      p.brand.toLowerCase().includes(searchQuery) ||
+      p.model.toLowerCase().includes(searchQuery) ||
+      p.category.toLowerCase().includes(searchQuery) ||
+      (p.movement && p.movement.toLowerCase().includes(searchQuery))
+    );
+  }
 
   // Sort
   if (currentSort === 'price-low') {
@@ -281,139 +389,112 @@ function renderProducts() {
     filtered.sort((a, b) => a.model.localeCompare(b.model));
   }
 
-  if (countEl) {
-    countEl.textContent = `${filtered.length} Masterpieces Available`;
+  // Update counter
+  if (countBadge) {
+    countBadge.textContent = `Showing ${filtered.length} ${filtered.length === 1 ? 'timepiece' : 'timepieces'}`;
   }
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div class="col-span-full py-16 text-center">
-        <div class="w-16 h-16 mx-auto mb-4 text-neutral-600">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <div class="col-span-4 py-16 text-center">
+        <div class="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mx-auto text-neutral-400 mb-4 border border-neutral-200">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
-        <h3 class="text-xl font-bold text-neutral-300 font-luxury mb-2">No Matching Watches Found</h3>
-        <p class="text-neutral-500 text-sm mb-6 max-w-md mx-auto">Try searching for other luxury brands like Rolex, Casio Vintage, Patek Philippe, or Audemars Piguet.</p>
-        <button onclick="resetFilters()" class="gold-btn px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider">
-          View All Watches
+        <h3 class="text-base font-bold text-neutral-900 mb-1">No matching watches found</h3>
+        <p class="text-xs text-neutral-500 mb-6 max-w-sm mx-auto">We couldn't find any watches matching your criteria. Try adjusting your search or filters.</p>
+        <button onclick="resetFilters()" class="btn-primary px-5 py-2 text-xs">
+          Reset All Filters
         </button>
       </div>
     `;
     return;
   }
 
+  // Compact 4-Column Product Cards (Strictly 4 per row, equal heights, centered images, mobile-optimized)
   container.innerHTML = filtered.map(product => {
     const savingsPercent = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    const wishlisted = isWishlisted(product.id);
 
     return `
-      <div class="product-card group relative flex flex-col bg-neutral-900/60 rounded-2xl border border-neutral-800/80 hover:border-amber-500/40 transition-all duration-300 luxury-card overflow-hidden">
+      <div class="product-card group relative bg-white border border-[#E5E7EB] rounded-xl hover:border-neutral-400 hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden">
         
-        <!-- Image & Quick View trigger -->
-        <div onclick="openQuickView('${product.id}')" class="product-image-container relative aspect-square w-full cursor-pointer overflow-hidden">
+        <!-- Image Area (Fixed Ratio, Contain, Centered) -->
+        <div onclick="openQuickView('${product.id}')" class="product-image-container relative aspect-square w-full cursor-pointer bg-white p-2 sm:p-3 flex items-center justify-center overflow-hidden">
           <img 
             src="${product.image}" 
             alt="${product.brand} ${product.model}" 
             loading="lazy" 
-            class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+            class="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
             onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'"
           />
           
-          <!-- Top Badges -->
-          <div class="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
-            <span class="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase bg-amber-500 text-black rounded-md shadow-lg">
-              ${product.badge}
-            </span>
-            <span class="px-2 py-0.5 text-[9px] font-semibold tracking-wider uppercase bg-black/80 text-amber-300 border border-amber-500/30 rounded backdrop-blur-md">
-              1:1 Master Clone
+          <!-- Top Left Badge -->
+          <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 z-10">
+            <span class="px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold tracking-wider uppercase bg-neutral-900 text-white rounded shadow-sm">
+              ${product.badge || '1:1 CLONE'}
             </span>
           </div>
 
-          <!-- Hover Overlay / Tap to Open Badge -->
-          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
-            <span class="px-3.5 py-2 rounded-xl bg-black/85 text-amber-400 border border-amber-400/50 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-2xl flex items-center gap-1.5">
-              <span>👁️</span> Open &amp; Inspect
-            </span>
-          </div>
-
-          <!-- Quick View Top-Right Float Button -->
+          <!-- Wishlist Heart Button Top Right -->
           <button 
             type="button"
-            onclick="event.stopPropagation(); openQuickView('${product.id}')"
-            class="absolute top-3 right-3 w-9 h-9 rounded-full bg-neutral-900/85 backdrop-blur-md border border-neutral-700 text-neutral-300 hover:text-amber-400 hover:border-amber-400 flex items-center justify-center transition-all shadow-xl z-20"
-            title="Open Watch Details"
+            onclick="toggleWishlist('${product.id}', event)"
+            class="wishlist-btn absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center z-20 ${wishlisted ? 'active' : ''}"
+            title="${wishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}"
+            aria-label="Wishlist"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 ${wishlisted ? 'text-red-500 fill-red-500' : 'text-neutral-500 hover:text-red-500'}" fill="${wishlisted ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
           </button>
-
-          <!-- Savings Badge -->
-          <div class="absolute bottom-3 right-3 px-2 py-0.5 rounded bg-emerald-950/90 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold z-10">
-            ${savingsPercent}% OFF
-          </div>
         </div>
 
-        <!-- Details Section -->
-        <div class="p-5 flex-1 flex flex-col justify-between">
+        <!-- Product Details -->
+        <div class="p-2 sm:p-3 flex-1 flex flex-col justify-between border-t border-neutral-100">
           <div>
-            <!-- Brand & Movement -->
-            <div class="flex items-center justify-between gap-2 mb-1.5">
-              <span class="text-[11px] font-bold tracking-widest uppercase text-amber-400 cursor-pointer" onclick="openQuickView('${product.id}')">${product.brand}</span>
-              <div class="flex items-center gap-1 text-[11px] text-neutral-400 font-medium">
-                <span class="text-amber-400">★</span>
+            <!-- Brand & Rating Row -->
+            <div class="flex items-center justify-between gap-1 mb-0.5">
+              <span class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-neutral-500 truncate" onclick="openQuickView('${product.id}')">${product.brand}</span>
+              <div class="flex items-center gap-0.5 text-[9px] sm:text-[10px] text-neutral-600 font-semibold flex-shrink-0">
+                <span class="text-amber-500">★</span>
                 <span>${product.rating}</span>
-                <span class="text-neutral-600">(${product.reviewsCount})</span>
               </div>
             </div>
 
-            <!-- Model Name (Clickable) -->
+            <!-- Model Title (Max 2 lines) -->
             <h3 
               onclick="openQuickView('${product.id}')"
-              class="text-base font-bold text-neutral-100 hover:text-amber-300 transition-colors line-clamp-1 mb-1 cursor-pointer" 
-              title="${product.model} (Click to inspect)"
+              class="text-[10px] sm:text-xs font-semibold text-neutral-900 hover:text-neutral-700 line-clamp-2 leading-tight cursor-pointer min-h-[26px] sm:min-h-[32px]"
+              title="${product.model}"
             >
               ${product.model}
             </h3>
 
-            <!-- Movement Pill -->
-            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 mb-3 bg-neutral-950 rounded-md border border-neutral-800 text-[11px] text-neutral-300">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="truncate">${product.movement}</span>
-            </div>
-
             <!-- Price Block -->
-            <div class="flex items-baseline gap-2 mb-3">
-              <span class="text-xl font-extrabold text-white">₹${product.price.toLocaleString('en-IN')}</span>
-              <span class="text-xs text-neutral-500 line-through">₹${product.originalPrice.toLocaleString('en-IN')}</span>
-              <span class="text-[10px] text-amber-500/90 font-medium">Free COD</span>
+            <div class="mt-1 flex flex-wrap items-baseline gap-1">
+              <span class="text-xs sm:text-sm font-bold text-neutral-900">₹${product.price.toLocaleString('en-IN')}</span>
+              <span class="text-[9px] sm:text-[10px] text-neutral-400 line-through">₹${product.originalPrice.toLocaleString('en-IN')}</span>
+              <span class="text-[9px] sm:text-[10px] font-bold text-[#15803D]">${savingsPercent}% OFF</span>
             </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="space-y-2 pt-2 border-t border-neutral-800/80">
-            <!-- Open & View Watch Button -->
+          <!-- Compact Action Area -->
+          <div class="mt-2.5 pt-2 border-t border-neutral-100 flex items-center gap-1.5">
             <button 
               type="button"
-              onclick="openQuickView('${product.id}')"
-              class="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-neutral-700 text-neutral-200 hover:text-amber-300 border border-neutral-700/80 hover:border-amber-400/40 flex items-center justify-center gap-1.5 text-xs font-semibold tracking-wider transition-all cursor-pointer"
+              onclick="addToCart('${product.id}'); openCartDrawer();"
+              class="flex-1 py-1.5 sm:py-2 px-2 rounded-md bg-[#111111] hover:bg-black text-white text-[10px] sm:text-xs font-medium transition-colors flex items-center justify-center gap-1"
             >
-              <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-              <span>Inspect &amp; View Details</span>
+              <svg class="w-3.5 h-3.5 hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+              <span>Add to Bag</span>
             </button>
-
-            <!-- Add to Cart -->
             <button 
-              onclick="addToCart('${product.id}')"
-              class="w-full py-2.5 px-4 rounded-xl gold-btn flex items-center justify-center gap-2 text-xs font-bold tracking-wider uppercase transition-all shadow-md active:scale-95"
+              type="button"
+              onclick="buyNow('${product.id}')"
+              class="py-1.5 sm:py-2 px-2 rounded-md bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[10px] sm:text-xs font-semibold transition-colors"
+              title="Buy Now (Cash on Delivery)"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-              <span>Add to Cart</span>
-            </button>
-
-            <!-- Direct WhatsApp Order -->
-            <button 
-              onclick="directWhatsAppBuy('${product.id}')"
-              class="w-full py-2 px-3 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-400 border border-emerald-500/40 hover:border-emerald-400 flex items-center justify-center gap-2 text-xs font-semibold tracking-wider transition-all"
-            >
-              <svg class="w-4 h-4 fill-current text-emerald-400" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.288.043.088.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.861.174.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/></svg>
-              <span>Order via WhatsApp</span>
+              Buy Now
             </button>
           </div>
         </div>
@@ -432,39 +513,61 @@ function resetFilters() {
   const searchInput = document.getElementById('search-input');
   if (searchInput) searchInput.value = '';
 
+  const searchClear = document.getElementById('search-clear-btn');
+  if (searchClear) searchClear.classList.add('hidden');
+
   const sortSelect = document.getElementById('sort-select');
   if (sortSelect) sortSelect.value = 'featured';
 
   document.querySelectorAll('.category-filter-btn').forEach(b => {
     if (b.getAttribute('data-category') === 'all') {
-      b.classList.remove('bg-neutral-900', 'text-neutral-300', 'border-neutral-800');
-      b.classList.add('bg-amber-500', 'text-black', 'border-amber-400');
+      b.classList.remove('bg-white', 'text-neutral-700', 'border-neutral-200');
+      b.classList.add('bg-[#111111]', 'text-white', 'border-[#111111]');
     } else {
-      b.classList.remove('bg-amber-500', 'text-black', 'border-amber-400');
-      b.classList.add('bg-neutral-900', 'text-neutral-300', 'border-neutral-800');
+      b.classList.remove('bg-[#111111]', 'text-white', 'border-[#111111]');
+      b.classList.add('bg-white', 'text-neutral-700', 'border-neutral-200');
     }
   });
 
   renderProducts();
 }
 
-// Add To Cart Action
-function addToCart(productId, qty = 1) {
+// Add To Cart Wrapper
+function addToCart(productId, quantity = 1) {
+  const product = liveProducts.find(p => p.id === productId);
+  if (!product) return;
+  cartManager.addItem(product, quantity);
+  showToast(`${product.model} added to your bag! 🛍️`, 'success');
+}
+
+// BUY NOW (WITH MANDATORY AUTHENTICATION REQUIREMENT)
+function buyNow(productId) {
   const product = liveProducts.find(p => p.id === productId);
   if (!product) return;
 
-  cartManager.addItem(product, qty);
-  showToast(`Added ${product.brand} ${product.model} to cart!`, 'success');
+  // Preserve in cart
+  cartManager.addItem(product, 1);
+
+  // Authenticate before allowing order
+  if (!currentCustomer) {
+    window.pendingCheckoutAction = { type: 'checkout', tab: 'cod', productId };
+    showToast('Please sign in or create an account to proceed with your order.', 'info');
+    openAuthModal('signin');
+    return;
+  }
+
+  // User is authenticated -> proceed to checkout directly
+  openCheckoutModal('cod');
 }
 
-// Direct Buy via WhatsApp
+// Direct WhatsApp Buy (Also checks auth or proceeds directly)
 function directWhatsAppBuy(productId) {
   const product = liveProducts.find(p => p.id === productId);
   if (!product) return;
   checkoutManager.quickBuyWhatsApp(product);
 }
 
-// Quick View / Watch Detail Modal Controller
+// Quick View / Full Inspection Modal Open
 function openQuickView(productId) {
   const product = liveProducts.find(p => p.id === productId);
   if (!product) return;
@@ -473,81 +576,82 @@ function openQuickView(productId) {
   const modal = document.getElementById('quick-view-modal');
   if (!modal) return;
 
-  // Set Badges & Ratings
+  const savingsPercent = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+
+  // Bind Data
+  const imgEl = document.getElementById('qv-image');
+  if (imgEl) {
+    imgEl.src = product.image;
+    imgEl.alt = `${product.brand} ${product.model}`;
+  }
+
+  const brandEl = document.getElementById('qv-brand');
+  if (brandEl) brandEl.textContent = product.brand.toUpperCase();
+
+  const modelEl = document.getElementById('qv-model');
+  if (modelEl) modelEl.textContent = product.model;
+
+  const taglineEl = document.getElementById('qv-tagline');
+  if (taglineEl) taglineEl.textContent = product.tagline || '1:1 Master Copy Horology Clone';
+
+  const priceEl = document.getElementById('qv-price');
+  if (priceEl) priceEl.textContent = `₹${product.price.toLocaleString('en-IN')}`;
+
+  const origPriceEl = document.getElementById('qv-original-price');
+  if (origPriceEl) origPriceEl.textContent = `₹${product.originalPrice.toLocaleString('en-IN')}`;
+
+  const descEl = document.getElementById('qv-description');
+  if (descEl) descEl.textContent = product.description || 'Precision crafted 1:1 master copy with exact weight, materials, and Japanese automatic caliber.';
+
   const badgeEl = document.getElementById('qv-badge');
   if (badgeEl) badgeEl.textContent = product.badge || 'MASTER EDITION';
 
-  const ratingVal = document.getElementById('qv-rating-val');
-  if (ratingVal) ratingVal.textContent = product.rating || '4.9';
+  const ratingValEl = document.getElementById('qv-rating-val');
+  if (ratingValEl) ratingValEl.textContent = `${product.rating} (${product.reviewsCount} verified reviews)`;
 
-  const reviewsVal = document.getElementById('qv-reviews-val');
-  if (reviewsVal) reviewsVal.textContent = `(${product.reviewsCount || 100}+ reviews)`;
+  const savingsBadgeEl = document.getElementById('qv-savings-badge');
+  if (savingsBadgeEl) savingsBadgeEl.textContent = `Save ${savingsPercent}% (₹${(product.originalPrice - product.price).toLocaleString('en-IN')})`;
 
-  const savingsPercent = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
-  const savingsAmount = product.originalPrice - product.price;
-  const savingsBadge = document.getElementById('qv-savings-badge');
-  if (savingsBadge) {
-    savingsBadge.textContent = `Save ₹${savingsAmount.toLocaleString('en-IN')} (${savingsPercent}% OFF)`;
-  }
+  // Specs Table
+  const movementEl = document.getElementById('qv-spec-movement');
+  if (movementEl) movementEl.textContent = product.movement || 'Japanese Automatic Caliber';
 
-  // Set Details
-  const brandEl = document.getElementById('qv-brand');
-  const modelEl = document.getElementById('qv-model');
-  const taglineEl = document.getElementById('qv-tagline');
-  const priceEl = document.getElementById('qv-price');
-  const originalPriceEl = document.getElementById('qv-original-price');
-  const descEl = document.getElementById('qv-description');
-  const imgEl = document.getElementById('qv-image');
+  const dialEl = document.getElementById('qv-spec-dial');
+  if (dialEl) dialEl.textContent = product.dialSize || '40-41 mm Standard';
 
-  if (brandEl) brandEl.textContent = product.brand;
-  if (modelEl) modelEl.textContent = product.model;
-  if (taglineEl) taglineEl.textContent = product.tagline;
-  if (priceEl) priceEl.textContent = `₹${product.price.toLocaleString('en-IN')}`;
-  if (originalPriceEl) originalPriceEl.textContent = `₹${product.originalPrice.toLocaleString('en-IN')}`;
-  if (descEl) descEl.textContent = product.description;
-  if (imgEl) imgEl.src = product.image;
+  const glassEl = document.getElementById('qv-spec-glass');
+  if (glassEl) glassEl.textContent = product.glass || 'Sapphire Coated Scratch-Resistant';
 
-  // Set Specs
-  const specMovement = document.getElementById('qv-spec-movement');
-  const specDial = document.getElementById('qv-spec-dial');
-  const specGlass = document.getElementById('qv-spec-glass');
-  const specStrap = document.getElementById('qv-spec-strap');
-  const specWater = document.getElementById('qv-spec-water');
-  const specClasp = document.getElementById('qv-spec-clasp');
+  const strapEl = document.getElementById('qv-spec-strap');
+  if (strapEl) strapEl.textContent = product.strap || '904L Solid Stainless Steel';
 
-  if (specMovement) specMovement.textContent = product.movement || '1:1 Automatic';
-  if (specDial) specDial.textContent = product.dialSize || 'Standard Case';
-  if (specGlass) specGlass.textContent = product.glass || 'Sapphire Crystal';
-  if (specStrap) specStrap.textContent = product.strap || 'Solid 904L Steel';
-  if (specWater) specWater.textContent = product.waterResistance || 'Daily Splash Proof';
-  if (specClasp) specClasp.textContent = product.clasp || 'Deployment Clasp';
+  const waterEl = document.getElementById('qv-spec-water');
+  if (waterEl) waterEl.textContent = product.waterResistance || 'Daily Splash & Rain Proof';
 
-  // Set Features Checklist
+  const claspEl = document.getElementById('qv-spec-clasp');
+  if (claspEl) claspEl.textContent = product.clasp || 'Authentic Double Folding Lock';
+
+  // Features List
   const featuresList = document.getElementById('qv-features-list');
-  if (featuresList) {
-    const feats = Array.isArray(product.features) && product.features.length > 0
-      ? product.features
-      : ['Exact 1:1 weight & dimensions', 'Sapphire crystal coating', 'Smooth automatic movement', 'Laser engravings'];
-
-    featuresList.innerHTML = feats.map(f => `
-      <li class="flex items-center gap-2 text-xs text-neutral-300">
-        <span class="text-amber-400 font-bold">✔</span>
+  if (featuresList && Array.isArray(product.features)) {
+    featuresList.innerHTML = product.features.map(f => `
+      <li class="flex items-start gap-2 text-xs text-neutral-700">
+        <span class="text-emerald-600 font-bold mt-0.5">✔</span>
         <span>${f}</span>
       </li>
     `).join('');
   }
 
-  // 1-Click Buy Now (COD) Inside Modal
+  // BUY NOW Button (Guarded by Auth)
   const buyNowBtn = document.getElementById('qv-buy-now-btn');
   if (buyNowBtn) {
     buyNowBtn.onclick = () => {
-      cartManager.addItem(product, 1);
       closeQuickViewModal();
-      openCheckoutModal('cod');
+      buyNow(product.id);
     };
   }
 
-  // Add to Bag Button Inside Modal
+  // Add to Bag Button
   const addBtn = document.getElementById('qv-add-to-cart-btn');
   if (addBtn) {
     addBtn.onclick = () => {
@@ -557,7 +661,7 @@ function openQuickView(productId) {
     };
   }
 
-  // WhatsApp Button Inside Modal
+  // WhatsApp Button
   const waBtn = document.getElementById('qv-whatsapp-btn');
   if (waBtn) {
     waBtn.onclick = () => {
@@ -565,10 +669,10 @@ function openQuickView(productId) {
     };
   }
 
-  // ── Product Showcase Video ──────────────────────────
+  // Video Section
   const qvVideoSection = document.getElementById('qv-video-section');
-  const qvVideoEl      = document.getElementById('qv-video-player');
-  const qvVideoIframe  = document.getElementById('qv-video-iframe');
+  const qvVideoEl = document.getElementById('qv-video-player');
+  const qvVideoIframe = document.getElementById('qv-video-iframe');
 
   if (qvVideoSection && qvVideoEl && qvVideoIframe) {
     const vid = product.videoUrl || '';
@@ -601,10 +705,9 @@ function closeQuickViewModal() {
   const modal = document.getElementById('quick-view-modal');
   if (modal) modal.classList.add('hidden');
   document.body.style.overflow = '';
-  // Pause and unload any video
-  const qvVideoEl     = document.getElementById('qv-video-player');
+  const qvVideoEl = document.getElementById('qv-video-player');
   const qvVideoIframe = document.getElementById('qv-video-iframe');
-  if (qvVideoEl)     { qvVideoEl.pause(); qvVideoEl.src = ''; }
+  if (qvVideoEl) { qvVideoEl.pause(); qvVideoEl.src = ''; }
   if (qvVideoIframe) { qvVideoIframe.src = ''; }
   activeQuickViewProduct = null;
 }
@@ -632,60 +735,76 @@ function closeCartDrawer() {
     setTimeout(() => {
       backdrop.classList.add('hidden');
       document.body.style.overflow = '';
-    }, 350);
+    }, 300);
   }
 }
 
-// Checkout Modal Open/Close & Tab Selection
+// Checkout Modal (WITH AUTHENTICATION GUARD)
 function openCheckoutModal(defaultTab = 'cod') {
+  if (!currentCustomer) {
+    window.pendingCheckoutAction = { type: 'checkout', tab: defaultTab };
+    showToast('Please sign in to access checkout.', 'info');
+    openAuthModal('signin');
+    return;
+  }
+
   const modal = document.getElementById('checkout-modal');
   if (!modal) return;
 
   const items = cartManager.getItems();
   if (items.length === 0) {
-    showToast('Your cart is empty. Add a watch first!', 'info');
+    showToast('Your cart is empty. Add a timepiece first!', 'info');
     return;
   }
 
-  // Update Checkout Order Summary in modal
-  renderCheckoutSummary();
-
-  // Tab switching
-  switchCheckoutTab(defaultTab);
-
-  // Pre-fill Customer details if logged in
-  if (currentCustomer) {
-    const codName = document.getElementById('cod-name');
-    const codPhone = document.getElementById('cod-phone');
-    const codAltPhone = document.getElementById('cod-alt-phone');
-    const codAddress = document.getElementById('cod-address');
-    const codLandmark = document.getElementById('cod-landmark');
-    const codCity = document.getElementById('cod-city');
-    const codState = document.getElementById('cod-state');
-    const codPincode = document.getElementById('cod-pincode');
-
-    const waName = document.getElementById('wa-name');
-    const waPhone = document.getElementById('wa-phone');
-    const waAddress = document.getElementById('wa-address');
-    const waCity = document.getElementById('wa-city');
-    const waPincode = document.getElementById('wa-pincode');
-
-    if (codName && !codName.value) codName.value = currentCustomer.name || '';
-    if (codPhone && !codPhone.value) codPhone.value = currentCustomer.phone || '';
-    if (codAltPhone && !codAltPhone.value && currentCustomer.altPhone) codAltPhone.value = currentCustomer.altPhone;
-    if (codAddress && !codAddress.value && currentCustomer.address) codAddress.value = currentCustomer.address;
-    if (codLandmark && !codLandmark.value && currentCustomer.landmark) codLandmark.value = currentCustomer.landmark;
-    if (codCity && !codCity.value && currentCustomer.city) codCity.value = currentCustomer.city;
-    if (codState && !codState.value && currentCustomer.state) codState.value = currentCustomer.state;
-    if (codPincode && !codPincode.value && currentCustomer.pincode) codPincode.value = currentCustomer.pincode;
-
-    if (waName && !waName.value) waName.value = currentCustomer.name || '';
-    if (waPhone && !waPhone.value) waPhone.value = currentCustomer.phone || '';
-    if (waAddress && !waAddress.value && currentCustomer.address) waAddress.value = currentCustomer.address;
-    if (waCity && !waCity.value && currentCustomer.city) waCity.value = currentCustomer.city;
-    if (waPincode && !waPincode.value && currentCustomer.pincode) waPincode.value = currentCustomer.pincode;
+  // Update Summary
+  const summaryContainer = document.getElementById('checkout-items-summary');
+  if (summaryContainer) {
+    summaryContainer.innerHTML = items.map(item => `
+      <div class="flex items-center justify-between text-xs py-1.5 border-b border-neutral-100">
+        <div class="flex items-center gap-2">
+          <span class="w-4 text-center font-bold text-neutral-500">${item.quantity}×</span>
+          <span class="font-medium text-neutral-800 truncate max-w-[200px]">${item.brand} ${item.model}</span>
+        </div>
+        <span class="font-semibold text-neutral-900">₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+      </div>
+    `).join('');
   }
 
+  const subtotalEl = document.getElementById('checkout-subtotal-val');
+  if (subtotalEl) subtotalEl.textContent = `₹${cartManager.getSubtotal().toLocaleString('en-IN')}`;
+
+  const discountEl = document.getElementById('checkout-discount-val');
+  const discountRow = document.getElementById('checkout-discount-row');
+  const discount = cartManager.getDiscount();
+  if (discountRow && discountEl) {
+    if (discount > 0) {
+      discountRow.classList.remove('hidden');
+      discountEl.textContent = `-₹${discount.toLocaleString('en-IN')}`;
+    } else {
+      discountRow.classList.add('hidden');
+    }
+  }
+
+  const totalEl = document.getElementById('checkout-total-val');
+  if (totalEl) totalEl.textContent = `₹${cartManager.getTotal().toLocaleString('en-IN')}`;
+
+  // Pre-fill Customer Profile Info
+  const nameInput = document.getElementById('cod-name');
+  const phoneInput = document.getElementById('cod-phone');
+  const addressInput = document.getElementById('cod-address');
+  const cityInput = document.getElementById('cod-city');
+  const stateInput = document.getElementById('cod-state');
+  const pincodeInput = document.getElementById('cod-pincode');
+
+  if (nameInput && currentCustomer.name) nameInput.value = currentCustomer.name;
+  if (phoneInput && currentCustomer.phone) phoneInput.value = currentCustomer.phone;
+  if (addressInput && currentCustomer.address) addressInput.value = currentCustomer.address;
+  if (cityInput && currentCustomer.city) cityInput.value = currentCustomer.city;
+  if (stateInput && currentCustomer.state) stateInput.value = currentCustomer.state;
+  if (pincodeInput && currentCustomer.pincode) pincodeInput.value = currentCustomer.pincode;
+
+  switchCheckoutTab(defaultTab);
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
@@ -698,76 +817,29 @@ function closeCheckoutModal() {
   }
 }
 
-function switchCheckoutTab(tabName) {
-  const tabCodBtn = document.getElementById('tab-btn-cod');
-  const tabWaBtn = document.getElementById('tab-btn-wa');
-  const sectionCod = document.getElementById('checkout-section-cod');
-  const sectionWa = document.getElementById('checkout-section-wa');
+function switchCheckoutTab(tab) {
+  const btnCod = document.getElementById('tab-btn-cod');
+  const btnWa = document.getElementById('tab-btn-wa');
+  const contentCod = document.getElementById('tab-content-cod');
+  const contentWa = document.getElementById('tab-content-wa');
 
-  if (tabName === 'cod') {
-    if (tabCodBtn) {
-      tabCodBtn.classList.remove('border-transparent', 'text-neutral-400');
-      tabCodBtn.classList.add('border-amber-400', 'text-amber-400');
-    }
-    if (tabWaBtn) {
-      tabWaBtn.classList.add('border-transparent', 'text-neutral-400');
-      tabWaBtn.classList.remove('border-emerald-400', 'text-emerald-400');
-    }
-    if (sectionCod) sectionCod.classList.remove('hidden');
-    if (sectionWa) sectionWa.classList.add('hidden');
+  if (tab === 'cod') {
+    if (btnCod) btnCod.className = 'py-3 text-center border-b-2 border-neutral-900 text-neutral-900 font-bold transition-colors';
+    if (btnWa) btnWa.className = 'py-3 text-center border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 font-semibold transition-colors';
+    if (contentCod) contentCod.classList.remove('hidden');
+    if (contentWa) contentWa.classList.add('hidden');
   } else {
-    if (tabWaBtn) {
-      tabWaBtn.classList.remove('border-transparent', 'text-neutral-400');
-      tabWaBtn.classList.add('border-emerald-400', 'text-emerald-400');
-    }
-    if (tabCodBtn) {
-      tabCodBtn.classList.add('border-transparent', 'text-neutral-400');
-      tabCodBtn.classList.remove('border-amber-400', 'text-amber-400');
-    }
-    if (sectionWa) sectionWa.classList.remove('hidden');
-    if (sectionCod) sectionCod.classList.add('hidden');
+    if (btnWa) btnWa.className = 'py-3 text-center border-b-2 border-emerald-600 text-emerald-700 font-bold transition-colors';
+    if (btnCod) btnCod.className = 'py-3 text-center border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 font-semibold transition-colors';
+    if (contentWa) contentWa.classList.remove('hidden');
+    if (contentCod) contentCod.classList.add('hidden');
   }
 }
 
-function renderCheckoutSummary() {
-  const summaryItems = document.getElementById('checkout-summary-items');
-  const summarySubtotal = document.getElementById('checkout-summary-subtotal');
-  const summaryDiscount = document.getElementById('checkout-summary-discount');
-  const summaryTotal = document.getElementById('checkout-summary-total');
+// Handle COD Order Submission
+async function handleCodFormSubmit(e) {
+  e.preventDefault();
 
-  const items = cartManager.getItems();
-  const subtotal = cartManager.getSubtotal();
-  const discount = cartManager.getDiscount();
-  const total = cartManager.getTotal();
-
-  if (summaryItems) {
-    summaryItems.innerHTML = items.map(item => `
-      <div class="flex items-center justify-between text-xs py-1.5 border-b border-neutral-800/60">
-        <div class="flex items-center gap-2 truncate pr-2">
-          <span class="w-4 text-center font-bold text-neutral-400">${item.quantity}×</span>
-          <span class="truncate text-neutral-200">${item.brand} ${item.model}</span>
-        </div>
-        <span class="font-semibold text-amber-400 flex-shrink-0">₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
-      </div>
-    `).join('');
-  }
-
-  if (summarySubtotal) summarySubtotal.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
-  
-  if (summaryDiscount) {
-    if (discount > 0) {
-      summaryDiscount.parentElement.classList.remove('hidden');
-      summaryDiscount.textContent = `-₹${discount.toLocaleString('en-IN')}`;
-    } else {
-      summaryDiscount.parentElement.classList.add('hidden');
-    }
-  }
-
-  if (summaryTotal) summaryTotal.textContent = `₹${total.toLocaleString('en-IN')}`;
-}
-
-// Handle Cash On Delivery Form Submit
-function handleCodFormSubmit() {
   const fullName = document.getElementById('cod-name').value.trim();
   const phone = document.getElementById('cod-phone').value.trim();
   const altPhone = document.getElementById('cod-alt-phone')?.value.trim() || '';
@@ -779,18 +851,26 @@ function handleCodFormSubmit() {
   const notes = document.getElementById('cod-notes')?.value.trim() || '';
 
   if (!fullName || !phone || !address || !city || !state || !pincode) {
-    showToast('Please fill in all required shipping fields.', 'error');
+    showToast('Please fill all required address fields.', 'error');
     return;
   }
 
-  if (phone.replace(/[^0-9]/g, '').length < 10) {
-    showToast('Please enter a valid 10-digit mobile number.', 'error');
+  const phoneRegex = /^[6-9]\d{9}$/;
+  const cleanPhone = phone.replace(/[^0-9]/g, '').slice(-10);
+  if (!phoneRegex.test(cleanPhone)) {
+    showToast('Please enter a valid 10-digit Indian mobile number.', 'error');
+    return;
+  }
+
+  const pinRegex = /^[1-9][0-9]{5}$/;
+  if (!pinRegex.test(pincode.replace(/\s/g, ''))) {
+    showToast('Please enter a valid 6-digit Indian Pincode.', 'error');
     return;
   }
 
   const formData = {
     fullName,
-    phone,
+    phone: cleanPhone,
     altPhone,
     address,
     landmark,
@@ -804,7 +884,7 @@ function handleCodFormSubmit() {
   checkoutManager.processCodOrder(formData);
 }
 
-// Handle Direct WhatsApp Order Form Submit
+// Handle WhatsApp Order Form Submit
 function handleWhatsAppFormSubmit() {
   const fullName = document.getElementById('wa-name')?.value.trim() || '';
   const phone = document.getElementById('wa-phone')?.value.trim() || '';
@@ -829,16 +909,6 @@ function handleWhatsAppFormSubmit() {
   closeCheckoutModal();
 }
 
-// Store Phone Customizer
-function handleStorePhoneChange() {
-  const current = checkoutManager.getStorePhone();
-  const newNumber = prompt("Enter the Store Owner's WhatsApp Number (with country code, e.g., 919876543210):", current);
-  if (newNumber !== null && newNumber.trim() !== '') {
-    const updated = checkoutManager.setStorePhone(newNumber);
-    showToast(`Store WhatsApp updated to +${updated}`, 'success');
-  }
-}
-
 // Mobile Menu
 function setupMobileMenu() {
   const mobileToggle = document.getElementById('mobile-menu-toggle');
@@ -850,47 +920,44 @@ function setupMobileMenu() {
   }
 }
 
-// Luxury Toast Notification System
+// Production-Grade Clean Toast Notification System
 function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container');
   if (!container) return;
 
   const toast = document.createElement('div');
-  toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-2xl transition-all duration-300 transform translate-y-2 opacity-0 text-sm font-medium ${
+  toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg transition-all duration-200 transform translate-y-2 opacity-0 text-xs font-semibold ${
     type === 'success' 
-      ? 'bg-neutral-900/95 border-amber-500/50 text-amber-200' 
+      ? 'bg-white border-emerald-300 text-emerald-900' 
       : type === 'error' 
-      ? 'bg-neutral-900/95 border-red-500/50 text-red-200' 
-      : 'bg-neutral-900/95 border-neutral-700 text-neutral-200'
+      ? 'bg-white border-red-300 text-red-900' 
+      : 'bg-white border-neutral-300 text-neutral-900'
   }`;
 
-  const icon = type === 'success' ? '✔' : type === 'error' ? '✖' : 'ℹ';
+  const icon = type === 'success' 
+    ? '<span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">✔</span>'
+    : type === 'error' 
+    ? '<span class="w-5 h-5 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs">✕</span>'
+    : '<span class="w-5 h-5 rounded-full bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xs">ℹ</span>';
+
   toast.innerHTML = `
-    <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">${icon}</span>
-    <span>${message}</span>
+    ${icon}
+    <span class="flex-1">${message}</span>
   `;
 
   container.appendChild(toast);
 
-  // Trigger enter animation
   requestAnimationFrame(() => {
     toast.classList.remove('translate-y-2', 'opacity-0');
   });
 
-  // Auto dismiss
   setTimeout(() => {
     toast.classList.add('opacity-0', 'translate-y-2');
-    setTimeout(() => {
-      toast.remove();
-    }, 300);
+    setTimeout(() => toast.remove(), 250);
   }, 3500);
 }
 
-// =====================================================
-// CUSTOMER PRIVILEGE AUTHENTICATION CONTROLLER
-// (NO OTP REGISTER · GOOGLE SIGN-IN · MY ORDERS)
-// =====================================================
-
+// Customer Auth Header Update
 function updateCustomerHeaderUI() {
   const authBtnText = document.getElementById('user-auth-btn-text');
   const avatarIcon = document.getElementById('user-avatar-icon');
@@ -901,18 +968,18 @@ function updateCustomerHeaderUI() {
   if (currentCustomer) {
     const firstName = currentCustomer.name ? currentCustomer.name.split(' ')[0] : 'Member';
     if (authBtnText) authBtnText.textContent = firstName;
-    if (mobileUserText) mobileUserText.textContent = `Hi, ${firstName} (View Account)`;
+    if (mobileUserText) mobileUserText.textContent = `Hi, ${firstName} (Account)`;
     if (dropdownName) dropdownName.textContent = currentCustomer.name || 'Privilege Member';
     if (dropdownEmail) dropdownEmail.textContent = currentCustomer.email || '';
     if (avatarIcon) {
       const initial = (currentCustomer.name || 'A').charAt(0).toUpperCase();
-      avatarIcon.innerHTML = `<span class="font-luxury font-bold text-amber-400">${initial}</span>`;
+      avatarIcon.innerHTML = `<span class="font-bold text-neutral-900 text-xs">${initial}</span>`;
     }
   } else {
     if (authBtnText) authBtnText.textContent = 'Sign In';
-    if (mobileUserText) mobileUserText.textContent = 'Sign In / Create Account';
+    if (mobileUserText) mobileUserText.textContent = 'Sign In / Register';
     if (avatarIcon) {
-      avatarIcon.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`;
+      avatarIcon.innerHTML = `<svg class="w-3.5 h-3.5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`;
     }
     const dropdown = document.getElementById('user-dropdown-menu');
     if (dropdown) dropdown.classList.add('hidden');
@@ -924,11 +991,11 @@ function toggleUserDropdownOrOpenModal() {
     const dropdown = document.getElementById('user-dropdown-menu');
     if (dropdown) dropdown.classList.toggle('hidden');
   } else {
-    openAuthModal('register');
+    openAuthModal('signin');
   }
 }
 
-function openAuthModal(defaultTab = 'register') {
+function openAuthModal(defaultTab = 'signin') {
   const modal = document.getElementById('customer-auth-modal');
   if (!modal) return;
   switchAuthTab(defaultTab);
@@ -951,21 +1018,13 @@ function switchAuthTab(tab) {
   const formSign = document.getElementById('customer-signin-form');
 
   if (tab === 'register') {
-    if (tabReg) {
-      tabReg.className = 'py-2 rounded-lg bg-amber-500 text-black shadow-md transition-all uppercase tracking-wider font-bold';
-    }
-    if (tabSign) {
-      tabSign.className = 'py-2 rounded-lg text-neutral-400 hover:text-white transition-all uppercase tracking-wider font-bold';
-    }
+    if (tabReg) tabReg.className = 'py-2 rounded-lg bg-neutral-900 text-white font-semibold text-xs transition-all';
+    if (tabSign) tabSign.className = 'py-2 rounded-lg text-neutral-500 hover:text-neutral-900 font-medium text-xs transition-all';
     if (formReg) formReg.classList.remove('hidden');
     if (formSign) formSign.classList.add('hidden');
   } else {
-    if (tabSign) {
-      tabSign.className = 'py-2 rounded-lg bg-amber-500 text-black shadow-md transition-all uppercase tracking-wider font-bold';
-    }
-    if (tabReg) {
-      tabReg.className = 'py-2 rounded-lg text-neutral-400 hover:text-white transition-all uppercase tracking-wider font-bold';
-    }
+    if (tabSign) tabSign.className = 'py-2 rounded-lg bg-neutral-900 text-white font-semibold text-xs transition-all';
+    if (tabReg) tabReg.className = 'py-2 rounded-lg text-neutral-500 hover:text-neutral-900 font-medium text-xs transition-all';
     if (formSign) formSign.classList.remove('hidden');
     if (formReg) formReg.classList.add('hidden');
   }
@@ -985,7 +1044,7 @@ async function handleCustomerRegister(e) {
   }
 
   try {
-    showToast('Creating your AM Privilege account...', 'info');
+    showToast('Creating your account...', 'info');
     const res = await fetch('/api/customer/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -998,12 +1057,20 @@ async function handleCustomerRegister(e) {
       localStorage.setItem('amc_customer', JSON.stringify(currentCustomer));
       updateCustomerHeaderUI();
       closeAuthModal();
-      showToast(data.message || `Account created! Welcome, ${name}! ✨`, 'success');
+
+      // Check for pending order action
+      if (window.pendingCheckoutAction) {
+        const pending = window.pendingCheckoutAction;
+        window.pendingCheckoutAction = null;
+        showToast(`Welcome, ${name}! Continuing with your order...`, 'success');
+        setTimeout(() => openCheckoutModal(pending.tab || 'cod'), 200);
+      } else {
+        showToast(data.message || `Account created! Welcome, ${name}! ✨`, 'success');
+      }
     } else {
       showToast(data.error || 'Registration failed. Try signing in.', 'error');
     }
   } catch (err) {
-    // Local / offline fallback
     const offlineUser = {
       userId: `AMC-LOCAL-${Date.now().toString().slice(-4)}`,
       name,
@@ -1014,7 +1081,15 @@ async function handleCustomerRegister(e) {
     localStorage.setItem('amc_customer', JSON.stringify(offlineUser));
     updateCustomerHeaderUI();
     closeAuthModal();
-    showToast(`Welcome, ${name}! (Account created locally) ✨`, 'success');
+
+    if (window.pendingCheckoutAction) {
+      const pending = window.pendingCheckoutAction;
+      window.pendingCheckoutAction = null;
+      showToast(`Welcome, ${name}! Continuing with your order...`, 'success');
+      setTimeout(() => openCheckoutModal(pending.tab || 'cod'), 200);
+    } else {
+      showToast(`Welcome, ${name}! ✨`, 'success');
+    }
   }
 }
 
@@ -1043,7 +1118,16 @@ async function handleCustomerLogin(e) {
       localStorage.setItem('amc_customer', JSON.stringify(currentCustomer));
       updateCustomerHeaderUI();
       closeAuthModal();
-      showToast(data.message || `Welcome back, ${data.user.name}! 👑`, 'success');
+
+      // Check for pending order action
+      if (window.pendingCheckoutAction) {
+        const pending = window.pendingCheckoutAction;
+        window.pendingCheckoutAction = null;
+        showToast(`Welcome back, ${data.user.name}! Continuing with your order...`, 'success');
+        setTimeout(() => openCheckoutModal(pending.tab || 'cod'), 200);
+      } else {
+        showToast(data.message || `Welcome back, ${data.user.name}! 👑`, 'success');
+      }
     } else {
       showToast(data.error || 'Invalid credentials. Please check and retry.', 'error');
     }
@@ -1052,10 +1136,7 @@ async function handleCustomerLogin(e) {
   }
 }
 
-// =====================================================
-// USER PROFILE & ADDRESS CONTROLLER
-// =====================================================
-
+// User Profile Modal
 function openProfileModal() {
   const modal = document.getElementById('customer-profile-modal');
   if (!modal) return;
@@ -1065,7 +1146,6 @@ function openProfileModal() {
     return;
   }
 
-  // Populate form with current customer details
   const nameInput = document.getElementById('prof-name');
   const phoneInput = document.getElementById('prof-phone');
   const emailInput = document.getElementById('prof-email');
@@ -1084,13 +1164,12 @@ function openProfileModal() {
   if (stateInput) stateInput.value = currentCustomer.state || '';
   if (pincodeInput) pincodeInput.value = currentCustomer.pincode || '';
 
-  if (headingName) headingName.textContent = currentCustomer.name || 'Patron Profile';
+  if (headingName) headingName.textContent = currentCustomer.name || 'My Profile';
   if (avatarBadge) {
     const initial = (currentCustomer.name || 'A').charAt(0).toUpperCase();
     avatarBadge.textContent = initial;
   }
 
-  // Close dropdown if open
   const dropdown = document.getElementById('user-dropdown-menu');
   if (dropdown) dropdown.classList.add('hidden');
 
@@ -1155,7 +1234,6 @@ async function handleProfileUpdate(e) {
       showToast(data.error || 'Failed to save profile.', 'error');
     }
   } catch (err) {
-    // Offline / local storage fallback
     currentCustomer = { ...currentCustomer, name, phone, address, city, state, pincode };
     localStorage.setItem('amc_customer', JSON.stringify(currentCustomer));
     updateCustomerHeaderUI();
@@ -1168,10 +1246,10 @@ function handleCustomerLogout() {
   currentCustomer = null;
   localStorage.removeItem('amc_customer');
   updateCustomerHeaderUI();
-  showToast('You have signed out of your AM Privilege account.', 'info');
+  showToast('You have signed out.', 'info');
 }
 
-// Customer My Orders Modal
+// My Orders Modal
 async function openMyOrdersModal() {
   const modal = document.getElementById('customer-orders-modal');
   const container = document.getElementById('customer-orders-list');
@@ -1184,9 +1262,9 @@ async function openMyOrdersModal() {
 
   modal.classList.remove('hidden');
   container.innerHTML = `
-    <div class="p-8 text-center text-neutral-400">
-      <span class="animate-spin inline-block text-2xl mb-2">⏳</span>
-      <p class="text-xs">Loading your order history...</p>
+    <div class="p-8 text-center text-neutral-500">
+      <span class="inline-block animate-spin text-2xl mb-2">⏳</span>
+      <p class="text-xs">Fetching your orders...</p>
     </div>
   `;
 
@@ -1199,9 +1277,9 @@ async function openMyOrdersModal() {
       container.innerHTML = `
         <div class="p-8 text-center text-neutral-500 space-y-2">
           <div class="text-3xl">📦</div>
-          <p class="text-sm font-bold text-neutral-300">No Orders Placed Yet</p>
-          <p class="text-xs">Browse our Master Copy collection and place your first Cash on Delivery order!</p>
-          <button onclick="closeMyOrdersModal(); window.location.href='#catalog';" class="mt-4 px-6 py-2.5 rounded-xl gold-btn text-xs font-bold uppercase tracking-wider">
+          <p class="text-sm font-bold text-neutral-800">No Orders Placed Yet</p>
+          <p class="text-xs text-neutral-500">Discover our Master Copy watches and order with Cash on Delivery!</p>
+          <button onclick="closeMyOrdersModal(); window.location.href='#catalog';" class="btn-primary mt-4 px-5 py-2 text-xs">
             Explore Collection
           </button>
         </div>
@@ -1210,37 +1288,37 @@ async function openMyOrdersModal() {
     }
 
     container.innerHTML = orders.map(o => `
-      <div class="p-4 rounded-2xl bg-neutral-900/70 border border-neutral-800 space-y-2.5">
+      <div class="p-4 rounded-xl bg-white border border-neutral-200 space-y-2.5 shadow-sm">
         <div class="flex items-center justify-between">
-          <span class="font-mono text-xs font-bold text-amber-400">${o.orderId}</span>
-          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-            o.status && o.status.includes('Delivered') ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
-            o.status && o.status.includes('Shipped') ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
-            'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+          <span class="font-mono text-xs font-bold text-neutral-900">${o.orderId}</span>
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${
+            o.status && o.status.includes('Delivered') ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
+            o.status && o.status.includes('Shipped') ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+            'bg-amber-100 text-amber-800 border border-amber-200'
           }">${o.status || 'Confirmed'}</span>
         </div>
-        <div class="text-[11px] text-neutral-400 flex justify-between">
+        <div class="text-[11px] text-neutral-500 flex justify-between">
           <span>Date: ${new Date(o.createdAt || o.date || Date.now()).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</span>
           <span>Payment: <strong>Cash on Delivery (COD)</strong></span>
         </div>
-        <div class="border-t border-neutral-800/80 pt-2 space-y-1">
+        <div class="border-t border-neutral-100 pt-2 space-y-1">
           ${(o.items || []).map(it => `
-            <div class="flex justify-between text-xs text-neutral-200">
+            <div class="flex justify-between text-xs text-neutral-800">
               <span>${it.quantity}× ${it.brand || ''} ${it.model || 'Watch'}</span>
-              <span class="font-semibold text-amber-400">₹${((it.price || 0) * (it.quantity || 1)).toLocaleString('en-IN')}</span>
+              <span class="font-semibold text-neutral-900">₹${((it.price || 0) * (it.quantity || 1)).toLocaleString('en-IN')}</span>
             </div>
           `).join('')}
         </div>
-        <div class="border-t border-neutral-800/80 pt-2 flex justify-between text-xs font-bold">
-          <span class="text-neutral-400">Total Bill:</span>
-          <span class="text-white">₹${Number(o.total || 0).toLocaleString('en-IN')}</span>
+        <div class="border-t border-neutral-100 pt-2 flex justify-between text-xs font-bold">
+          <span class="text-neutral-500">Total Bill:</span>
+          <span class="text-neutral-900">₹${Number(o.total || 0).toLocaleString('en-IN')}</span>
         </div>
       </div>
     `).join('');
   } catch (err) {
     container.innerHTML = `
-      <div class="p-6 text-center text-red-400 text-xs">
-        Failed to fetch orders. Please check your connection.
+      <div class="p-6 text-center text-red-600 text-xs">
+        Failed to fetch orders. Please check your network connection.
       </div>
     `;
   }
