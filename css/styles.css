@@ -222,3 +222,54 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 1px #111827 !important;
   outline: none;
 }
+
+/* =====================================================
+   FLIPKART-STYLE ORDER SUCCESS & REWARDS ANIMATIONS
+   ===================================================== */
+
+/* Success Checkmark Pop */
+@keyframes checkmark-circle {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes checkmark-tick {
+  0% { stroke-dashoffset: 48; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.success-check-circle {
+  animation: checkmark-circle 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.success-check-path {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkmark-tick 0.4s ease 0.3s forwards;
+}
+
+/* Coin Floating / Glow */
+@keyframes coin-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(6deg); }
+}
+
+.coin-anim {
+  display: inline-block;
+  animation: coin-bounce 2s ease-in-out infinite;
+}
+
+/* Order Tracking Timeline */
+.tracking-step-active {
+  color: #047857;
+  font-weight: 700;
+}
+.tracking-node-active {
+  background-color: #059669;
+  border-color: #059669;
+  color: #FFFFFF;
+}
+.tracking-line-active {
+  background-color: #059669;
+}

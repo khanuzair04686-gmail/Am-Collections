@@ -157,7 +157,7 @@ async function syncWithBackend() {
 
     if (productsRes.status === 'fulfilled' && productsRes.value.ok) {
       const prods = await productsRes.value.json();
-      if (Array.isArray(prods) && prods.length > 0) {
+      if (Array.isArray(prods)) {
         liveProducts = prods;
         renderProducts();
       }
@@ -184,13 +184,19 @@ function applyBrandingSettings(settings) {
   if (settings.storePhone) {
     checkoutManager.setStorePhone(settings.storePhone);
   }
+  const img = document.getElementById('header-logo-img');
+  const monogram = document.getElementById('header-logo-monogram');
   if (settings.logoUrl) {
-    const img = document.getElementById('header-logo-img');
-    const monogram = document.getElementById('header-logo-monogram');
     if (img && monogram) {
       img.src = settings.logoUrl;
       img.classList.remove('hidden');
       monogram.classList.add('hidden');
+    }
+  } else {
+    if (img && monogram) {
+      img.src = '';
+      img.classList.add('hidden');
+      monogram.classList.remove('hidden');
     }
   }
 }
@@ -881,7 +887,8 @@ async function handleCodFormSubmit(e) {
     customerEmail: currentCustomer ? currentCustomer.email : ''
   };
 
-  checkoutManager.processCodOrder(formData);
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  checkoutManager.processCodOrder(formData, submitBtn);
 }
 
 // Handle WhatsApp Order Form Submit
@@ -1146,6 +1153,14 @@ function openProfileModal() {
     return;
   }
 
+  // Update AM Coins & order stats in modal
+  const coinsEl = document.getElementById('profile-coins-balance');
+  const spentEl = document.getElementById('profile-total-spent');
+  const ordersEl = document.getElementById('profile-total-orders');
+  if (coinsEl) coinsEl.textContent = currentCustomer.coinBalance || 0;
+  if (spentEl) spentEl.textContent = `₹${Number(currentCustomer.totalSpent || 0).toLocaleString('en-IN')}`;
+  if (ordersEl) ordersEl.textContent = currentCustomer.totalOrders || 0;
+
   const nameInput = document.getElementById('prof-name');
   const phoneInput = document.getElementById('prof-phone');
   const emailInput = document.getElementById('prof-email');
@@ -1249,7 +1264,7 @@ function handleCustomerLogout() {
   showToast('You have signed out.', 'info');
 }
 
-// My Orders Modal
+// My Orders Modal with Flipkart-Style Live Tracking Timeline
 async function openMyOrdersModal() {
   const modal = document.getElementById('customer-orders-modal');
   const container = document.getElementById('customer-orders-list');
@@ -1264,64 +1279,132 @@ async function openMyOrdersModal() {
   container.innerHTML = `
     <div class="p-8 text-center text-neutral-500">
       <span class="inline-block animate-spin text-2xl mb-2">⏳</span>
-      <p class="text-xs">Fetching your orders...</p>
+      <p class="text-xs">Fetching your orders from database...</p>
     </div>
   `;
 
+  let orders = [];
   try {
-    const identifier = currentCustomer.email || currentCustomer.phone || '';
+    const identifier = currentCustomer.email || currentCustomer.phone || currentCustomer.userId || '';
     const res = await fetch(`/api/customer/orders/${encodeURIComponent(identifier)}`);
-    const orders = await res.json();
-
-    if (!Array.isArray(orders) || orders.length === 0) {
-      container.innerHTML = `
-        <div class="p-8 text-center text-neutral-500 space-y-2">
-          <div class="text-3xl">📦</div>
-          <p class="text-sm font-bold text-neutral-800">No Orders Placed Yet</p>
-          <p class="text-xs text-neutral-500">Discover our Master Copy watches and order with Cash on Delivery!</p>
-          <button onclick="closeMyOrdersModal(); window.location.href='#catalog';" class="btn-primary mt-4 px-5 py-2 text-xs">
-            Explore Collection
-          </button>
-        </div>
-      `;
-      return;
+    if (res.ok) {
+      orders = await res.json();
     }
+  } catch (err) {
+    // Fallback to local storage history
+    try {
+      orders = JSON.parse(localStorage.getItem('AMC_ORDERS_HISTORY') || '[]');
+    } catch (e) {
+      orders = [];
+    }
+  }
 
-    container.innerHTML = orders.map(o => `
-      <div class="p-4 rounded-xl bg-white border border-neutral-200 space-y-2.5 shadow-sm">
+  if (!Array.isArray(orders) || orders.length === 0) {
+    try {
+      orders = JSON.parse(localStorage.getItem('AMC_ORDERS_HISTORY') || '[]');
+    } catch (e) {}
+  }
+
+  if (!Array.isArray(orders) || orders.length === 0) {
+    container.innerHTML = `
+      <div class="p-8 text-center text-neutral-500 space-y-2">
+        <div class="text-4xl">📦</div>
+        <p class="text-sm font-bold text-neutral-800">No Orders Placed Yet</p>
+        <p class="text-xs text-neutral-500">Discover our Master Copy watches and place your first Cash on Delivery order!</p>
+        <button onclick="closeMyOrdersModal(); window.location.href='#catalog';" class="btn-primary mt-4 px-5 py-2 text-xs">
+          Explore Collection
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  const steps = ['Confirmed', 'Packed', 'Shipped', 'Delivered'];
+
+  container.innerHTML = orders.map(o => {
+    const currentStatus = o.status || 'Confirmed';
+    const isCancelled = currentStatus.toLowerCase().includes('cancel');
+    let activeIdx = steps.findIndex(s => currentStatus.toLowerCase().includes(s.toLowerCase()));
+    if (activeIdx === -1) activeIdx = 0;
+
+    return `
+      <div class="p-4 rounded-2xl bg-white border border-neutral-200 space-y-3 shadow-xs">
         <div class="flex items-center justify-between">
-          <span class="font-mono text-xs font-bold text-neutral-900">${o.orderId}</span>
-          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${
-            o.status && o.status.includes('Delivered') ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
-            o.status && o.status.includes('Shipped') ? 'bg-blue-100 text-blue-800 border border-blue-200' :
-            'bg-amber-100 text-amber-800 border border-amber-200'
-          }">${o.status || 'Confirmed'}</span>
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-xs font-bold text-neutral-900">#${o.orderId}</span>
+            <span class="text-[10px] text-neutral-500">• ${new Date(o.createdAt || o.date || Date.now()).toLocaleDateString('en-IN', { day:'numeric', month:'short' })}</span>
+          </div>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+            isCancelled ? 'bg-red-100 text-red-800' :
+            currentStatus.includes('Delivered') ? 'bg-emerald-100 text-emerald-800' :
+            currentStatus.includes('Shipped') ? 'bg-blue-100 text-blue-800' :
+            'bg-amber-100 text-amber-800'
+          }">${currentStatus}</span>
         </div>
-        <div class="text-[11px] text-neutral-500 flex justify-between">
-          <span>Date: ${new Date(o.createdAt || o.date || Date.now()).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</span>
-          <span>Payment: <strong>Cash on Delivery (COD)</strong></span>
-        </div>
-        <div class="border-t border-neutral-100 pt-2 space-y-1">
+
+        <!-- Flipkart-Style Live Tracking Timeline Bar -->
+        ${!isCancelled ? `
+          <div class="py-2 px-1">
+            <div class="flex items-center justify-between relative">
+              <div class="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 bg-neutral-200 w-full z-0"></div>
+              <div class="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 bg-emerald-600 transition-all duration-500 z-0" style="width: ${(activeIdx / (steps.length - 1)) * 100}%"></div>
+              ${steps.map((step, idx) => `
+                <div class="flex flex-col items-center z-10">
+                  <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all ${
+                    idx <= activeIdx
+                      ? 'bg-emerald-600 border-emerald-600 text-white'
+                      : 'bg-white border-neutral-300 text-neutral-400'
+                  }">
+                    ${idx <= activeIdx ? '✔' : idx + 1}
+                  </div>
+                  <span class="text-[9px] mt-1 font-semibold ${
+                    idx <= activeIdx ? 'text-emerald-700' : 'text-neutral-400'
+                  }">${step}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : `
+          <div class="p-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 font-semibold text-center">
+            This order was cancelled.
+          </div>
+        `}
+
+        <!-- Items in Order -->
+        <div class="border-t border-neutral-100 pt-2 space-y-1.5">
           ${(o.items || []).map(it => `
-            <div class="flex justify-between text-xs text-neutral-800">
-              <span>${it.quantity}× ${it.brand || ''} ${it.model || 'Watch'}</span>
-              <span class="font-semibold text-neutral-900">₹${((it.price || 0) * (it.quantity || 1)).toLocaleString('en-IN')}</span>
+            <div class="flex items-center justify-between text-xs text-neutral-800">
+              <div class="flex items-center gap-2">
+                <img src="${it.image || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=200'}" class="w-8 h-8 rounded object-contain border border-neutral-100" />
+                <span class="font-medium">${it.brand || ''} ${it.model || 'Master Watch'} <span class="text-neutral-400">×${it.quantity || 1}</span></span>
+              </div>
+              <span class="font-bold text-neutral-900 font-mono">₹${((it.price || 0) * (it.quantity || 1)).toLocaleString('en-IN')}</span>
             </div>
           `).join('')}
         </div>
-        <div class="border-t border-neutral-100 pt-2 flex justify-between text-xs font-bold">
-          <span class="text-neutral-500">Total Bill:</span>
-          <span class="text-neutral-900">₹${Number(o.total || 0).toLocaleString('en-IN')}</span>
+
+        <!-- Order Total & Rewards -->
+        <div class="border-t border-neutral-100 pt-2 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-1.5 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
+            <span>🪙</span>
+            <span>+${o.coinsEarned || Math.floor((o.total || 0) / 100)} AM Coins</span>
+          </div>
+          <div>
+            <span class="text-neutral-500 font-normal">Payable (COD):</span>
+            <span class="font-bold text-neutral-900 font-mono text-sm ml-1">₹${Number(o.total || 0).toLocaleString('en-IN')}</span>
+          </div>
+        </div>
+
+        <!-- WhatsApp Support Link -->
+        <div class="pt-1">
+          <button onclick="checkoutManager.sendToWhatsApp('Hello AM COLLECTION! I am inquiring about my watch order #${o.orderId}.')" class="w-full py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors">
+            <span>💬</span>
+            <span>Chat regarding Order #${o.orderId}</span>
+          </button>
         </div>
       </div>
-    `).join('');
-  } catch (err) {
-    container.innerHTML = `
-      <div class="p-6 text-center text-red-600 text-xs">
-        Failed to fetch orders. Please check your network connection.
-      </div>
     `;
-  }
+  }).join('');
 }
 
 function closeMyOrdersModal() {

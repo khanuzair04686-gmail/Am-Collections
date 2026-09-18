@@ -675,13 +675,52 @@
 
       <div class="p-4 sm:p-6 max-h-[75vh] overflow-y-auto space-y-4">
         
-        <!-- Order Summary Pill -->
-        <div class="bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl p-3">
-          <p class="text-[11px] font-bold uppercase text-neutral-500 mb-2">Order Summary</p>
+        <!-- Order Summary Pill with Coins & Coupons -->
+        <div class="bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <p class="text-[11px] font-bold uppercase text-neutral-500">Order Summary</p>
+            <span id="checkout-coins-earned-badge" class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">+0 AM Coins on this order</span>
+          </div>
           <div id="checkout-items-summary" class="space-y-1"></div>
+
+          <!-- Coupon Code Input -->
+          <div class="pt-2 border-t border-neutral-200">
+            <div class="flex gap-2">
+              <input id="checkout-coupon-input" type="text" placeholder="Promo code (e.g. WELCOME500)" class="flex-1 px-3 py-1.5 text-xs bg-white border border-[#E5E7EB] rounded-lg uppercase font-mono placeholder:normal-case" />
+              <button type="button" onclick="checkoutManager.applyCouponCode(document.getElementById('checkout-coupon-input').value)" class="px-3 py-1.5 btn-secondary text-xs font-semibold">
+                Apply
+              </button>
+            </div>
+            <div id="checkout-coupon-discount-row" class="hidden flex justify-between text-xs text-emerald-700 font-semibold pt-1.5">
+              <span>Coupon Discount:</span>
+              <span id="checkout-coupon-discount-val">-₹0</span>
+            </div>
+          </div>
+
+          <!-- AM Coins Redemption Checkbox -->
+          <div class="pt-2 border-t border-neutral-200">
+            <div class="p-2.5 rounded-lg bg-amber-50/70 border border-amber-200 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-base">🪙</span>
+                <div>
+                  <p class="text-xs font-bold text-neutral-900">Redeem AM Coins</p>
+                  <p class="text-[10px] text-neutral-500">Balance: <span id="checkout-coins-balance" class="font-bold text-amber-700 font-mono">0 AM Coins</span> (1 Coin = ₹1 OFF)</p>
+                </div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="checkout-use-coins-toggle" onchange="checkoutManager.toggleUseCoins(this.checked)" class="sr-only peer" />
+                <div class="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+              </label>
+            </div>
+            <div id="checkout-coins-discount-row" class="hidden flex justify-between text-xs text-amber-800 font-semibold pt-1.5">
+              <span>Coins Redeemed:</span>
+              <span id="checkout-coins-discount-val">-₹0</span>
+            </div>
+          </div>
+
           <div class="flex justify-between text-xs font-bold text-neutral-900 pt-2 border-t border-neutral-200 mt-2">
-            <span>Total Payable:</span>
-            <span id="checkout-total-val">₹0</span>
+            <span>Total Payable (COD):</span>
+            <span id="checkout-total-val" class="font-mono text-sm">₹0</span>
           </div>
         </div>
 
@@ -947,6 +986,22 @@
         </button>
       </div>
       <div class="p-5">
+        
+        <!-- AM Privilege Wallet Card -->
+        <div class="grid grid-cols-3 gap-2 p-3 bg-neutral-50 rounded-xl border border-neutral-200 text-center mb-3">
+          <div>
+            <span class="text-[10px] text-neutral-500 block uppercase font-semibold">AM Coins</span>
+            <span id="profile-coins-balance" class="text-base font-black text-amber-600 font-mono">50</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-neutral-500 block uppercase font-semibold">Total Spent</span>
+            <span id="profile-total-spent" class="text-base font-black text-neutral-900 font-mono">₹0</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-neutral-500 block uppercase font-semibold">Orders</span>
+            <span id="profile-total-orders" class="text-base font-black text-neutral-900 font-mono">0</span>
+          </div>
+        </div>
         <form id="customer-profile-form" class="space-y-3 text-xs">
           <div>
             <label class="block font-medium text-neutral-700 mb-1">Full Name</label>
@@ -1033,6 +1088,104 @@
   >
     <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.288.043.088.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.861.174.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/></svg>
   </a>
+
+  
+  <!-- ================= FLIPKART-STYLE ORDER SUCCESS FULLSCREEN ================= -->
+  <div id="order-success-screen" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+    <canvas id="order-confetti-canvas" class="fixed inset-0 pointer-events-none z-10 w-full h-full"></canvas>
+
+    <div class="bg-white border border-[#E5E7EB] rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl my-6 relative z-20 text-center animate-in fade-in zoom-in-95 duration-300">
+      
+      <!-- Top Celebration Header -->
+      <div class="p-6 bg-gradient-to-b from-emerald-50 to-white border-b border-neutral-100 space-y-4">
+        <!-- Animated Green Check Circle -->
+        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto text-emerald-600 success-check-circle shadow-lg shadow-emerald-500/20">
+          <svg class="w-10 h-10 sm:w-12 sm:h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" class="success-check-path"></polyline>
+          </svg>
+        </div>
+
+        <div>
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider mb-1">
+            <span>✔</span>
+            <span>Cash on Delivery Confirmed</span>
+          </span>
+          <h2 class="font-heading text-xl sm:text-2xl font-black text-neutral-900 mt-1">Order Placed Successfully! 🎉</h2>
+          <p class="text-xs text-neutral-500 mt-1">Thank you for choosing AM COLLECTION. Your luxury timepiece is being prepped for dispatch.</p>
+        </div>
+      </div>
+
+      <div class="p-5 sm:p-6 space-y-4 text-left">
+        
+        <!-- Order Meta Info Pill -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-3 rounded-2xl bg-neutral-50 border border-neutral-200/80 text-xs">
+          <div>
+            <span class="text-[10px] text-neutral-500 uppercase font-semibold block">Order ID</span>
+            <span id="success-screen-order-id" class="font-mono font-bold text-neutral-900">#AMC-00000</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-neutral-500 uppercase font-semibold block">Est. Delivery</span>
+            <span id="success-screen-delivery-date" class="font-bold text-emerald-700">4-5 Days</span>
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <span class="text-[10px] text-neutral-500 uppercase font-semibold block">Payment Mode</span>
+            <span class="font-semibold text-neutral-800">Cash on Delivery</span>
+          </div>
+        </div>
+
+        <!-- AM Coins Reward Celebration Banner -->
+        <div id="success-screen-coins-badge" class="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl coin-anim">🪙</span>
+            <div>
+              <p class="font-bold text-amber-900 text-xs sm:text-sm" id="success-screen-coins-val">+50 AM Coins Earned!</p>
+              <p class="text-[10px] text-amber-700">Credited to your AM Privilege Wallet. Redeem on future orders!</p>
+            </div>
+          </div>
+          <span class="text-[11px] font-bold text-amber-800 bg-amber-200/80 px-2.5 py-1 rounded-full whitespace-nowrap">Reward</span>
+        </div>
+
+        <!-- Delivery Address Box -->
+        <div class="p-3 rounded-2xl bg-white border border-neutral-200 text-xs space-y-1">
+          <div class="flex items-center justify-between text-neutral-500 text-[10px] font-bold uppercase">
+            <span>Delivery Destination</span>
+            <span>Pan-India Free Express</span>
+          </div>
+          <p id="success-screen-name" class="font-bold text-neutral-900">Customer Name</p>
+          <p id="success-screen-address" class="text-neutral-600 leading-relaxed text-[11px]">Address</p>
+        </div>
+
+        <!-- Items Summary List -->
+        <div>
+          <p class="text-[11px] font-bold uppercase text-neutral-500 mb-1">Timepieces in this order</p>
+          <div id="success-screen-items-list" class="max-h-36 overflow-y-auto divide-y divide-neutral-100">
+            <!-- Dynamically populated items -->
+          </div>
+          <div class="flex justify-between items-center text-xs font-bold text-neutral-900 pt-2 border-t border-neutral-200 mt-2">
+            <span>Total Payable Amount (COD):</span>
+            <span id="success-screen-total" class="font-mono text-sm text-neutral-900">₹0</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons Footer -->
+        <div class="pt-2 space-y-2">
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="checkoutManager.closeOrderSuccessScreen(); openMyOrdersModal();" class="py-2.5 px-4 rounded-xl btn-primary text-xs font-bold tracking-wider">
+              Track Order
+            </button>
+            <button onclick="checkoutManager.closeOrderSuccessScreen(); openMyOrdersModal();" class="py-2.5 px-4 rounded-xl btn-secondary text-xs font-bold tracking-wider">
+              View My Orders
+            </button>
+          </div>
+          <button onclick="checkoutManager.closeOrderSuccessScreen(); window.location.href='#catalog';" class="w-full py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-semibold transition-colors">
+            Continue Shopping
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
 
   <!-- ================= TOAST NOTIFICATIONS ================= -->
   <div id="toast-container" class="fixed bottom-6 left-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
