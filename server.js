@@ -14,11 +14,15 @@ const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || 'admin123';
 // =====================================================
 // DIRECTORY SETUP
 // =====================================================
-const UPLOADS_DIR = path.join(__dirname, 'uploads');
-const DATA_DIR = path.join(__dirname, 'data');
+const isVercel = process.env.VERCEL === '1' || !!process.env.VERCEL;
+const UPLOADS_DIR = isVercel ? path.join('/tmp', 'uploads') : path.join(__dirname, 'uploads');
+const DATA_DIR = isVercel ? path.join('/tmp', 'data') : path.join(__dirname, 'data');
 [UPLOADS_DIR, DATA_DIR].forEach(dir => {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  if (!fs.existsSync(dir)) {
+    try { fs.mkdirSync(dir, { recursive: true }); } catch (e) { console.warn('Directory create warn:', e.message); }
+  }
 });
+
 
 // =====================================================
 // MIDDLEWARE
@@ -628,5 +632,12 @@ async function startServer() {
     console.log('======================================================\n');
   });
 }
+ 
+if (require.main === module) {
+  startServer();
+} else {
+  seedDatabase().catch(console.error);
+}
 
-startServer();
+module.exports = app;
+
