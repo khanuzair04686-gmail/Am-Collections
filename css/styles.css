@@ -273,3 +273,203 @@ input:focus, select:focus, textarea:focus {
 .tracking-line-active {
   background-color: #059669;
 }
+
+
+/* =====================================================
+   COMPREHENSIVE MOBILE VIEWPORT FIXES (320px - 768px)
+   ===================================================== */
+* {
+  box-sizing: border-box !important;
+}
+
+html, body {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative;
+}
+
+main, section, header, nav, footer, aside, .max-w-7xl, .hero-section {
+  width: 100% !important;
+  max-width: 100vw !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden;
+}
+
+/* Ensure all images scale fluidly */
+img, video, iframe {
+  max-width: 100% !important;
+  height: auto;
+}
+
+@media screen and (max-width: 768px) {
+  /* 1. CONTAINER & BODY FIX */
+  html, body, main, section, header, nav, footer, div {
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 2. HEADER & NAVIGATION */
+  header {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  header > div {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 6px 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .header-inner,
+  header .flex.items-center.justify-between {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 48px !important;
+    gap: 4px 4px !important;
+    padding: 0 !important;
+  }
+
+  /* Logo stays left on Row 1 — BIGGER SIZE */
+  .header-logo,
+  header a.flex.items-center {
+    order: 1 !important;
+    flex-shrink: 0 !important;
+    max-width: 55% !important;
+    gap: 6px !important;
+  }
+
+  /* Logo box bigger on mobile */
+  .header-logo #header-logo-container,
+  header a.flex.items-center #header-logo-container {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+  }
+
+  /* Store name bigger on mobile */
+  .header-logo #header-store-name,
+  header a.flex.items-center #header-store-name {
+    font-size: 15px !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.2 !important;
+  }
+
+  /* All Action buttons (Wishlist, User, Bag, Menu) — TIGHT SPACING, STAY INSIDE */
+  .header-actions,
+  header .flex.items-center.gap-1.5,
+  header .flex.items-center.gap-1 {
+    order: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    flex-shrink: 0 !important;
+    max-width: 45% !important;
+    overflow: visible !important;
+  }
+
+  /* Reduce padding on action buttons so they fit */
+  .header-actions button,
+  .header-actions a,
+  .header-actions > div > button {
+    padding: 6px !important;
+    margin: 0 !important;
+  }
+
+  /* Cart/Bag button tighter on mobile */
+  .header-actions .cart-drawer-trigger {
+    padding: 5px 8px !important;
+    gap: 4px !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
+  }
+
+  /* Hamburger menu tighter */
+  #mobile-menu-toggle {
+    padding: 4px !important;
+    margin-right: 0 !important;
+  }
+
+  /* Search bar drops to full-width Row 2 so it never pushes icons off-screen */
+  .header-search,
+  header .flex-1.max-w-lg {
+    order: 3 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 4px 0 2px 0 !important;
+    flex: 1 1 100% !important;
+  }
+
+  #search-input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 3. HERO & BANNER CARDS */
+  .hero-section,
+  section {
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0 auto !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    overflow-x: hidden !important;
+  }
+
+  .hero-section .grid,
+  section .grid {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 4. PRODUCT CARDS & 2-COLUMN RESPONSIVE GRID */
+  #products-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .product-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .product-image-container {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+
+  /* Category scroll chips */
+  nav[aria-label="Category Navigation"] > div {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  /* Floating WhatsApp button: safe bounds on mobile */
+  #floating-whatsapp {
+    bottom: 20px !important;
+    right: 16px !important;
+    z-index: 45 !important;
+  }
+}

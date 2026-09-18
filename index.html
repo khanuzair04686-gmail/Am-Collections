@@ -55,7 +55,7 @@
 <body class="bg-[#FAFAFA] text-[#111827] antialiased selection:bg-[#111111] selection:text-white">
 
   <!-- ================= TOP TRUST ANNOUNCEMENT BAR ================= -->
-  <aside id="top-announcement-bar" aria-label="Announcement" class="bg-[#111111] text-white text-[11px] sm:text-xs py-2 px-3 tracking-wide text-center flex items-center justify-center gap-3">
+  <aside id="top-announcement-bar" aria-label="Announcement" class="bg-[#111111] text-white text-[11px] sm:text-xs py-2 px-3 tracking-wide text-center flex items-center justify-center gap-2 sm:gap-3 w-full max-w-full overflow-hidden">
     <span id="top-announcement-text">
       ✨ <strong>FREE Pan-India Cash on Delivery</strong> • 7-Day Hassle-Free Replacement • 100% Quality Inspected
     </span>
@@ -68,10 +68,10 @@
   <!-- ================= COMPACT STICKY E-COMMERCE HEADER ================= -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] shadow-xs">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-14 sm:h-16 gap-3">
+      <div class="header-inner flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-3">
         
         <!-- Left: Brand Logo -->
-        <a href="#" class="flex items-center gap-2.5 flex-shrink-0 group focus:outline-none">
+        <a href="#" class="header-logo flex items-center gap-2 sm:gap-2.5 flex-shrink-0 group focus:outline-none">
           <div id="header-logo-container" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#111111] text-white flex items-center justify-center font-bold text-xs sm:text-sm tracking-wider shadow-xs overflow-hidden">
             <img id="header-logo-img" src="" alt="Logo" class="w-full h-full object-contain hidden" />
             <span id="header-logo-monogram" class="font-heading font-black">AM</span>
@@ -87,7 +87,7 @@
         </a>
 
         <!-- Center: Instant Search Bar (Desktop & Tablet) -->
-        <div class="flex-1 max-w-lg mx-2 sm:mx-4 relative">
+        <div class="header-search flex-1 max-w-lg mx-1 sm:mx-4 relative">
           <div class="relative w-full">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#9CA3AF]">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -105,7 +105,7 @@
         </div>
 
         <!-- Right: Actions (Wishlist, Account, Cart) -->
-        <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+        <div class="header-actions flex items-center gap-1 sm:gap-3 flex-shrink-0">
           
           <!-- Wishlist Trigger Button -->
           <button 
@@ -260,8 +260,8 @@
 
         <!-- Hero Spotlight Watch Preview -->
         <div class="lg:col-span-5">
-          <div class="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-sm flex items-center gap-4 cursor-pointer hover:border-neutral-400 transition-colors" onclick="openQuickView('amc-01')">
-            <div class="w-28 h-28 sm:w-36 sm:h-36 bg-neutral-50 rounded-lg p-2 flex items-center justify-center flex-shrink-0">
+          <div class="bg-white rounded-xl border border-[#E5E7EB] p-3 sm:p-4 shadow-sm flex items-center gap-2.5 sm:gap-4 cursor-pointer hover:border-neutral-400 transition-colors w-full" onclick="openQuickView('amc-01')">
+            <div class="w-20 h-20 sm:w-32 sm:h-32 bg-neutral-50 rounded-lg p-1.5 sm:p-2 flex items-center justify-center flex-shrink-0">
               <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop" alt="Rolex Submariner Master" class="w-full h-full object-contain" />
             </div>
             <div class="space-y-1">
@@ -355,7 +355,7 @@
     </div>
 
     <!-- DYNAMIC 4-COLUMN GRID (STRICTLY 4 CARDS PER ROW, EQUAL HEIGHT, NO HORIZONTAL SCROLL) -->
-    <div id="products-grid" class="grid grid-cols-4 gap-1.5 sm:gap-3 md:gap-4 lg:gap-5">
+    <div id="products-grid" class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-5 w-full">
       <!-- Injected dynamically via js/app.js -->
     </div>
 

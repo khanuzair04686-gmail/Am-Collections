@@ -485,19 +485,19 @@ function renderProducts() {
           </div>
 
           <!-- Compact Action Area -->
-          <div class="mt-2.5 pt-2 border-t border-neutral-100 flex items-center gap-1.5">
+          <div class="mt-2 pt-2 border-t border-neutral-100 grid grid-cols-2 gap-1 sm:gap-1.5 w-full">
             <button 
               type="button"
               onclick="addToCart('${product.id}'); openCartDrawer();"
-              class="flex-1 py-1.5 sm:py-2 px-2 rounded-md bg-[#111111] hover:bg-black text-white text-[10px] sm:text-xs font-medium transition-colors flex items-center justify-center gap-1"
+              class="py-1.5 px-1 sm:px-2 rounded-md bg-[#111111] hover:bg-black text-white text-[10px] sm:text-xs font-medium transition-colors flex items-center justify-center gap-1 truncate"
             >
-              <svg class="w-3.5 h-3.5 hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-              <span>Add to Bag</span>
+              <svg class="w-3.5 h-3.5 hidden sm:inline flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+              <span class="truncate">+ Bag</span>
             </button>
             <button 
               type="button"
               onclick="buyNow('${product.id}')"
-              class="py-1.5 sm:py-2 px-2 rounded-md bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[10px] sm:text-xs font-semibold transition-colors"
+              class="py-1.5 px-1 sm:px-2 rounded-md bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[10px] sm:text-xs font-semibold transition-colors text-center truncate"
               title="Buy Now (Cash on Delivery)"
             >
               Buy Now
