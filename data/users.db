@@ -1,0 +1,6 @@
+{"userId":"AMC-USR-736360","name":"Aman Sharma","email":"aman@example.com","password":"pass123","phone":"9876543210","authProvider":"email","createdAt":"2026-09-18T03:38:56.360Z","_id":"6zt1yBaQZH398DQN","address":"Flat 402, Luxury Heights, Linking Road","landmark":"","city":"Mumbai","state":"Maharashtra","pincode":"400050","updatedAt":"2026-09-18T03:39:23.182Z"}
+{"userId":"AMC-USR-G-047754","name":"VIP Patron","email":"vip.patron@gmail.com","avatar":"","phone":"","authProvider":"google","createdAt":"2026-09-18T03:27:27.754Z","_id":"9rz2Kdrb6476Asa6"}
+{"userId":"AMC-USR-G-854746","name":"Priya Sharma","email":"priya.sharma@gmail.com","avatar":"","phone":"","authProvider":"google","createdAt":"2026-09-18T00:54:14.746Z","_id":"D2aMfwHetzpJcv2x"}
+{"userId":"AMC-USR-G-130858","name":"Guest Patron","email":"patron@gmail.com","avatar":"","phone":"","authProvider":"google","createdAt":"2026-09-18T03:28:50.858Z","_id":"fxi3crepwZp97pDC"}
+{"userId":"AMC-USR-850934","name":"Uzair Khan","email":"khanuzair04685@gmail.com","password":"00000","phone":"","authProvider":"email","createdAt":"2026-09-18T03:40:50.934Z","_id":"iUEka8qkKjhfzLh3"}
+{"userId":"AMC-USR-854524","name":"Rahul Roy","email":"rahul@example.com","password":"mypassword123","phone":"9876543210","authProvider":"email","createdAt":"2026-09-18T00:54:14.524Z","_id":"x8qmfhYZo1lICkuS"}

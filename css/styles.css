@@ -1,0 +1,255 @@
+/* AM COLLECTION - Luxury Theme Custom Styles */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-surface: #121212;
+  --bg-surface-elevated: #181818;
+  --gold-primary: #d4af37;
+  --gold-light: #f3e5ab;
+  --gold-dark: #996515;
+  --gold-accent: #c5a028;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-primary);
+  color: #e5e5e5;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .font-luxury {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
+
+/* Gold Gradients & Text */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #fff2b2 0%, #d4af37 50%, #aa7c11 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-subtle {
+  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+}
+
+.gold-border-glow {
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.12);
+  transition: all 0.3s ease;
+}
+
+.gold-border-glow:hover {
+  border-color: rgba(212, 175, 55, 0.7);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+}
+
+.gold-btn {
+  background: linear-gradient(135deg, #e6ca65 0%, #d4af37 50%, #b38b1d 100%);
+  color: #000;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.gold-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: rotate(30deg);
+  transition: all 0.7s ease;
+  opacity: 0;
+}
+
+.gold-btn:hover::after {
+  left: 100%;
+  opacity: 1;
+}
+
+.gold-btn:hover {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.45);
+  transform: translateY(-1px);
+}
+
+.gold-btn-outline {
+  border: 1px solid #d4af37;
+  color: #d4af37;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.gold-btn-outline:hover {
+  background: rgba(212, 175, 55, 0.12);
+  color: #f3e5ab;
+  border-color: #f3e5ab;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+/* Glassmorphism */
+.glass-header {
+  background: rgba(10, 10, 10, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+}
+
+.glass-card {
+  background: rgba(18, 18, 18, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+/* Sliding Cart Drawer Animation */
+#cart-drawer {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#cart-backdrop {
+  transition: opacity 0.35s ease;
+}
+
+/* Image Container & Hover */
+.product-image-container {
+  overflow: hidden;
+  background: radial-gradient(circle at center, #222222 0%, #0d0d0d 100%);
+  position: relative;
+}
+
+.product-image-container img {
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.product-card:hover .product-image-container img {
+  transform: scale(1.08);
+}
+
+/* Pulse Animation for Cart Badge */
+@keyframes badge-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.cart-badge-pulse {
+  animation: badge-pulse 0.3s ease;
+}
+
+/* WhatsApp Floating Button */
+.whatsapp-float-pulse {
+  box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6);
+  animation: wa-pulse 2s infinite;
+}
+
+@keyframes wa-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+/* Modals */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+/* Custom Checkbox & Radio */
+input[type="radio"]:checked, input[type="checkbox"]:checked {
+  accent-color: #d4af37;
+}
+
+/* Shimmer Line */
+.shimmer-line {
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+  height: 1px;
+}
+
+/* Luxury Card Shadow */
+.luxury-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.luxury-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.15);
+}
+
+/* Hide scrollbar on category chips */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Product card skeleton loader */
+@keyframes skeleton-shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* Focus ring - gold for accessibility */
+*:focus-visible {
+  outline: 2px solid rgba(212, 175, 55, 0.7);
+  outline-offset: 2px;
+}
+
+/* Product Card Rating Stars */
+.star-gold { color: #d4af37; }
+
+/* Smooth scrolling section offsets (for sticky header) */
+section[id] { scroll-margin-top: 88px; }
+
+/* Mobile touch tap highlight */
+a, button { -webkit-tap-highlight-color: rgba(212, 175, 55, 0.15); }
+
+/* Input autofill override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #0d0d0d inset !important;
+  -webkit-text-fill-color: #e5e5e5 !important;
+  caret-color: #d4af37;
+}
+
+/* Video player custom controls color */
+video::-webkit-media-controls-panel { background: #0a0a0a; }
+video { border-radius: 12px; }
+
+/* Print: hide unnecessary elements */
+@media print {
+  header, footer, aside, #cart-drawer, #floating-whatsapp,
+  #cart-backdrop, #checkout-modal, #quick-view-modal { display: none !important; }
+  body { background: white; color: black; }
+}
