@@ -610,7 +610,10 @@ app.get('/api/customer/profile/:email', async (req, res) => {
 
 // Fallback SPA route
 app.get('*', (req, res) => {
-  if (req.path.startsWith('/admin')) {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: `API endpoint ${req.path} not found` });
+  }
+  if (req.path === '/admin' || req.path === '/admin/' || req.path === '/admin.html') {
     res.sendFile(path.join(__dirname, 'admin.html'));
   } else {
     res.sendFile(path.join(__dirname, 'index.html'));
