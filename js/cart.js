@@ -181,8 +181,8 @@ class CartManager {
 
     // Populate Items
     drawerContainer.innerHTML = this.items.map(item => `
-      <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-200 hover:border-neutral-300 shadow-sm transition-all">
-        <div class="w-16 h-16 rounded-lg bg-neutral-50 flex-shrink-0 overflow-hidden border border-neutral-200 p-1 flex items-center justify-center">
+      <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-[#E8E3D8] hover:border-[#D8B878] shadow-sm hover:shadow-md transition-all">
+        <div class="w-16 h-16 rounded-lg bg-[#F9F7F1] flex-shrink-0 overflow-hidden border border-[#EDE8DB] p-1 flex items-center justify-center">
           <img src="${item.image}" alt="${item.brand} ${item.model}" class="w-full h-full object-contain" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'" />
         </div>
         <div class="flex-1 min-w-0">
@@ -195,12 +195,12 @@ class CartManager {
           <h4 class="text-xs font-semibold text-neutral-900 truncate" title="${item.model}">${item.model}</h4>
           <div class="flex items-center justify-between mt-2">
             <div class="text-neutral-900 font-bold text-sm">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
-            <div class="flex items-center bg-neutral-100 border border-neutral-200 rounded-md overflow-hidden">
-              <button onclick="cartManager.updateQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-neutral-600 hover:bg-neutral-200 transition-colors text-xs font-bold">
+            <div class="flex items-center bg-[#F6F4EE] border border-[#E8E3D8] rounded-md overflow-hidden">
+              <button onclick="cartManager.updateQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-neutral-600 hover:bg-[#EDE8DB] transition-colors text-xs font-bold">
                 -
               </button>
               <span class="w-6 text-center text-xs font-semibold text-neutral-800">${item.quantity}</span>
-              <button onclick="cartManager.updateQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-neutral-600 hover:bg-neutral-200 transition-colors text-xs font-bold">
+              <button onclick="cartManager.updateQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-neutral-600 hover:bg-[#EDE8DB] transition-colors text-xs font-bold">
                 +
               </button>
             </div>

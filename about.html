@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AM COLLECTION | India's Premier Master Copy Watch Marketplace</title>
+  <title>About Us | AM COLLECTION</title>
   
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⌚</text></svg>" />
@@ -199,310 +199,212 @@
     </div>
   </header>
 
-  <!-- ================= SUB-HEADER CATEGORIES STRIP ================= -->
-  <nav aria-label="Category Navigation" class="bg-white border-b border-[#E8E3D8] sticky top-14 sm:top-16 z-30 shadow-2xs">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div class="flex items-center gap-2 overflow-x-auto py-2.5 no-scrollbar scroll-smooth text-xs">
-        <button data-category="all" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#10151C] text-white border border-[#10151C] whitespace-nowrap transition-colors">
-          All Watches
-        </button>
-        <button data-category="rolex" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-white text-neutral-700 border border-neutral-200 hover:border-[#C6A15B] hover:text-[#10151C] whitespace-nowrap transition-colors">
-          Rolex
-        </button>
-        <button data-category="patek" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-white text-neutral-700 border border-neutral-200 hover:border-[#C6A15B] hover:text-[#10151C] whitespace-nowrap transition-colors">
-          Patek Philippe
-        </button>
-        <button data-category="ap" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-white text-neutral-700 border border-neutral-200 hover:border-[#C6A15B] hover:text-[#10151C] whitespace-nowrap transition-colors">
-          Audemars Piguet
-        </button>
-        <button data-category="cartier" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-white text-neutral-700 border border-neutral-200 hover:border-[#C6A15B] hover:text-[#10151C] whitespace-nowrap transition-colors">
-          Cartier
-        </button>
-        <button data-category="hublot" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-white text-neutral-700 border border-neutral-200 hover:border-[#C6A15B] hover:text-[#10151C] whitespace-nowrap transition-colors">
-          Hublot
-        </button>
-        <button data-category="omega" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-white text-neutral-700 border border-neutral-200 hover:border-[#C6A15B] hover:text-[#10151C] whitespace-nowrap transition-colors">
-          Omega
-        </button>
-        <button data-category="casio" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-white text-neutral-700 border border-neutral-200 hover:border-[#C6A15B] hover:text-[#10151C] whitespace-nowrap transition-colors">
-          Casio Vintage
-        </button>
-      </div>
-    </div>
-  </nav>
+  <!-- ================= ABOUT US PAGE (DATA-DRIVEN FROM /api/about) ================= -->
+  <div id="about-state" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+    <div class="inline-block h-8 w-8 border-2 border-[#C6A15B] border-t-transparent rounded-full animate-spin"></div>
+    <p class="mt-4 text-xs font-bold text-neutral-500 uppercase tracking-[0.25em]">Loading Our Story</p>
+  </div>
 
-  <!-- ================= HERO EDITORIAL BANNER ================= -->
-  <section class="bg-white border-b border-[#E8E3D8] py-6 sm:py-10">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div class="relative grid grid-cols-1 lg:grid-cols-12 gap-6 items-center bg-gradient-to-br from-[#F4EFE3] via-[#FAF8F2] to-white rounded-3xl border border-[#E8E3D8] p-5 sm:p-8 lg:p-10 overflow-hidden shadow-sm rise-in">
-        <div class="hero-glow w-72 h-72 -top-24 -right-16"></div>
-        <div class="hero-glow w-56 h-56 -bottom-24 left-1/3 hidden lg:block"></div>
-        <div class="hero-ring w-64 h-64 -bottom-24 -left-16"></div>
-        <div class="hero-ring w-40 h-40 -bottom-12 -left-4 hidden sm:block"></div>
-        
-        <!-- Hero Text -->
-        <div class="lg:col-span-7 space-y-4">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F5EEDC] text-[#8A6A2F] text-[11px] font-semibold border border-[#E3D3A8]">
-            <span class="w-2 h-2 rounded-full bg-[#C6A15B]"></span>
-            <span>Festive Horology Edition 2026</span>
-          </div>
-          <h1 class="font-heading text-2xl sm:text-4xl lg:text-5xl font-extrabold text-[#10151C] leading-tight">
-            India's Master Copy Luxury Horology Marketplace
-          </h1>
-          <p class="text-xs sm:text-sm text-[#4B5563] max-w-xl leading-relaxed">
-            1:1 Super Clone timepieces with authentic weight, sapphire crystal, and Japanese automatic movements. Starting ₹1,899 with <strong>Free Pan-India Cash on Delivery</strong>.
-          </p>
-          <div class="flex flex-wrap items-center gap-3 pt-2">
-            <a href="#catalog" class="btn-primary px-6 py-2.5 text-xs font-semibold">
-              Explore Collection
+  <div id="about-root" class="hidden"></div>
+
+  <script>
+  // About Us — renders exclusively from GET /api/about. No mock/local fallback.
+  (function () {
+    const stateEl = document.getElementById('about-state');
+    const rootEl = document.getElementById('about-root');
+
+    function escapeHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function nl2p(text) {
+      return escapeHtml(text).split(/\n+/).filter(Boolean).map(p => `<p>${p}</p>`).join('');
+    }
+
+    function showState(html) {
+      stateEl.classList.remove('hidden');
+      stateEl.innerHTML = html;
+    }
+
+    const renderers = {
+      intro(about) {
+        if (!about.intro) return '';
+        return `
+        <section class="relative overflow-hidden bg-[#10151C] text-white">
+          <div class="absolute inset-0 opacity-[0.06]" style="background-image:radial-gradient(circle at 1px 1px, #C6A15B 1px, transparent 0); background-size:28px 28px;"></div>
+          <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center rise-in">
+            <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#D8B878]">
+              <span class="h-px w-8 bg-[#C6A15B]/60"></span> The House <span class="h-px w-8 bg-[#C6A15B]/60"></span>
+            </span>
+            <h1 class="mt-5 font-heading text-3xl sm:text-5xl font-black leading-tight">${escapeHtml(about.pageTitle || 'About Us')}</h1>
+            <p class="mt-6 text-sm sm:text-base text-neutral-300 leading-relaxed max-w-2xl mx-auto">${escapeHtml(about.intro)}</p>
+            <a href="/#catalog" class="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#C6A15B] hover:bg-[#D8B878] text-[#10151C] text-xs font-bold uppercase tracking-widest transition-colors">
+              Explore The Collection <span aria-hidden="true">→</span>
             </a>
-            <button onclick="document.getElementById('floating-whatsapp').click()" class="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-1.5">
-              <span>💬</span>
-              <span>WhatsApp Concierge</span>
-            </button>
           </div>
-        </div>
+        </section>`;
+      },
 
-        <!-- Hero Spotlight Watch Preview -->
-        <div class="lg:col-span-5">
-          <div class="bg-white rounded-2xl border border-[#E8E3D8] p-3 sm:p-4 shadow-md hover:shadow-xl hover:border-[#C6A15B] transition-all flex items-center gap-2.5 sm:gap-4 cursor-pointer w-full rise-in" onclick="openQuickView('amc-01')">
-            <div class="w-20 h-20 sm:w-32 sm:h-32 bg-neutral-50 rounded-lg p-1.5 sm:p-2 flex items-center justify-center flex-shrink-0">
-              <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop" alt="Rolex Submariner Master" class="w-full h-full object-contain" />
+      story(about) {
+        if (!about.story) return '';
+        return `
+        <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
+          <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#A87F3D]">
+            <span class="h-px w-8 bg-[#C6A15B]/60"></span> Our Story
+          </span>
+          <div class="mt-5 border-l-2 border-[#C6A15B] pl-5 sm:pl-8 space-y-4 text-sm sm:text-[15px] text-neutral-600 leading-relaxed">
+            ${nl2p(about.story)}
+          </div>
+        </section>`;
+      },
+
+      mission(about) {
+        if (!about.mission && !about.vision) return '';
+        const card = (title, text) => text ? `
+          <div class="rounded-2xl bg-white border border-[#E8E3D8] p-7 sm:p-8 shadow-sm hover:shadow-md hover:border-[#D8B878] transition-all h-full">
+            <div class="w-11 h-11 rounded-xl bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center">
+              <span class="w-2.5 h-2.5 rotate-45 bg-[#C6A15B]"></span>
             </div>
-            <div class="space-y-1">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-[#8A6A2F] bg-[#F5EEDC] border border-[#E3D3A8] px-2 py-0.5 rounded">BEST SELLER</span>
-              <h3 class="font-heading text-sm sm:text-base font-bold text-neutral-900">Rolex Submariner 41mm</h3>
-              <p class="text-[11px] text-neutral-500">1:1 Japanese Automatic Movement</p>
-              <div class="flex items-baseline gap-2 pt-1">
-                <span class="text-sm sm:text-base font-extrabold text-neutral-900">₹4,499</span>
-                <span class="text-xs text-neutral-400 line-through">₹11,50,000</span>
-                <span class="text-xs font-bold text-[#16794C]">99% OFF</span>
-              </div>
-              <p class="text-[10px] text-emerald-700 font-semibold">✓ Free Cash on Delivery</p>
+            <h3 class="mt-5 font-heading text-lg font-extrabold text-[#10151C]">${title}</h3>
+            <div class="mt-3 text-sm text-neutral-600 leading-relaxed space-y-3">${nl2p(text)}</div>
+          </div>` : '';
+        return `
+        <section class="bg-[#FBF8F1] border-y border-[#E8E3D8]">
+          <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
+            <div class="text-center">
+              <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#A87F3D]">
+                <span class="h-px w-8 bg-[#C6A15B]/60"></span> Purpose <span class="h-px w-8 bg-[#C6A15B]/60"></span>
+              </span>
+              <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black text-[#10151C]">Mission &amp; Vision</h2>
+            </div>
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-5">
+              ${card('Our Mission', about.mission)}
+              ${card('Our Vision', about.vision)}
             </div>
           </div>
-        </div>
+        </section>`;
+      },
 
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= VALUE PROPOSITION STRIP ================= -->
-  <section class="bg-white border-b border-[#E8E3D8] py-4">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-xs">
-        <div class="flex items-center gap-2.5 p-2">
-          <span class="w-9 h-9 rounded-full bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center text-lg flex-shrink-0">🚚</span>
-          <div>
-            <p class="font-bold text-neutral-900">Pan-India COD</p>
-            <p class="text-[11px] text-neutral-500">Pay at doorstep</p>
+      team(about) {
+        const members = (about.team || []).filter(m => m.enabled !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
+        if (!members.length) return '';
+        const socialBtn = (label, href) => href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-lg border border-[#E8E3D8] text-[10px] font-bold text-neutral-500 hover:text-[#10151C] hover:border-[#D8B878] transition-colors">${label}</a>` : '';
+        const cards = members.map(m => {
+          const initials = (m.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          const photo = m.photoUrl
+            ? `<img src="${escapeHtml(m.photoUrl)}" alt="${escapeHtml(m.name)}" loading="lazy" class="w-full h-64 sm:h-72 object-cover object-top">`
+            : `<div class="w-full h-64 sm:h-72 flex items-center justify-center bg-[#F6F0E2] border-b border-[#E8DCBE]">
+                 <span class="font-heading text-4xl font-black text-[#C6A15B]">${escapeHtml(initials)}</span>
+               </div>`;
+          const socials = [socialBtn('Instagram', m.social && m.social.instagram), socialBtn('X', m.social && m.social.twitter), socialBtn('LinkedIn', m.social && m.social.linkedin), m.social && m.social.email ? `<a href="mailto:${escapeHtml(m.social.email)}" class="px-2.5 py-1 rounded-lg border border-[#E8E3D8] text-[10px] font-bold text-neutral-500 hover:text-[#10151C] hover:border-[#D8B878] transition-colors">Email</a>` : ''].join('');
+          return `
+          <article class="rounded-2xl bg-white border border-[#E8E3D8] overflow-hidden shadow-sm hover:shadow-lg hover:border-[#D8B878] hover:-translate-y-1 transition-all">
+            ${photo}
+            <div class="p-6">
+              <span class="inline-block px-2.5 py-1 rounded-lg bg-[#F6F0E2] border border-[#E8DCBE] text-[10px] font-bold tracking-wider uppercase text-[#7A5C24]">${escapeHtml(m.role || 'Team Member')}</span>
+              <h3 class="mt-3 font-heading text-lg font-extrabold text-[#10151C]">${escapeHtml(m.name || 'Team Member')}</h3>
+              ${m.bio ? `<p class="mt-2 text-xs text-neutral-600 leading-relaxed">${escapeHtml(m.bio)}</p>` : ''}
+              ${socials.trim() ? `<div class="mt-4 flex flex-wrap gap-1.5">${socials}</div>` : ''}
+            </div>
+          </article>`;
+        }).join('');
+        return `
+        <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
+          <div class="text-center">
+            <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#A87F3D]">
+              <span class="h-px w-8 bg-[#C6A15B]/60"></span> The People <span class="h-px w-8 bg-[#C6A15B]/60"></span>
+            </span>
+            <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black text-[#10151C]">Meet The Team</h2>
+            <p class="mt-3 text-xs text-neutral-500">The small, obsessive crew behind every timepiece we ship.</p>
           </div>
-        </div>
-        <div class="flex items-center gap-2.5 p-2">
-          <span class="w-9 h-9 rounded-full bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center text-lg flex-shrink-0">🔄</span>
-          <div>
-            <p class="font-bold text-neutral-900">7-Day Replacement</p>
-            <p class="text-[11px] text-neutral-500">Hassle-free guarantee</p>
+          <div class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">${cards}</div>
+        </section>`;
+      },
+
+      whoIsWho(about) {
+        const entries = (about.whoIsWho || []).filter(w => w.enabled !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
+        if (!entries.length) return '';
+        const rows = entries.map(w => `
+          <div class="flex gap-4 sm:gap-6 rounded-2xl bg-white border border-[#E8E3D8] p-6 shadow-sm hover:border-[#D8B878] hover:shadow-md transition-all">
+            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center">
+              <span class="w-2 h-2 rotate-45 bg-[#C6A15B]"></span>
+            </div>
+            <div>
+              <h3 class="font-heading text-sm font-extrabold text-[#10151C]">${escapeHtml(w.title || w.role || '')}</h3>
+              <p class="mt-1.5 text-xs text-neutral-600 leading-relaxed">${escapeHtml(w.description || '')}</p>
+            </div>
+          </div>`).join('');
+        return `
+        <section class="bg-[#10151C] text-white">
+          <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
+            <div class="text-center">
+              <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#D8B878]">
+                <span class="h-px w-8 bg-[#C6A15B]/60"></span> Who Is Who <span class="h-px w-8 bg-[#C6A15B]/60"></span>
+              </span>
+              <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black">Who Does What</h2>
+              <p class="mt-3 text-xs text-neutral-400">A clear look at each role keeping AM COLLECTION running.</p>
+            </div>
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">${rows}</div>
           </div>
-        </div>
-        <div class="flex items-center gap-2.5 p-2">
-          <span class="w-9 h-9 rounded-full bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center text-lg flex-shrink-0">🔍</span>
-          <div>
-            <p class="font-bold text-neutral-900">100% Inspected</p>
-            <p class="text-[11px] text-neutral-500">Quality tested before dispatch</p>
+        </section>`;
+      },
+
+      quality(about) {
+        if (!about.quality) return '';
+        return `
+        <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 rise-in">
+          <div class="rounded-3xl bg-[#FBF8F1] border border-[#E8DCBE] p-8 sm:p-10 text-center">
+            <span class="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.25em] uppercase text-[#A87F3D]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+              The Quality Standard
+            </span>
+            <p class="mt-4 text-sm sm:text-[15px] text-neutral-700 leading-relaxed">${escapeHtml(about.quality)}</p>
           </div>
-        </div>
-        <div class="flex items-center gap-2.5 p-2">
-          <span class="w-9 h-9 rounded-full bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center text-lg flex-shrink-0">💬</span>
-          <div>
-            <p class="font-bold text-neutral-900">WhatsApp Support</p>
-            <p class="text-[11px] text-neutral-500">Real-time order tracking</p>
+        </section>`;
+      }
+    };
+
+    function renderAbout(about) {
+      const order = { intro: 1, story: 2, mission: 3, team: 4, quality: 5, whoIsWho: 6 };
+      const sections = Array.isArray(about.sections) && about.sections.length
+        ? [...about.sections].sort((a, b) => (a.order || 0) - (b.order || 0))
+        : Object.keys(order).map(k => ({ key: k, enabled: true, order: order[k] }));
+      const html = sections
+        .filter(s => s.enabled !== false && renderers[s.key])
+        .map(s => renderers[s.key](about))
+        .join('');
+      rootEl.innerHTML = html || '<div class="py-24 text-center text-xs font-bold text-neutral-500 uppercase tracking-widest">No content published yet</div>';
+      rootEl.classList.remove('hidden');
+      stateEl.classList.add('hidden');
+    }
+
+    async function loadAbout() {
+      showState(`
+        <div class="inline-block h-8 w-8 border-2 border-[#C6A15B] border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-xs font-bold text-neutral-500 uppercase tracking-[0.25em]">Loading Our Story</p>`);
+      try {
+        const res = await fetch('/api/about', { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) throw new Error('Server responded with status ' + res.status);
+        const about = await res.json();
+        if (!about || typeof about !== 'object') throw new Error('Unexpected response from server');
+        renderAbout(about);
+      } catch (e) {
+        showState(`
+          <div class="mx-auto w-14 h-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center">
+            <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
+          <h2 class="mt-5 font-heading text-lg font-extrabold text-[#10151C]">Unable To Load About Us</h2>
+          <p class="mt-2 text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">The content could not be loaded from the database. Please check your connection and try again.</p>
+          <button onclick="window.aboutLoadRetry()" class="mt-6 px-6 py-2.5 rounded-xl bg-[#10151C] text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors">Retry</button>`);
+      }
+    }
 
-  <!-- ================= PRODUCT CATALOG SECTION (COMPACT 4-COLUMN GRID) ================= -->
-  <section id="catalog" class="py-8 sm:py-12 max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-    
-    <!-- Catalog Header & Controls Bar -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 pb-4 border-b border-[#E8E3D8]">
-      <div>
-        <h2 class="font-heading text-lg sm:text-2xl font-bold text-[#10151C]">
-          Curated Master Timepieces
-        </h2>
-        <p class="text-xs text-[#5B6472]">
-          1:1 Super Clone replicas with sweeping automatic movements and scratch-proof sapphire crystal.
-        </p>
-      </div>
-
-      <!-- Controls: Counter & Sort Dropdown -->
-      <div class="flex items-center justify-between md:justify-end gap-3">
-        <span id="products-count-badge" class="text-xs text-[#5B6472] font-medium">
-          Showing timepieces...
-        </span>
-
-        <div class="flex items-center gap-2">
-          <label for="sort-select" class="text-xs text-[#5B6472] whitespace-nowrap">Sort:</label>
-          <select 
-            id="sort-select" 
-            class="bg-white border border-[#E8E3D8] text-xs text-[#1A1F27] rounded-lg px-2.5 py-1.5 focus:border-[#10151C] focus:ring-1 focus:ring-[#10151C]"
-          >
-            <option value="featured">Featured</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="rating">Customer Rating</option>
-            <option value="name">Name (A-Z)</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- DYNAMIC 4-COLUMN GRID (STRICTLY 4 CARDS PER ROW, EQUAL HEIGHT, NO HORIZONTAL SCROLL) -->
-    <div id="products-grid" class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-5 w-full">
-      <!-- Injected dynamically via js/app.js -->
-    </div>
-
-  </section>
-
-  <!-- ================= WHY 1:1 MASTER COPIES (TRUST SECTION) ================= -->
-  <section id="trust-section" class="py-12 bg-white border-y border-[#E8E3D8]">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-2xl mx-auto mb-10">
-        <span class="text-xs font-bold uppercase tracking-wider text-[#A87F3D]">Production Standards</span>
-        <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-[#10151C] mt-1">
-          Why AM COLLECTION Master Clones?
-        </h2>
-        <p class="text-xs text-neutral-500 mt-2">
-          Experience the difference between cheap street fakes and our 1:1 Horological Master Copies.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <!-- Card 1 -->
-        <div class="p-5 rounded-2xl bg-white border border-[#E8E3D8] space-y-3 shadow-sm hover:border-[#D8B878] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-          <div class="w-10 h-10 rounded-xl bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center text-lg">⚖️</div>
-          <h3 class="font-heading text-sm font-bold text-neutral-900">Exact 1:1 Authentic Weight</h3>
-          <p class="text-xs text-neutral-600 leading-relaxed">
-            Crafted from solid 904L surgical stainless steel, our watches match the exact gram-for-gram wrist weight of authentic luxury models.
-          </p>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="p-5 rounded-2xl bg-white border border-[#E8E3D8] space-y-3 shadow-sm hover:border-[#D8B878] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-          <div class="w-10 h-10 rounded-xl bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center text-lg">⚙️</div>
-          <h3 class="font-heading text-sm font-bold text-neutral-900">Sweeping Automatic Movement</h3>
-          <p class="text-xs text-neutral-600 leading-relaxed">
-            Powered by Japanese Miyota and high-beat automatic calibers featuring silent, stutter-free sweeping second hands.
-          </p>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="p-5 rounded-2xl bg-white border border-[#E8E3D8] space-y-3 shadow-sm hover:border-[#D8B878] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-          <div class="w-10 h-10 rounded-xl bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center text-lg">💎</div>
-          <h3 class="font-heading text-sm font-bold text-neutral-900">Anti-Scratch Sapphire Glass</h3>
-          <p class="text-xs text-neutral-600 leading-relaxed">
-            Double AR-coated sapphire crystal ensures scratch-resistance and high optical clarity under Indian sun.
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ================= VERIFIED CLIENT REVIEWS ================= -->
-  <section id="reviews" class="py-12 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-    <div class="text-center max-w-2xl mx-auto mb-8">
-      <h2 class="font-heading text-xl sm:text-2xl font-bold text-neutral-900">
-        Verified Buyer Reviews
-      </h2>
-      <p class="text-xs text-neutral-500 mt-1">
-        Over 4,800+ watches delivered across Mumbai, Delhi, Bengaluru, Hyderabad, and Tier-1/2 cities.
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <!-- Review 1 -->
-      <div class="p-4 rounded-2xl bg-white border border-[#E8E3D8] shadow-sm space-y-2 hover:border-[#D8B878] hover:shadow-md transition-all duration-200">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-neutral-900">Vikram S., Mumbai</span>
-          <span class="text-xs text-amber-400">★★★★★</span>
-        </div>
-        <p class="text-xs text-neutral-600">
-          "Received the Rolex Submariner via COD in 3 days. Weight is heavy and solid, ceramic bezel rotates with crisp clicks. Truly indistinguishable."
-        </p>
-        <span class="text-[10px] text-emerald-700 font-semibold block pt-1">✓ Verified Purchase (COD)</span>
-      </div>
-
-      <!-- Review 2 -->
-      <div class="p-4 rounded-2xl bg-white border border-[#E8E3D8] shadow-sm space-y-2 hover:border-[#D8B878] hover:shadow-md transition-all duration-200">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-neutral-900">Arjun K., Bengaluru</span>
-          <span class="text-xs text-amber-400">★★★★★</span>
-        </div>
-        <p class="text-xs text-neutral-600">
-          "Patek Nautilus in rose gold has brilliant luster. Gliding second hand and exhibition glass back are top tier. WhatsApp team sent dispatch video before shipping."
-        </p>
-        <span class="text-[10px] text-emerald-700 font-semibold block pt-1">✓ Verified Purchase (COD)</span>
-      </div>
-
-      <!-- Review 3 -->
-      <div class="p-4 rounded-2xl bg-white border border-[#E8E3D8] shadow-sm space-y-2 hover:border-[#D8B878] hover:shadow-md transition-all duration-200">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-neutral-900">Rahul M., New Delhi</span>
-          <span class="text-xs text-amber-400">★★★★★</span>
-        </div>
-        <p class="text-xs text-neutral-600">
-          "Audemars Piguet Royal Oak skeleton dial is mesmerizing. Wore it to a wedding and received compliments all evening. Best value in India."
-        </p>
-        <span class="text-[10px] text-emerald-700 font-semibold block pt-1">✓ Verified Purchase (COD)</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= FAQ SECTION ================= -->
-  <section id="faq" class="py-12 bg-white border-t border-[#E8E3D8]">
-    <div class="max-w-4xl mx-auto px-3 sm:px-6">
-      <div class="text-center mb-8">
-        <h2 class="font-heading text-xl sm:text-2xl font-bold text-neutral-900">Frequently Asked Questions</h2>
-        <p class="text-xs text-neutral-500 mt-1">Common questions about Cash on Delivery, shipping, and quality.</p>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <details class="group bg-white border border-[#E8E3D8] rounded-2xl p-4 cursor-pointer hover:border-[#D8B878] transition-colors">
-          <summary class="font-bold text-neutral-900 flex justify-between items-center">
-            <span>Is Cash on Delivery (COD) available for my pincode?</span>
-            <span class="text-neutral-400 group-open:rotate-180 transition-transform">▼</span>
-          </summary>
-          <p class="mt-2 text-neutral-600 leading-relaxed">
-            Yes! We offer 100% Free Cash on Delivery across all 19,000+ serviceable Indian postal pincodes via Express Courier (BlueDart, Delhivery, DTDC).
-          </p>
-        </details>
-
-        <details class="group bg-white border border-[#E8E3D8] rounded-2xl p-4 cursor-pointer hover:border-[#D8B878] transition-colors">
-          <summary class="font-bold text-neutral-900 flex justify-between items-center">
-            <span>Can I inspect the parcel before paying?</span>
-            <span class="text-neutral-400 group-open:rotate-180 transition-transform">▼</span>
-          </summary>
-          <p class="mt-2 text-neutral-600 leading-relaxed">
-            Our couriers follow standard security parcel guidelines. In addition, we provide a 7-Day Hassle-Free Replacement Guarantee if any issue occurs.
-          </p>
-        </details>
-
-        <details class="group bg-white border border-[#E8E3D8] rounded-2xl p-4 cursor-pointer hover:border-[#D8B878] transition-colors">
-          <summary class="font-bold text-neutral-900 flex justify-between items-center">
-            <span>What happens if the watch stops working or arrives damaged?</span>
-            <span class="text-neutral-400 group-open:rotate-180 transition-transform">▼</span>
-          </summary>
-          <p class="mt-2 text-neutral-600 leading-relaxed">
-            Simply send a 10-second unboxing video to our WhatsApp concierge. We dispatch a brand-new replacement immediately with pickup of the old piece at zero extra cost.
-          </p>
-        </details>
-      </div>
-    </div>
-  </section>
+    window.aboutLoadRetry = loadAbout;
+    loadAbout();
+  })();
+  </script>
 
   <!-- ================= PRODUCTION COMPACT FOOTER ================= -->
   <footer class="bg-[#0C1016] text-white border-t border-[#232B38] pt-12 pb-8 text-xs">

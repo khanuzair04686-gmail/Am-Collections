@@ -38,6 +38,7 @@ async function handleAuthSubmit(e) {
 
     if (res.ok) {
       sessionStorage.setItem('amc_admin_auth', 'true');
+      sessionStorage.setItem('amc_admin_passkey', passkey);
       const modal = document.getElementById('auth-modal');
       if (modal) modal.classList.add('hidden');
       showToast('Admin Access Granted! Welcome to AM COLLECTION Portal. 👑', 'success');
@@ -48,6 +49,7 @@ async function handleAuthSubmit(e) {
   } catch (err) {
     if (passkey === 'admin123') {
       sessionStorage.setItem('amc_admin_auth', 'true');
+      sessionStorage.setItem('amc_admin_passkey', passkey);
       const modal = document.getElementById('auth-modal');
       if (modal) modal.classList.add('hidden');
       showToast('Admin Access Granted (Offline Mode)!', 'info');
@@ -60,7 +62,17 @@ async function handleAuthSubmit(e) {
 
 function handleLogout() {
   sessionStorage.removeItem('amc_admin_auth');
+  sessionStorage.removeItem('amc_admin_passkey');
   location.reload();
+}
+
+// Adds the admin passkey header required by protected server routes
+function adminHeaders(json = true) {
+  const h = {};
+  if (json) h['Content-Type'] = 'application/json';
+  const key = sessionStorage.getItem('amc_admin_passkey');
+  if (key) h['x-admin-passkey'] = key;
+  return h;
 }
 
 // Setup Event Listeners
@@ -85,6 +97,9 @@ function setupAdminListeners() {
 
   const couponForm = document.getElementById('create-coupon-form');
   if (couponForm) couponForm.addEventListener('submit', handleCreateCoupon);
+
+  const aboutForm = document.getElementById('about-form');
+  if (aboutForm) aboutForm.addEventListener('submit', handleAboutSubmit);
 
   const searchInput = document.getElementById('admin-search-watches');
   if (searchInput) searchInput.addEventListener('input', () => renderWatchesTable());
@@ -168,7 +183,7 @@ async function handleSettingsSubmit(e) {
   try {
     const res = await fetch('/api/settings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders(),
       body: JSON.stringify({ storeName, storePhone, tagline, announcementText })
     });
 
@@ -197,6 +212,7 @@ async function handleLogoUpload(e) {
     showToast('Uploading new logo...', 'info');
     const res = await fetch('/api/settings/logo', {
       method: 'POST',
+      headers: adminHeaders(false),
       body: formData
     });
 
@@ -220,7 +236,7 @@ async function handleLogoUpload(e) {
 async function handleRemoveLogo() {
   if (!confirm('Permanently remove custom logo and return to default monogram?')) return;
   try {
-    const res = await fetch('/api/settings/logo', { method: 'DELETE' });
+    const res = await fetch('/api/settings/logo', { method: 'DELETE', headers: adminHeaders(false) });
     if (res.ok) {
       const preview = document.getElementById('branding-logo-preview');
       const placeholder = document.getElementById('branding-logo-placeholder');
@@ -248,7 +264,7 @@ async function handleChangePasskey(e) {
   try {
     const res = await fetch('/api/auth/change-passkey', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders(),
       body: JSON.stringify({ currentPasskey, newPasskey })
     });
     const data = await res.json();
@@ -307,10 +323,10 @@ function renderWatchesTable() {
   }
 
   tbody.innerHTML = filtered.map(w => `
-    <tr class="hover:bg-neutral-900/40 transition-colors">
+    <tr class="hover:bg-[#161B25]/40 transition-colors">
       <td class="p-4">
         <div class="flex items-center gap-3">
-          <img src="${w.image}" alt="${w.model}" class="w-12 h-12 rounded-xl object-contain border border-neutral-800 bg-black flex-shrink-0" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'" />
+          <img src="${w.image}" alt="${w.model}" class="w-12 h-12 rounded-xl object-contain border border-[#1F2632] bg-black flex-shrink-0" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'" />
           <div>
             <div class="flex items-center gap-1.5 font-bold text-white text-xs">
               ${w.model}
@@ -326,7 +342,7 @@ function renderWatchesTable() {
       <td class="p-4 font-mono ${(w.stock || 0) <= 5 ? 'text-red-400 font-bold' : 'text-neutral-300'}">${w.stock !== undefined ? w.stock : 20}</td>
       <td class="p-4 text-neutral-300">${w.movement || 'Japanese Automatic'}</td>
       <td class="p-4">
-        <span class="px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 text-[10px] font-bold">
+        <span class="px-2 py-0.5 rounded bg-[#1B222C] text-neutral-300 text-[10px] font-bold">
           ${w.badge || '1:1 MASTER'}
         </span>
       </td>
@@ -339,7 +355,7 @@ function renderWatchesTable() {
       </td>
       <td class="p-4 text-right">
         <div class="flex items-center justify-end gap-2">
-          <button onclick="openEditWatchModal('${w.id}')" class="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-amber-300 transition-colors" title="Edit Watch Details">
+          <button onclick="openEditWatchModal('${w.id}')" class="px-3 py-1.5 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 hover:text-amber-300 transition-colors" title="Edit Watch Details">
             Edit
           </button>
           <button onclick="handleDeleteWatchPermanently('${w.id}', '${w.brand} ${w.model}')" class="px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-500/30 transition-colors" title="Permanently Delete">
@@ -359,7 +375,7 @@ async function handleDeleteWatchPermanently(id, title) {
 
   try {
     showToast('Deleting watch permanently...', 'info');
-    const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: adminHeaders(false) });
     if (res.ok) {
       showToast(`"${title}" permanently removed from database! 🗑️`, 'success');
       await loadAdminWatches();
@@ -376,7 +392,7 @@ async function toggleWatchHidden(id) {
   try {
     const res = await fetch(`/api/products/${id}/toggle`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders(),
       body: JSON.stringify({ field: 'isHidden' })
     });
     if (res.ok) {
@@ -390,7 +406,7 @@ async function handleSeedCatalog() {
   if (!confirm('Populate the default curated 8 master copy watches into the catalog?')) return;
   try {
     showToast('Populating watches...', 'info');
-    const res = await fetch('/api/admin/seed-defaults', { method: 'POST' });
+    const res = await fetch('/api/admin/seed-defaults', { method: 'POST', headers: adminHeaders(false) });
     if (res.ok) {
       showToast('Curated collection populated! 🌟', 'success');
       await loadAdminWatches();
@@ -531,7 +547,7 @@ async function handleWatchFormSubmit(e) {
 
   try {
     showToast(isEdit ? 'Updating watch in database...' : 'Saving new watch to database...', 'info');
-    const res = await fetch(endpoint, { method, body: formData });
+    const res = await fetch(endpoint, { method, headers: adminHeaders(false), body: formData });
 
     if (res.ok) {
       showToast(isEdit ? 'Watch updated permanently! ✅' : 'New watch uploaded successfully! ⌚', 'success');
@@ -599,7 +615,7 @@ function renderOrdersTable() {
     const itemsSummary = (o.items || []).map(i => `${i.brand} ${i.model} (×${i.quantity || 1})`).join(', ');
 
     return `
-      <tr class="hover:bg-neutral-900/40 transition-colors">
+      <tr class="hover:bg-[#161B25]/40 transition-colors">
         <td class="p-4">
           <div class="font-mono font-bold text-amber-400">#${o.orderId}</div>
           <div class="text-[10px] text-neutral-500">${new Date(o.createdAt).toLocaleDateString('en-IN')}</div>
@@ -615,7 +631,7 @@ function renderOrdersTable() {
         <td class="p-4 font-extrabold text-white font-mono">₹${Number(o.total || 0).toLocaleString('en-IN')}</td>
         <td class="p-4 font-mono text-amber-400 text-xs">+${o.coinsEarned || 0}</td>
         <td class="p-4">
-          <select onchange="handleOrderStatusChange('${o.orderId}', this.value)" class="bg-neutral-950 border border-neutral-800 rounded-lg px-2.5 py-1 text-[11px] font-semibold text-amber-300 focus:outline-none">
+          <select onchange="handleOrderStatusChange('${o.orderId}', this.value)" class="bg-[#0B0E13] border border-[#1F2632] rounded-lg px-2.5 py-1 text-[11px] font-semibold text-amber-300 focus:outline-none">
             <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
             <option value="Packed" ${o.status === 'Packed' ? 'selected' : ''}>Packed</option>
             <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
@@ -644,7 +660,7 @@ async function handleOrderStatusChange(orderId, newStatus) {
   try {
     const res = await fetch(`/api/orders/${orderId}/status`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders(),
       body: JSON.stringify({ status: newStatus })
     });
     if (res.ok) {
@@ -659,7 +675,7 @@ async function handleOrderStatusChange(orderId, newStatus) {
 async function handleDeleteOrderPermanently(orderId) {
   if (!confirm(`Permanently delete order #${orderId} from the database?`)) return;
   try {
-    const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+    const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE', headers: adminHeaders(false) });
     if (res.ok) {
       showToast('Order permanently deleted', 'success');
       await loadAdminOrders();
@@ -707,7 +723,7 @@ function renderUsersTable() {
   }
 
   tbody.innerHTML = adminUsers.map(u => `
-    <tr class="hover:bg-neutral-900/40 transition-colors">
+    <tr class="hover:bg-[#161B25]/40 transition-colors">
       <td class="p-4 font-bold text-white flex items-center gap-2">
         <div class="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xs">
           ${(u.name || 'U').charAt(0).toUpperCase()}
@@ -772,7 +788,7 @@ async function handleCreateCoupon(e) {
     showToast('Creating coupon...', 'info');
     const res = await fetch('/api/coupons', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders(),
       body: JSON.stringify({ code, discountType, discountValue, minOrder })
     });
 
@@ -792,7 +808,7 @@ async function handleCreateCoupon(e) {
 async function handleDeleteCoupon(code) {
   if (!confirm(`Delete coupon '${code}'?`)) return;
   try {
-    const res = await fetch(`/api/coupons/${code}`, { method: 'DELETE' });
+    const res = await fetch(`/api/coupons/${code}`, { method: 'DELETE', headers: adminHeaders(false) });
     if (res.ok) {
       showToast('Coupon deleted', 'success');
       await loadAdminCoupons();
@@ -815,13 +831,180 @@ function switchAdminTab(tab) {
     activeBtn.classList.add('border-amber-400', 'text-amber-400');
   }
 
-  ['watches', 'orders', 'customers', 'branding', 'coupons'].forEach(t => {
+  ['watches', 'orders', 'customers', 'branding', 'coupons', 'about'].forEach(t => {
     const sec = document.getElementById(`admin-tab-${t}`);
     if (sec) {
       if (t === tab) sec.classList.remove('hidden');
       else sec.classList.add('hidden');
     }
   });
+
+  if (tab === 'about') loadAdminAbout();
+}
+
+// ===== ABOUT US MANAGEMENT =====
+const ABOUT_MEMBER_KEYS = ['founder', 'developer', 'manager'];
+
+function setAboutPhotoPreview(key, url) {
+  const preview = document.getElementById(`about-${key}-preview`);
+  const placeholder = document.getElementById(`about-${key}-placeholder`);
+  const removeBtn = document.getElementById(`about-${key}-remove`);
+  if (!preview || !placeholder) return;
+  if (url) {
+    preview.src = url;
+    preview.classList.remove('hidden');
+    placeholder.classList.add('hidden');
+    if (removeBtn) removeBtn.classList.remove('hidden');
+  } else {
+    preview.src = '';
+    preview.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+    if (removeBtn) removeBtn.classList.add('hidden');
+  }
+}
+
+function fillAboutForm(about) {
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v == null ? '' : v; };
+  const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = v !== false; };
+
+  setVal('about-page-title', about.pageTitle);
+  setVal('about-intro', about.intro);
+  setVal('about-story', about.story);
+  setVal('about-mission', about.mission);
+  setVal('about-vision', about.vision);
+  setVal('about-quality', about.quality);
+
+  (about.sections || []).forEach(s => {
+    setChk(`about-sec-${s.key}`, s.enabled);
+    setVal(`about-sec-order-${s.key}`, s.order);
+  });
+
+  (about.team || []).forEach(m => {
+    setChk(`about-${m.key}-enabled`, m.enabled);
+    setVal(`about-${m.key}-name`, m.name);
+    setVal(`about-${m.key}-role`, m.role);
+    setVal(`about-${m.key}-bio`, m.bio);
+    setVal(`about-${m.key}-photo`, m.photoUrl);
+    setVal(`about-${m.key}-instagram`, m.social && m.social.instagram);
+    setVal(`about-${m.key}-twitter`, m.social && m.social.twitter);
+    setVal(`about-${m.key}-linkedin`, m.social && m.social.linkedin);
+    setVal(`about-${m.key}-email`, m.social && m.social.email);
+    setAboutPhotoPreview(m.key, m.photoUrl);
+  });
+
+  (about.whoIsWho || []).forEach(w => {
+    setChk(`about-who-${w.role}-enabled`, w.enabled);
+    setVal(`about-who-${w.role}-title`, w.title);
+    setVal(`about-who-${w.role}-desc`, w.description);
+    setVal(`about-who-${w.role}-order`, w.order);
+  });
+}
+
+async function loadAdminAbout(manual = false) {
+  try {
+    const res = await fetch('/api/about');
+    if (!res.ok) throw new Error('status ' + res.status);
+    const about = await res.json();
+    fillAboutForm(about);
+    if (manual) showToast('About Us content loaded from database.', 'success');
+  } catch (e) {
+    showToast('Could not load About Us content from the database.', 'error');
+  }
+}
+
+async function handleAboutPhoto(key, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('photo', file);
+  try {
+    showToast('Uploading photo...', 'info');
+    const res = await fetch('/api/about/photo', {
+      method: 'POST',
+      headers: adminHeaders(false),
+      body: formData
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      const hidden = document.getElementById(`about-${key}-photo`);
+      if (hidden) hidden.value = data.photoUrl;
+      setAboutPhotoPreview(key, data.photoUrl);
+      showToast('Photo uploaded! Click "Save About Us" to publish it.', 'success');
+    } else {
+      showToast(data.error || 'Photo upload failed', 'error');
+    }
+  } catch (e) {
+    showToast('Photo upload error', 'error');
+  } finally {
+    input.value = '';
+  }
+}
+
+function removeAboutPhoto(key) {
+  const hidden = document.getElementById(`about-${key}-photo`);
+  if (hidden) hidden.value = '';
+  setAboutPhotoPreview(key, '');
+  showToast('Photo removed. Click "Save About Us" to publish the change.', 'info');
+}
+
+async function handleAboutSubmit(e) {
+  e.preventDefault();
+  const getVal = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const getChk = id => { const el = document.getElementById(id); return el ? el.checked : true; };
+  const getNum = id => { const el = document.getElementById(id); const n = parseInt(el && el.value, 10); return Number.isFinite(n) ? n : 0; };
+
+  const sectionKeys = ['intro', 'story', 'mission', 'team', 'whoIsWho'];
+  const sectionLabels = { intro: 'Brand Introduction', story: 'Our Story', mission: 'Mission & Vision', team: 'Meet The Team', whoIsWho: 'Who Is Who' };
+
+  const payload = {
+    pageTitle: getVal('about-page-title'),
+    intro: getVal('about-intro'),
+    story: getVal('about-story'),
+    mission: getVal('about-mission'),
+    vision: getVal('about-vision'),
+    quality: getVal('about-quality'),
+    sections: sectionKeys.map(k => ({ key: k, label: sectionLabels[k], enabled: getChk(`about-sec-${k}`), order: getNum(`about-sec-order-${k}`) })),
+    team: ABOUT_MEMBER_KEYS.map(k => ({
+      key: k,
+      name: getVal(`about-${k}-name`),
+      role: getVal(`about-${k}-role`),
+      bio: getVal(`about-${k}-bio`),
+      photoUrl: getVal(`about-${k}-photo`),
+      enabled: getChk(`about-${k}-enabled`),
+      order: ABOUT_MEMBER_KEYS.indexOf(k) + 1,
+      social: {
+        instagram: getVal(`about-${k}-instagram`),
+        twitter: getVal(`about-${k}-twitter`),
+        linkedin: getVal(`about-${k}-linkedin`),
+        email: getVal(`about-${k}-email`)
+      }
+    })),
+    whoIsWho: ABOUT_MEMBER_KEYS.map((k, i) => ({
+      role: k,
+      title: getVal(`about-who-${k}-title`),
+      description: getVal(`about-who-${k}-desc`),
+      enabled: getChk(`about-who-${k}-enabled`),
+      order: getNum(`about-who-${k}-order`) || (i + 1)
+    }))
+  };
+
+  try {
+    showToast('Saving About Us to database...', 'info');
+    const res = await fetch('/api/about', {
+      method: 'PUT',
+      headers: adminHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('About Us saved to database! ✅', 'success');
+      if (data.about) fillAboutForm(data.about);
+    } else {
+      showToast(data.error || 'Failed to save About Us', 'error');
+    }
+  } catch (e) {
+    showToast('Network error saving About Us', 'error');
+  }
 }
 
 // Toast System
@@ -832,10 +1015,10 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-2xl transition-all duration-300 transform translate-y-2 opacity-0 text-sm font-medium ${
     type === 'success' 
-      ? 'bg-neutral-900/95 border-amber-500/50 text-amber-200' 
+      ? 'bg-[#12161F]/95 border-amber-500/50 text-amber-200' 
       : type === 'error' 
-      ? 'bg-neutral-900/95 border-red-500/50 text-red-200' 
-      : 'bg-neutral-900/95 border-neutral-700 text-neutral-200'
+      ? 'bg-[#12161F]/95 border-red-500/50 text-red-200' 
+      : 'bg-[#12161F]/95 border-[#2A3342] text-neutral-200'
   }`;
 
   const icon = type === 'success' ? '✔' : type === 'error' ? '✖' : 'ℹ';

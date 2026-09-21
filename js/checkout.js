@@ -94,7 +94,7 @@ class CheckoutManager {
         itemsContainer.innerHTML = '<p class="text-neutral-500 text-xs py-2">Your bag is empty.</p>';
       } else {
         itemsContainer.innerHTML = items.map(i => `
-          <div class="flex justify-between items-center text-xs py-1 border-b border-neutral-100 text-neutral-700">
+          <div class="flex justify-between items-center text-xs py-1 border-b border-[#F0EDE4] text-neutral-700">
             <span class="truncate max-w-[200px] font-medium">${i.brand} ${i.model} <span class="text-neutral-400 font-normal">×${i.quantity || 1}</span></span>
             <span class="font-bold text-neutral-900 font-mono">₹${((i.price) * (i.quantity || 1)).toLocaleString('en-IN')}</span>
           </div>
@@ -328,7 +328,7 @@ class CheckoutManager {
 
     if (itemsList && order.items) {
       itemsList.innerHTML = order.items.map(i => `
-        <div class="flex items-center justify-between text-xs py-2 border-b border-neutral-100">
+        <div class="flex items-center justify-between text-xs py-2 border-b border-[#F0EDE4]">
           <div class="flex items-center gap-2">
             <img src="${i.image || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=200'}" class="w-10 h-10 object-contain rounded border border-neutral-200" />
             <div>

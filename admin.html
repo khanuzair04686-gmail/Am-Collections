@@ -41,11 +41,11 @@
   <!-- Google Fonts & Custom Styles -->
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
-<body class="bg-[#0A0A0A] text-neutral-200 antialiased selection:bg-amber-500 selection:text-black min-h-screen flex flex-col font-sans">
+<body class="bg-[#08090D] text-neutral-200 antialiased selection:bg-amber-500 selection:text-black min-h-screen flex flex-col font-sans">
 
   <!-- ================= AUTHENTICATION MODAL ================= -->
   <div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
-    <div class="bg-neutral-950 border border-amber-500/40 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl">
+    <div class="bg-[#0B0E13] border border-amber-500/40 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl">
       <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 mx-auto flex items-center justify-center">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
       </div>
@@ -60,7 +60,7 @@
           id="auth-passkey" 
           required 
           placeholder="Enter Passkey (Default: admin123)" 
-          class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-center text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500 tracking-wider font-mono"
+          class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-4 py-3 text-center text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500 tracking-wider font-mono"
         />
         <button type="submit" class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black text-xs font-black uppercase tracking-widest shadow-xl transition-all">
           Unlock Dashboard
@@ -70,7 +70,7 @@
   </div>
 
   <!-- ================= TOP ADMIN BAR ================= -->
-  <header class="bg-neutral-950 border-b border-neutral-800 sticky top-0 z-30 shadow-xl">
+  <header class="bg-[#0B0E13] border-b border-[#1F2632] sticky top-0 z-30 shadow-xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         
@@ -91,12 +91,12 @@
 
         <!-- System Status & Quick Links -->
         <div class="flex items-center gap-3 text-xs">
-          <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono">
+          <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#12161F] border border-[#1F2632] text-neutral-400 font-mono">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="db-status-pill">Checking DB...</span>
           </div>
           
-          <a href="/" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-amber-400 transition-colors flex items-center gap-1.5 font-medium">
+          <a href="/" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-[#12161F] hover:bg-[#1A2029] border border-[#1F2632] text-neutral-300 hover:text-amber-400 transition-colors flex items-center gap-1.5 font-medium">
             <span>Storefront</span>
             <span class="text-[10px]">↗</span>
           </a>
@@ -115,22 +115,22 @@
     
     <!-- STATS OVERVIEW CARDS -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800">
+      <div class="p-5 rounded-2xl bg-[#12161F]/80 border border-[#1F2632]">
         <div class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Total Watches</div>
         <div class="text-3xl font-black text-white mt-1" id="stat-total-watches">0</div>
         <div class="text-[11px] text-amber-400 mt-1">Live in catalog</div>
       </div>
-      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800">
+      <div class="p-5 rounded-2xl bg-[#12161F]/80 border border-[#1F2632]">
         <div class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Total Orders</div>
         <div class="text-3xl font-black text-white mt-1" id="stat-total-orders">0</div>
         <div class="text-[11px] text-emerald-400 mt-1">Cash on Delivery</div>
       </div>
-      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800">
+      <div class="p-5 rounded-2xl bg-[#12161F]/80 border border-[#1F2632]">
         <div class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Total Revenue</div>
         <div class="text-3xl font-black text-amber-400 mt-1 font-mono" id="stat-order-value">₹0</div>
         <div class="text-[11px] text-neutral-500 mt-1">Gross Order Bookings</div>
       </div>
-      <div class="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800">
+      <div class="p-5 rounded-2xl bg-[#12161F]/80 border border-[#1F2632]">
         <div class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Registered Customers</div>
         <div class="text-3xl font-black text-white mt-1" id="stat-total-customers">0</div>
         <div class="text-[11px] text-amber-400 mt-1">Privilege Accounts</div>
@@ -138,7 +138,7 @@
     </div>
 
     <!-- TABS NAVIGATION -->
-    <div class="flex items-center gap-2 border-b border-neutral-800 overflow-x-auto no-scrollbar">
+    <div class="flex items-center gap-2 border-b border-[#1F2632] overflow-x-auto no-scrollbar">
       <button onclick="switchAdminTab('watches')" id="tab-btn-watches" class="admin-tab-btn py-3 px-5 text-xs font-bold uppercase tracking-wider border-b-2 border-amber-400 text-amber-400 transition-all flex items-center gap-2 whitespace-nowrap">
         <span>⌚</span>
         <span>Watches & Inventory</span>
@@ -159,20 +159,24 @@
         <span>🎟️</span>
         <span>Coupons</span>
       </button>
+      <button onclick="switchAdminTab('about')" id="tab-btn-about" class="admin-tab-btn py-3 px-5 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-neutral-400 hover:text-white transition-all flex items-center gap-2 whitespace-nowrap">
+        <span>🏛️</span>
+        <span>About Us</span>
+      </button>
     </div>
 
     <!-- ================= TAB 1: WATCHES & INVENTORY ================= -->
     <section id="admin-tab-watches" class="space-y-6">
       <!-- Top Actions Bar -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-neutral-900/60 border border-neutral-800 p-4 rounded-2xl">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#10131A]/80 border border-[#1F2632] p-4 rounded-2xl">
         <div class="flex items-center gap-3">
           <input 
             type="text" 
             id="admin-search-watches" 
             placeholder="Search watches by model or brand..." 
-            class="bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 w-64"
+            class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 w-64"
           />
-          <select id="admin-filter-brand" class="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+          <select id="admin-filter-brand" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
             <option value="all">All Brands</option>
             <option value="rolex">Rolex</option>
             <option value="patek">Patek Philippe</option>
@@ -190,17 +194,17 @@
             <span>+</span>
             <span>Upload New Watch</span>
           </button>
-          <button onclick="handleSeedCatalog()" class="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-semibold tracking-wider transition-colors" title="Seed curated luxury catalog if empty">
+          <button onclick="handleSeedCatalog()" class="px-4 py-2.5 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-300 text-xs font-semibold tracking-wider transition-colors" title="Seed curated luxury catalog if empty">
             Populate Demo Watches
           </button>
         </div>
       </div>
 
       <!-- Watches Table -->
-      <div class="bg-neutral-900/60 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl">
+      <div class="bg-[#10131A]/80 border border-[#1F2632] rounded-3xl overflow-hidden shadow-2xl">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-neutral-950 border-b border-neutral-800 text-neutral-400 uppercase tracking-wider font-semibold">
+            <thead class="bg-[#0B0E13] border-b border-[#1F2632] text-neutral-400 uppercase tracking-wider font-semibold">
               <tr>
                 <th class="p-4">Watch</th>
                 <th class="p-4">Brand</th>
@@ -212,7 +216,7 @@
                 <th class="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="admin-watches-table-body" class="divide-y divide-neutral-800/80 text-neutral-200">
+            <tbody id="admin-watches-table-body" class="divide-y divide-[#1F2632]/80 text-neutral-200">
               <!-- Populated via admin.js -->
             </tbody>
           </table>
@@ -222,15 +226,15 @@
 
     <!-- ================= TAB 2: ORDERS MANAGEMENT ================= -->
     <section id="admin-tab-orders" class="hidden space-y-6">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-neutral-900/60 border border-neutral-800 p-4 rounded-2xl">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#10131A]/80 border border-[#1F2632] p-4 rounded-2xl">
         <div class="flex items-center gap-3">
           <input 
             type="text" 
             id="admin-search-orders" 
             placeholder="Search Order ID, Phone, Customer..." 
-            class="bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 w-64"
+            class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 w-64"
           />
-          <select id="admin-filter-order-status" class="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+          <select id="admin-filter-order-status" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
             <option value="all">All Orders</option>
             <option value="Confirmed">Confirmed</option>
             <option value="Packed">Packed</option>
@@ -239,16 +243,16 @@
             <option value="Cancelled">Cancelled</option>
           </select>
         </div>
-        <button onclick="loadAdminOrders()" class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-semibold text-neutral-200 transition-colors">
+        <button onclick="loadAdminOrders()" class="px-4 py-2 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-xs font-semibold text-neutral-200 transition-colors">
           Refresh Orders
         </button>
       </div>
 
       <!-- Orders Table -->
-      <div class="bg-neutral-900/60 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl">
+      <div class="bg-[#10131A]/80 border border-[#1F2632] rounded-3xl overflow-hidden shadow-2xl">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-neutral-950 border-b border-neutral-800 text-neutral-400 uppercase tracking-wider font-semibold">
+            <thead class="bg-[#0B0E13] border-b border-[#1F2632] text-neutral-400 uppercase tracking-wider font-semibold">
               <tr>
                 <th class="p-4">Order ID & Date</th>
                 <th class="p-4">Customer</th>
@@ -261,7 +265,7 @@
                 <th class="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="admin-orders-table-body" class="divide-y divide-neutral-800/80 text-neutral-200">
+            <tbody id="admin-orders-table-body" class="divide-y divide-[#1F2632]/80 text-neutral-200">
               <!-- Populated via admin.js -->
             </tbody>
           </table>
@@ -271,20 +275,20 @@
 
     <!-- ================= TAB 3: CUSTOMERS & USERS ================= -->
     <section id="admin-tab-customers" class="hidden space-y-6">
-      <div class="flex items-center justify-between bg-neutral-900/60 border border-neutral-800 p-4 rounded-2xl">
+      <div class="flex items-center justify-between bg-[#10131A]/80 border border-[#1F2632] p-4 rounded-2xl">
         <div>
           <h3 class="font-heading text-base font-bold text-white">REGISTERED PRIVILEGE MEMBERS</h3>
           <p class="text-xs text-neutral-400">All registered user accounts with AM Coins wallet balances and order history.</p>
         </div>
-        <button onclick="loadAdminUsers()" class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-semibold text-neutral-200 transition-colors">
+        <button onclick="loadAdminUsers()" class="px-4 py-2 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-xs font-semibold text-neutral-200 transition-colors">
           Refresh Customers
         </button>
       </div>
 
-      <div class="bg-neutral-900/60 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl">
+      <div class="bg-[#10131A]/80 border border-[#1F2632] rounded-3xl overflow-hidden shadow-2xl">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-neutral-950 border-b border-neutral-800 text-neutral-400 uppercase tracking-wider font-semibold">
+            <thead class="bg-[#0B0E13] border-b border-[#1F2632] text-neutral-400 uppercase tracking-wider font-semibold">
               <tr>
                 <th class="p-4">Customer Name</th>
                 <th class="p-4">Email Address</th>
@@ -295,7 +299,7 @@
                 <th class="p-4">Joined Date</th>
               </tr>
             </thead>
-            <tbody id="admin-users-table-body" class="divide-y divide-neutral-800/80 text-neutral-200">
+            <tbody id="admin-users-table-body" class="divide-y divide-[#1F2632]/80 text-neutral-200">
               <!-- Populated via admin.js -->
             </tbody>
           </table>
@@ -308,14 +312,14 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         <!-- Left: Upload Logo Box (Enlarged & Prominent) -->
-        <div class="lg:col-span-5 p-6 rounded-3xl bg-neutral-900/60 border border-neutral-800 space-y-6">
+        <div class="lg:col-span-5 p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-6">
           <div>
             <h3 class="font-heading text-lg font-bold text-white">STORE LOGO</h3>
             <p class="text-xs text-neutral-400 mt-1">Upload a custom logo image (PNG, SVG, WEBP, JPG) to display on header & emails.</p>
           </div>
 
           <!-- Enlarged Logo Preview Box with Clear Space -->
-          <div class="w-full h-56 rounded-2xl bg-neutral-950 border-2 border-dashed border-neutral-700 flex flex-col items-center justify-center p-6 text-center relative overflow-hidden group">
+          <div class="w-full h-56 rounded-2xl bg-neutral-950 border-2 border-dashed border-[#2A3342] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden group">
             <img id="branding-logo-preview" src="" alt="Store Logo" class="h-44 w-auto max-w-full object-contain hidden" />
             
             <div id="branding-logo-placeholder" class="flex flex-col items-center justify-center space-y-3">
@@ -335,7 +339,7 @@
                 type="file" 
                 id="logo-file-input" 
                 accept="image/*" 
-                class="w-full text-xs text-neutral-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-neutral-800 file:text-amber-400 hover:file:bg-neutral-700 cursor-pointer"
+                class="w-full text-xs text-neutral-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#1B222C] file:text-amber-400 hover:file:bg-[#252E3B] cursor-pointer"
               />
             </div>
             <div class="flex gap-2">
@@ -350,7 +354,7 @@
         </div>
 
         <!-- Right: Store Details Form -->
-        <div class="lg:col-span-7 p-6 rounded-3xl bg-neutral-900/60 border border-neutral-800 space-y-6">
+        <div class="lg:col-span-7 p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-6">
           <div>
             <h3 class="font-heading text-lg font-bold text-white">STORE IDENTITY & HOTLINE</h3>
             <p class="text-xs text-neutral-400 mt-1">Configure your business name, tagline, WhatsApp hotline, and top banner.</p>
@@ -364,7 +368,7 @@
                   type="text" 
                   id="setting-store-name" 
                   required 
-                  class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-semibold"
+                  class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-semibold"
                 />
               </div>
               <div>
@@ -374,7 +378,7 @@
                   id="setting-store-phone" 
                   required 
                   placeholder="e.g. 919876543210" 
-                  class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                  class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
                 />
               </div>
             </div>
@@ -385,7 +389,7 @@
                 type="text" 
                 id="setting-tagline" 
                 required 
-                class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
               />
             </div>
 
@@ -395,7 +399,7 @@
                 id="setting-announcement" 
                 rows="2" 
                 required 
-                class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
               ></textarea>
             </div>
 
@@ -411,7 +415,7 @@
       </div>
 
       <!-- Security & Passkey Management Card -->
-      <div class="p-6 rounded-3xl bg-neutral-900/60 border border-neutral-800 space-y-4">
+      <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -429,7 +433,7 @@
               type="password" 
               id="passkey-current" 
               required 
-              class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+              class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
             />
           </div>
           <div>
@@ -439,7 +443,7 @@
               id="passkey-new" 
               required 
               minlength="4"
-              class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+              class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
             />
           </div>
           <div>
@@ -449,11 +453,11 @@
               id="passkey-confirm" 
               required 
               minlength="4"
-              class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+              class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
             />
           </div>
           <div class="sm:col-span-3 flex items-center justify-between pt-1">
-            <span class="text-[11px] text-neutral-500">Default passkey is <code class="text-amber-400 bg-black px-1.5 py-0.5 rounded border border-neutral-800">admin123</code>.</span>
+            <span class="text-[11px] text-neutral-500">Default passkey is <code class="text-amber-400 bg-black px-1.5 py-0.5 rounded border border-[#1F2632]">admin123</code>.</span>
             <button type="submit" class="px-7 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold uppercase tracking-wider shadow-lg flex items-center gap-2">
               <span>Update Passkey</span>
               <span>🔒</span>
@@ -467,29 +471,29 @@
     <section id="admin-tab-coupons" class="hidden space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Add Coupon Form -->
-        <div class="p-6 rounded-3xl bg-neutral-900/60 border border-neutral-800 space-y-4">
+        <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
           <h3 class="font-heading text-base font-bold text-white">CREATE PROMO COUPON</h3>
           <form id="create-coupon-form" class="space-y-3 text-xs">
             <div>
               <label class="block font-semibold text-neutral-300 mb-1">Coupon Code *</label>
-              <input type="text" id="coupon-code" required placeholder="e.g. FESTIVE500" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2 text-white uppercase font-mono" />
+              <input type="text" id="coupon-code" required placeholder="e.g. FESTIVE500" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2 text-white uppercase font-mono" />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block font-semibold text-neutral-300 mb-1">Discount Type</label>
-                <select id="coupon-type" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white">
+                <select id="coupon-type" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white">
                   <option value="flat">Flat ₹ OFF</option>
                   <option value="percent">Percentage %</option>
                 </select>
               </div>
               <div>
                 <label class="block font-semibold text-neutral-300 mb-1">Discount Value *</label>
-                <input type="number" id="coupon-value" required placeholder="500" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white font-mono" />
+                <input type="number" id="coupon-value" required placeholder="500" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white font-mono" />
               </div>
             </div>
             <div>
               <label class="block font-semibold text-neutral-300 mb-1">Minimum Order Amount (₹)</label>
-              <input type="number" id="coupon-min-order" placeholder="0" class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white font-mono" />
+              <input type="number" id="coupon-min-order" placeholder="0" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white font-mono" />
             </div>
             <button type="submit" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold uppercase tracking-wider text-xs shadow-lg transition-all">
               Save Coupon
@@ -498,25 +502,272 @@
         </div>
 
         <!-- Active Coupons List -->
-        <div class="lg:col-span-2 p-6 rounded-3xl bg-neutral-900/60 border border-neutral-800 space-y-4">
+        <div class="lg:col-span-2 p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
           <div class="flex items-center justify-between">
             <h3 class="font-heading text-base font-bold text-white">ACTIVE STORE COUPONS</h3>
             <button onclick="loadAdminCoupons()" class="text-xs text-amber-400 hover:underline">Refresh</button>
           </div>
-          <div id="coupons-list-container" class="divide-y divide-neutral-800">
+          <div id="coupons-list-container" class="divide-y divide-[#1F2632]>
             <!-- Populated via admin.js -->
           </div>
         </div>
       </div>
     </section>
 
+
+    <!-- ================= TAB 6: ABOUT US ================= -->
+    <section id="admin-tab-about" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="font-heading text-lg font-bold text-white">ABOUT US PAGE</h2>
+          <p class="text-[11px] text-neutral-400 mt-1">Everything saved here is published live to <span class="text-amber-400">/about.html</span> from the database.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="loadAdminAbout(true)" class="px-4 py-2 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[11px] font-bold uppercase tracking-wider transition-colors">Refresh</button>
+          <button type="button" onclick="window.open('/about.html','_blank')" class="px-4 py-2 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[11px] font-bold uppercase tracking-wider transition-colors">Preview ↗</button>
+        </div>
+      </div>
+
+      <form id="about-form" class="space-y-6" autocomplete="off">
+        <!-- General Content -->
+        <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
+          <h3 class="font-heading text-base font-bold text-white">GENERAL CONTENT</h3>
+          <div>
+            <label class="block font-semibold text-neutral-300 mb-1">Page Title</label>
+            <input type="text" id="about-page-title" maxlength="200" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="e.g. About AM COLLECTION" />
+          </div>
+          <div>
+            <label class="block font-semibold text-neutral-300 mb-1">Brand Introduction</label>
+            <textarea id="about-intro" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="Short premium intro shown in the hero…"></textarea>
+          </div>
+          <div>
+            <label class="block font-semibold text-neutral-300 mb-1">Our Story</label>
+            <textarea id="about-story" rows="4" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="How the brand began and grew…"></textarea>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-semibold text-neutral-300 mb-1">Mission</label>
+              <textarea id="about-mission" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="What you promise every customer…"></textarea>
+            </div>
+            <div>
+              <label class="block font-semibold text-neutral-300 mb-1">Vision</label>
+              <textarea id="about-vision" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="Where the brand is headed…"></textarea>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-neutral-300 mb-1">Quality Statement</label>
+            <textarea id="about-quality" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="Your inspection / quality promise…"></textarea>
+          </div>
+        </div>
+
+        <!-- Section Visibility & Order -->
+        <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
+          <h3 class="font-heading text-base font-bold text-white">SECTIONS ON THE PAGE</h3>
+          <p class="text-[11px] text-neutral-400">Toggle sections on/off and set the order they appear (1 = first).</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="about-sections-grid">
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-intro" class="accent-amber-500 w-4 h-4" /> Introduction</label>
+              <input type="number" id="about-sec-order-intro" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-story" class="accent-amber-500 w-4 h-4" /> Our Story</label>
+              <input type="number" id="about-sec-order-story" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-mission" class="accent-amber-500 w-4 h-4" /> Mission &amp; Vision</label>
+              <input type="number" id="about-sec-order-mission" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-team" class="accent-amber-500 w-4 h-4" /> Meet The Team</label>
+              <input type="number" id="about-sec-order-team" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-whoIsWho" class="accent-amber-500 w-4 h-4" /> Who Is Who</label>
+              <input type="number" id="about-sec-order-whoIsWho" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Team Members -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-heading text-base font-bold text-white">TEAM MEMBERS</h3>
+            <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">JPG / JPEG / PNG / WebP • Max 5MB</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+
+            <!-- FOUNDER -->
+            <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
+              <div class="flex items-center justify-between">
+                <h4 class="font-heading text-sm font-bold text-amber-400">FOUNDER</h4>
+                <label class="flex items-center gap-2 text-[11px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-founder-enabled" class="accent-amber-500 w-4 h-4" /> Show on page</label>
+              </div>
+              <div class="flex flex-col items-center gap-3">
+                <div class="relative w-24 h-24">
+                  <div id="about-founder-placeholder" class="w-24 h-24 rounded-2xl bg-[#12161F] border border-[#1F2632] flex items-center justify-center font-heading text-xl font-black text-amber-500">F</div>
+                  <img id="about-founder-preview" alt="Founder photo" class="hidden absolute inset-0 w-24 h-24 rounded-2xl object-cover border border-[#1F2632]" />
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="document.getElementById('about-founder-file').click()" class="px-3 py-1.5 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[10px] font-bold uppercase tracking-wider transition-colors">Upload</button>
+                  <button type="button" id="about-founder-remove" onclick="removeAboutPhoto('founder')" class="hidden px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 hover:bg-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-colors">Remove</button>
+                </div>
+                <input type="file" id="about-founder-file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" onchange="handleAboutPhoto('founder', this)" />
+                <input type="hidden" id="about-founder-photo" />
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block font-semibold text-neutral-300 mb-1">Name</label>
+                  <input type="text" id="about-founder-name" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Founder Name" />
+                </div>
+                <div>
+                  <label class="block font-semibold text-neutral-300 mb-1">Role</label>
+                  <input type="text" id="about-founder-role" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Founder & CEO" />
+                </div>
+                <div>
+                  <label class="block font-semibold text-neutral-300 mb-1">Bio</label>
+                  <textarea id="about-founder-bio" rows="3" maxlength="1000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Short bio…"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="text" id="about-founder-instagram" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Instagram URL" />
+                  <input type="text" id="about-founder-twitter" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="X / Twitter URL" />
+                  <input type="text" id="about-founder-linkedin" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="LinkedIn URL" />
+                  <input type="email" id="about-founder-email" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Email" />
+                </div>
+              </div>
+            </div>
+
+            <!-- DEVELOPER -->
+            <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
+              <div class="flex items-center justify-between">
+                <h4 class="font-heading text-sm font-bold text-amber-400">DEVELOPER</h4>
+                <label class="flex items-center gap-2 text-[11px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-developer-enabled" class="accent-amber-500 w-4 h-4" /> Show on page</label>
+              </div>
+              <div class="flex flex-col items-center gap-3">
+                <div class="relative w-24 h-24">
+                  <div id="about-developer-placeholder" class="w-24 h-24 rounded-2xl bg-[#12161F] border border-[#1F2632] flex items-center justify-center font-heading text-xl font-black text-amber-500">D</div>
+                  <img id="about-developer-preview" alt="Developer photo" class="hidden absolute inset-0 w-24 h-24 rounded-2xl object-cover border border-[#1F2632]" />
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="document.getElementById('about-developer-file').click()" class="px-3 py-1.5 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[10px] font-bold uppercase tracking-wider transition-colors">Upload</button>
+                  <button type="button" id="about-developer-remove" onclick="removeAboutPhoto('developer')" class="hidden px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 hover:bg-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-colors">Remove</button>
+                </div>
+                <input type="file" id="about-developer-file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" onchange="handleAboutPhoto('developer', this)" />
+                <input type="hidden" id="about-developer-photo" />
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block font-semibold text-neutral-300 mb-1">Name</label>
+                  <input type="text" id="about-developer-name" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Developer Name" />
+                </div>
+                <div>
+                  <label class="block font-semibold text-neutral-300 mb-1">Role</label>
+                  <input type="text" id="about-developer-role" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Lead Developer" />
+                </div>
+                <div>
+                  <label class="block font-semibold text-neutral-300 mb-1">Bio</label>
+                  <textarea id="about-developer-bio" rows="3" maxlength="1000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Short bio…"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="text" id="about-developer-instagram" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Instagram URL" />
+                  <input type="text" id="about-developer-twitter" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="X / Twitter URL" />
+                  <input type="text" id="about-developer-linkedin" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="LinkedIn URL" />
+                  <input type="email" id="about-developer-email" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Email" />
+                </div>
+              </div>
+            </div>
+
+            <!-- MANAGER -->
+            <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
+              <div class="flex items-center justify-between">
+                <h4 class="font-heading text-sm font-bold text-amber-400">MANAGER</h4>
+                <label class="flex items-center gap-2 text-[11px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-manager-enabled" class="accent-amber-500 w-4 h-4" /> Show on page</label>
+              </div>
+              <div class="flex flex-col items-center gap-3">
+                <div class="relative w-24 h-24">
+                  <div id="about-manager-placeholder" class="w-24 h-24 rounded-2xl bg-[#12161F] border border-[#1F2632] flex items-center justify-center font-heading text-xl font-black text-amber-500">M</div>
+                  <img id="about-manager-preview" alt="Manager photo" class="hidden absolute inset-0 w-24 h-24 rounded-2xl object-cover border border-[#1F2632]" />
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="document.getElementById('about-manager-file').click()" class="px-3 py-1.5 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[10px] font-bold uppercase tracking-wider transition-colors">Upload</button>
+                  <button type="button" id="about-manager-remove" onclick="removeAboutPhoto('manager')" class="hidden px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 hover:bg-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-colors">Remove</button>
+                </div>
+                <input type="file" id="about-manager-file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" onchange="handleAboutPhoto('manager', this)" />
+                <input type="hidden" id="about-manager-photo" />
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block font-semibold text-neutral-300 mb-1">Name</label>
+                  <input type="text" id="about-manager-name" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Manager Name" />
+                </div>
+                <div>
+                  <label class="block font-semibold text-neutral-300 mb-1">Role</label>
+                  <input type="text" id="about-manager-role" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Operations Manager" />
+                </div>
+                <div>
+                  <label class="block font-semibold text-neutral-300 mb-1">Bio</label>
+                  <textarea id="about-manager-bio" rows="3" maxlength="1000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Short bio…"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="text" id="about-manager-instagram" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Instagram URL" />
+                  <input type="text" id="about-manager-twitter" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="X / Twitter URL" />
+                  <input type="text" id="about-manager-linkedin" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="LinkedIn URL" />
+                  <input type="email" id="about-manager-email" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Email" />
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Who Is Who -->
+        <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
+          <h3 class="font-heading text-base font-bold text-white">WHO IS WHO</h3>
+          <p class="text-[11px] text-neutral-400">Explain what each role is responsible for — shown at the bottom of the page.</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Founder</span>
+                <label class="flex items-center gap-2 text-[10px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-who-founder-enabled" class="accent-amber-500 w-3.5 h-3.5" /> Show</label>
+              </div>
+              <input type="text" id="about-who-founder-title" maxlength="120" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="The Founder" />
+              <textarea id="about-who-founder-desc" rows="4" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="What the founder does…"></textarea>
+              <input type="number" id="about-who-founder-order" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs" placeholder="Order" />
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Developer</span>
+                <label class="flex items-center gap-2 text-[10px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-who-developer-enabled" class="accent-amber-500 w-3.5 h-3.5" /> Show</label>
+              </div>
+              <input type="text" id="about-who-developer-title" maxlength="120" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="The Developer" />
+              <textarea id="about-who-developer-desc" rows="4" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="What the developer does…"></textarea>
+              <input type="number" id="about-who-developer-order" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs" placeholder="Order" />
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Manager</span>
+                <label class="flex items-center gap-2 text-[10px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-who-manager-enabled" class="accent-amber-500 w-3.5 h-3.5" /> Show</label>
+              </div>
+              <input type="text" id="about-who-manager-title" maxlength="120" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="The Manager" />
+              <textarea id="about-who-manager-desc" rows="4" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="What the manager does…"></textarea>
+              <input type="number" id="about-who-manager-order" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs" placeholder="Order" />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" onclick="window.open('/about.html','_blank')" class="px-5 py-3 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-xs font-bold uppercase tracking-wider transition-colors">Preview Page ↗</button>
+          <button type="submit" class="px-8 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold uppercase tracking-wider text-xs shadow-lg transition-all">Save About Us</button>
+        </div>
+      </form>
+    </section>
+
   </main>
 
   <!-- ================= ADD / EDIT WATCH MODAL (WITH MULTIPLE SUGGESTIONS) ================= -->
   <div id="watch-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-backdrop overflow-y-auto bg-black/85 backdrop-blur-md">
-    <div class="bg-neutral-950 border border-neutral-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl my-8 relative">
+    <div class="bg-[#0B0E13] border border-[#1F2632] rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl my-8 relative">
       
-      <div class="p-6 border-b border-neutral-800 bg-neutral-900/80 flex items-center justify-between">
+      <div class="p-6 border-b border-[#1F2632] bg-[#12161F]/80 flex items-center justify-between">
         <h3 id="watch-modal-title" class="font-heading text-lg font-bold text-white">UPLOAD NEW MASTER WATCH</h3>
         <button onclick="closeWatchModal()" class="text-neutral-400 hover:text-white p-2">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -530,7 +781,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Brand Name * (Choose or type)</label>
-            <input type="text" id="form-watch-brand" list="brand-suggestions" required placeholder="e.g. Rolex, Patek Philippe, AP" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
+            <input type="text" id="form-watch-brand" list="brand-suggestions" required placeholder="e.g. Rolex, Patek Philippe, AP" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
             <datalist id="brand-suggestions">
               <option value="Rolex" />
               <option value="Patek Philippe" />
@@ -548,7 +799,7 @@
           </div>
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Store Category Key *</label>
-            <select id="form-watch-category" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500">
+            <select id="form-watch-category" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500">
               <option value="rolex">Rolex</option>
               <option value="patek">Patek Philippe</option>
               <option value="ap">Audemars Piguet</option>
@@ -565,11 +816,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Model Name *</label>
-            <input type="text" id="form-watch-model" required placeholder="e.g. Submariner Date 41mm Ceramic" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
+            <input type="text" id="form-watch-model" required placeholder="e.g. Submariner Date 41mm Ceramic" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
           </div>
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Tagline</label>
-            <input type="text" id="form-watch-tagline" placeholder="e.g. 1:1 Super Clone Master Edition" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
+            <input type="text" id="form-watch-tagline" placeholder="e.g. 1:1 Super Clone Master Edition" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
           </div>
         </div>
 
@@ -577,15 +828,15 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Selling Price (₹) *</label>
-            <input type="number" id="form-watch-price" required placeholder="e.g. 4499" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500 font-bold" />
+            <input type="number" id="form-watch-price" required placeholder="e.g. 4499" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500 font-bold" />
           </div>
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Original Reference MRP (₹) *</label>
-            <input type="number" id="form-watch-original-price" required placeholder="e.g. 1150000" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
+            <input type="number" id="form-watch-original-price" required placeholder="e.g. 1150000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
           </div>
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Badge Tag</label>
-            <select id="form-watch-badge" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500 font-semibold">
+            <select id="form-watch-badge" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500 font-semibold">
               <option value="1:1 MASTER">1:1 MASTER</option>
               <option value="BEST SELLER">BEST SELLER</option>
               <option value="HOT DEAL">HOT DEAL</option>
@@ -603,7 +854,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Caliber / Movement (Select or type)</label>
-            <input type="text" id="form-watch-movement" list="movement-suggestions" placeholder="e.g. Japanese Automatic Movement" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
+            <input type="text" id="form-watch-movement" list="movement-suggestions" placeholder="e.g. Japanese Automatic Movement" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
             <datalist id="movement-suggestions">
               <option value="Japanese Automatic Movement" />
               <option value="Swiss Clone Automatic Movement" />
@@ -615,7 +866,7 @@
           </div>
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Dial Case Diameter</label>
-            <input type="text" id="form-watch-dial" placeholder="e.g. 41 mm" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
+            <input type="text" id="form-watch-dial" placeholder="e.g. 41 mm" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
           </div>
         </div>
 
@@ -623,7 +874,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Glass Material (Select or type)</label>
-            <input type="text" id="form-watch-glass" list="glass-suggestions" placeholder="e.g. Sapphire Crystal (Anti-Reflective)" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
+            <input type="text" id="form-watch-glass" list="glass-suggestions" placeholder="e.g. Sapphire Crystal (Anti-Reflective)" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
             <datalist id="glass-suggestions">
               <option value="Sapphire Crystal (Anti-Reflective)" />
               <option value="Double AR-Coated Sapphire Crystal" />
@@ -634,7 +885,7 @@
           </div>
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Strap / Bracelet (Select or type)</label>
-            <input type="text" id="form-watch-strap" list="strap-suggestions" placeholder="e.g. Solid 904L Stainless Steel" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
+            <input type="text" id="form-watch-strap" list="strap-suggestions" placeholder="e.g. Solid 904L Stainless Steel" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
             <datalist id="strap-suggestions">
               <option value="Solid 904L Stainless Steel Oyster" />
               <option value="Five-Piece Jubilee Two-Tone Bracelet" />
@@ -647,10 +898,10 @@
         </div>
 
         <!-- Stock, Best Seller, New Arrival, Trending Toggles -->
-        <div class="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="p-4 rounded-2xl bg-[#10131A]/80 border border-[#1F2632] grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Stock Count</label>
-            <input type="number" id="form-watch-stock" placeholder="20" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-2.5 py-1.5 text-white font-mono" />
+            <input type="number" id="form-watch-stock" placeholder="20" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white font-mono" />
           </div>
           <div class="flex items-center gap-2 pt-4">
             <input type="checkbox" id="form-watch-bestseller" class="rounded border-neutral-700 text-amber-500" />
@@ -667,30 +918,30 @@
         </div>
 
         <!-- Image Upload OR URL -->
-        <div class="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-3">
+        <div class="p-4 rounded-2xl bg-[#10131A]/80 border border-[#1F2632] space-y-3">
           <label class="block font-semibold text-amber-400 uppercase tracking-wider">📷 Watch Showcase Image</label>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <span class="text-neutral-400 block mb-1">Option A: Upload Image File</span>
-              <input type="file" id="form-watch-file" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-neutral-800 file:text-amber-300" onchange="previewWatchImage(this)" />
+              <input type="file" id="form-watch-file" accept="image/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#1B222C] file:text-amber-300" onchange="previewWatchImage(this)" />
               <img id="form-watch-image-preview" src="" alt="" class="hidden mt-2 h-20 w-auto rounded-lg object-cover border border-neutral-700" />
             </div>
             <div>
               <span class="text-neutral-400 block mb-1">Option B: Direct Image URL</span>
-              <input type="url" id="form-watch-image-url" placeholder="https://..." class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500" />
+              <input type="url" id="form-watch-image-url" placeholder="https://..." class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500" />
             </div>
           </div>
         </div>
 
         <!-- Video Upload -->
-        <div class="p-4 rounded-2xl bg-neutral-900/60 border border-amber-500/20 space-y-3">
+        <div class="p-4 rounded-2xl bg-[#12161F]/60 border border-amber-500/20 space-y-3">
           <label class="block font-semibold text-amber-400 uppercase tracking-wider">🎥 Showcase Video (Optional MP4 / URL)</label>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <input type="file" id="form-watch-video" accept="video/*" class="w-full text-xs text-neutral-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-amber-500/20 file:text-amber-300" onchange="previewWatchVideo(this)" />
             </div>
             <div>
-              <input type="url" id="form-watch-video-url" placeholder="https://youtu.be/... or /uploads/..." class="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500" />
+              <input type="url" id="form-watch-video-url" placeholder="https://youtu.be/... or /uploads/..." class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500" />
             </div>
           </div>
           <div id="video-preview-container" class="hidden mt-2">
@@ -700,16 +951,16 @@
 
         <div>
           <label class="block font-semibold text-neutral-300 mb-1">Description</label>
-          <textarea id="form-watch-desc" rows="2" placeholder="Watch description..." class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
+          <textarea id="form-watch-desc" rows="2" placeholder="Watch description..." class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
         </div>
 
         <div>
           <label class="block font-semibold text-neutral-300 mb-1">Key Features (One feature per line)</label>
-          <textarea id="form-watch-features" rows="3" placeholder="Exact 1:1 weight & dimensions&#10;Ceramic rotating Cerachrom bezel&#10;Sweeping smooth automatic movement" class="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
+          <textarea id="form-watch-features" rows="3" placeholder="Exact 1:1 weight & dimensions&#10;Ceramic rotating Cerachrom bezel&#10;Sweeping smooth automatic movement" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
         </div>
 
-        <div class="pt-3 border-t border-neutral-800 flex justify-end gap-3">
-          <button type="button" onclick="closeWatchModal()" class="px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors">
+        <div class="pt-3 border-t border-[#1F2632] flex justify-end gap-3">
+          <button type="button" onclick="closeWatchModal()" class="px-5 py-2.5 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-300 transition-colors">
             Cancel
           </button>
           <button type="submit" class="px-7 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black text-xs font-black uppercase tracking-wider shadow-lg">
@@ -726,7 +977,7 @@
   <div id="toast-container" class="fixed bottom-6 left-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
   <!-- Admin JavaScript Controller -->
-  <script src="/js/admin.js"></script>
+  <script src="/js/admin.js?v=20260921"></script>
 
 </body>
 </html>

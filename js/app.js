@@ -70,7 +70,7 @@ function openWishlistModal() {
   if (wishlistedProducts.length === 0) {
     container.innerHTML = `
       <div class="py-12 text-center">
-        <div class="w-14 h-14 rounded-full bg-neutral-100 flex items-center justify-center mx-auto text-neutral-400 mb-3">
+        <div class="w-14 h-14 rounded-full bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center mx-auto text-neutral-400 mb-3">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
         </div>
         <p class="text-sm font-semibold text-neutral-800">Your Wishlist is Empty</p>
@@ -239,13 +239,13 @@ function setupEventListeners() {
   document.querySelectorAll('.category-filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.category-filter-btn').forEach(b => {
-        b.classList.remove('bg-[#111111]', 'text-white', 'border-[#111111]');
+        b.classList.remove('bg-[#10151C]', 'text-white', 'border-[#10151C]');
         b.classList.add('bg-white', 'text-neutral-700', 'border-neutral-200');
       });
 
       const target = e.currentTarget;
       target.classList.remove('bg-white', 'text-neutral-700', 'border-neutral-200');
-      target.classList.add('bg-[#111111]', 'text-white', 'border-[#111111]');
+      target.classList.add('bg-[#10151C]', 'text-white', 'border-[#10151C]');
 
       activeCategory = target.getAttribute('data-category');
       renderProducts();
@@ -403,7 +403,7 @@ function renderProducts() {
   if (filtered.length === 0) {
     container.innerHTML = `
       <div class="col-span-4 py-16 text-center">
-        <div class="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mx-auto text-neutral-400 mb-4 border border-neutral-200">
+        <div class="w-16 h-16 rounded-full bg-[#F6F0E2] flex items-center justify-center mx-auto text-neutral-400 mb-4 border border-[#E8DCBE]">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
         <h3 class="text-base font-bold text-neutral-900 mb-1">No matching watches found</h3>
@@ -436,7 +436,7 @@ function renderProducts() {
           
           <!-- Top Left Badge -->
           <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 z-10">
-            <span class="px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold tracking-wider uppercase bg-neutral-900 text-white rounded shadow-sm">
+            <span class="px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold tracking-wider uppercase bg-[#10151C] text-white rounded shadow-sm">
               ${product.badge || '1:1 CLONE'}
             </span>
           </div>
@@ -462,7 +462,7 @@ function renderProducts() {
             <div class="flex items-center justify-between gap-1 mb-0.5">
               <span class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-neutral-500 truncate" onclick="openQuickView('${product.id}')">${product.brand}</span>
               <div class="flex items-center gap-0.5 text-[9px] sm:text-[10px] text-neutral-600 font-semibold flex-shrink-0">
-                <span class="text-amber-500">★</span>
+                <span class="text-amber-400">★</span>
                 <span>${product.rating}</span>
               </div>
             </div>
@@ -480,7 +480,7 @@ function renderProducts() {
             <div class="mt-1 flex flex-wrap items-baseline gap-1">
               <span class="text-xs sm:text-sm font-bold text-neutral-900">₹${product.price.toLocaleString('en-IN')}</span>
               <span class="text-[9px] sm:text-[10px] text-neutral-400 line-through">₹${product.originalPrice.toLocaleString('en-IN')}</span>
-              <span class="text-[9px] sm:text-[10px] font-bold text-[#15803D]">${savingsPercent}% OFF</span>
+              <span class="text-[9px] sm:text-[10px] font-bold text-[#16794C]">${savingsPercent}% OFF</span>
             </div>
           </div>
 
@@ -489,15 +489,15 @@ function renderProducts() {
             <button 
               type="button"
               onclick="addToCart('${product.id}'); openCartDrawer();"
-              class="py-1.5 px-1 sm:px-2 rounded-md bg-[#111111] hover:bg-black text-white text-[10px] sm:text-xs font-medium transition-colors flex items-center justify-center gap-1 truncate"
+              class="py-1.5 px-1 sm:px-2 rounded-md bg-[#10151C] hover:bg-black text-white text-[10px] sm:text-xs font-medium transition-colors flex items-center justify-center gap-1 truncate shadow-sm"
             >
               <svg class="w-3.5 h-3.5 hidden sm:inline flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
               <span class="truncate">+ Bag</span>
             </button>
-            <button 
+            <button
               type="button"
               onclick="buyNow('${product.id}')"
-              class="py-1.5 px-1 sm:px-2 rounded-md bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[10px] sm:text-xs font-semibold transition-colors text-center truncate"
+              class="py-1.5 px-1 sm:px-2 rounded-md bg-[#F6F0E2] hover:bg-[#F0E6CC] border border-[#E8DCBE] hover:border-[#D8B878] text-[#7A5C24] text-[10px] sm:text-xs font-semibold transition-colors text-center truncate"
               title="Buy Now (Cash on Delivery)"
             >
               Buy Now
@@ -528,9 +528,9 @@ function resetFilters() {
   document.querySelectorAll('.category-filter-btn').forEach(b => {
     if (b.getAttribute('data-category') === 'all') {
       b.classList.remove('bg-white', 'text-neutral-700', 'border-neutral-200');
-      b.classList.add('bg-[#111111]', 'text-white', 'border-[#111111]');
+      b.classList.add('bg-[#10151C]', 'text-white', 'border-[#10151C]');
     } else {
-      b.classList.remove('bg-[#111111]', 'text-white', 'border-[#111111]');
+      b.classList.remove('bg-[#10151C]', 'text-white', 'border-[#10151C]');
       b.classList.add('bg-white', 'text-neutral-700', 'border-neutral-200');
     }
   });
@@ -830,13 +830,13 @@ function switchCheckoutTab(tab) {
   const contentWa = document.getElementById('tab-content-wa');
 
   if (tab === 'cod') {
-    if (btnCod) btnCod.className = 'py-3 text-center border-b-2 border-neutral-900 text-neutral-900 font-bold transition-colors';
-    if (btnWa) btnWa.className = 'py-3 text-center border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 font-semibold transition-colors';
+    if (btnCod) btnCod.className = 'py-3 text-center border-b-2 border-[#C6A15B] text-[#10151C] font-bold transition-colors';
+    if (btnWa) btnWa.className = 'py-3 text-center border-b-2 border-transparent text-neutral-500 hover:text-[#10151C] font-semibold transition-colors';
     if (contentCod) contentCod.classList.remove('hidden');
     if (contentWa) contentWa.classList.add('hidden');
   } else {
     if (btnWa) btnWa.className = 'py-3 text-center border-b-2 border-emerald-600 text-emerald-700 font-bold transition-colors';
-    if (btnCod) btnCod.className = 'py-3 text-center border-b-2 border-transparent text-neutral-500 hover:text-neutral-900 font-semibold transition-colors';
+    if (btnCod) btnCod.className = 'py-3 text-center border-b-2 border-transparent text-neutral-500 hover:text-[#10151C] font-semibold transition-colors';
     if (contentWa) contentWa.classList.remove('hidden');
     if (contentCod) contentCod.classList.add('hidden');
   }
@@ -1025,12 +1025,12 @@ function switchAuthTab(tab) {
   const formSign = document.getElementById('customer-signin-form');
 
   if (tab === 'register') {
-    if (tabReg) tabReg.className = 'py-2 rounded-lg bg-neutral-900 text-white font-semibold text-xs transition-all';
+    if (tabReg) tabReg.className = 'py-2 rounded-lg bg-[#10151C] text-white font-semibold text-xs transition-all';
     if (tabSign) tabSign.className = 'py-2 rounded-lg text-neutral-500 hover:text-neutral-900 font-medium text-xs transition-all';
     if (formReg) formReg.classList.remove('hidden');
     if (formSign) formSign.classList.add('hidden');
   } else {
-    if (tabSign) tabSign.className = 'py-2 rounded-lg bg-neutral-900 text-white font-semibold text-xs transition-all';
+    if (tabSign) tabSign.className = 'py-2 rounded-lg bg-[#10151C] text-white font-semibold text-xs transition-all';
     if (tabReg) tabReg.className = 'py-2 rounded-lg text-neutral-500 hover:text-neutral-900 font-medium text-xs transition-all';
     if (formSign) formSign.classList.remove('hidden');
     if (formReg) formReg.classList.add('hidden');

@@ -44,7 +44,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOADS_DIR),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    const prefix = file.fieldname === 'logo' ? 'logo' : (file.fieldname === 'banner' ? 'banner' : 'watch');
+    const prefix = file.fieldname === 'logo' ? 'logo' : (file.fieldname === 'banner' ? 'banner' : (file.fieldname === 'photo' ? 'team' : 'watch'));
     cb(null, `${prefix}-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
   }
 });
@@ -67,6 +67,21 @@ const uploadMedia = upload.fields([
   { name: 'image', maxCount: 1 },
   { name: 'video', maxCount: 1 }
 ]);
+
+// Team photo uploads — strict image-only validation (JPG/JPEG/PNG/WebP, max 5MB)
+const uploadPhoto = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|webp/;
+    const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
+    if (allowed.test(ext) || allowed.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPG, JPEG, PNG or WebP images are allowed for team photos!'));
+    }
+  }
+});
 
 // =====================================================
 // INITIAL DEFAULTS (Used ONLY on very first initialization)
@@ -105,32 +120,72 @@ const INITIAL_CATEGORIES = [
   { id:'cat-casio', name:'Casio Vintage', slug:'casio', icon:'⌚', sortOrder:7 }
 ];
 
+// About Us page — seeded ONLY on very first creation (admin editable afterwards)
+const DEFAULT_ABOUT = {
+  pageTitle: 'About AM COLLECTION',
+  intro: 'AM COLLECTION curates master-grade luxury timepieces — 1:1 super clones of the world\'s most iconic watches, inspected piece by piece and delivered across India with cash on delivery.',
+  story: 'What began as a passion for horology grew into a mission: to make legendary watchmaking accessible without compromise. Every piece in our vault is measured against the original — weight, finish, movement sweep — before it earns the AM COLLECTION name.',
+  mission: 'To deliver impeccably crafted luxury timepieces with transparent pricing, honest quality checks, and service that treats every customer like a collector.',
+  vision: 'To become India\'s most trusted destination for master copy watches — where craftsmanship, trust, and timeless style meet.',
+  quality: 'Every watch passes a 27-point inspection covering movement accuracy, case finishing, glass clarity, strap integrity, and water resistance before dispatch. No piece ships unless it would fool a jeweller\'s loupe.',
+  sections: [
+    { key: 'intro',    label: 'Brand Introduction', enabled: true, order: 1 },
+    { key: 'story',    label: 'Our Story',          enabled: true, order: 2 },
+    { key: 'mission',  label: 'Mission & Vision',   enabled: true, order: 3 },
+    { key: 'team',     label: 'Meet The Team',      enabled: true, order: 4 },
+    { key: 'whoIsWho', label: 'Who Is Who',         enabled: true, order: 5 }
+  ],
+  team: [
+    { key: 'founder',   name: 'Founder Name',   role: 'Founder & CEO',       bio: 'Drives the brand vision, curates the collection, and sets the quality standard every watch must meet.', photoUrl: '', enabled: true, order: 1, social: { instagram: '', twitter: '', linkedin: '', email: '' } },
+    { key: 'developer', name: 'Developer Name', role: 'Lead Developer',      bio: 'Builds and maintains the website, checkout, order tracking, and every digital experience you use.',   photoUrl: '', enabled: true, order: 2, social: { instagram: '', twitter: '', linkedin: '', email: '' } },
+    { key: 'manager',   name: 'Manager Name',   role: 'Operations Manager',  bio: 'Runs day-to-day operations — inventory, dispatch, support, and making sure your order reaches you fast.', photoUrl: '', enabled: true, order: 3, social: { instagram: '', twitter: '', linkedin: '', email: '' } }
+  ],
+  whoIsWho: [
+    { role: 'founder',   title: 'The Founder',        description: 'The Founder owns the brand and business direction — choosing which timepieces enter the collection, setting pricing and quality policy, and steering AM COLLECTION\'s growth.', enabled: true, order: 1 },
+    { role: 'developer', title: 'The Developer',      description: 'The Developer builds and maintains the software behind the store — the website, shopping cart, secure checkout, order tracking, and the Admin Panel used to manage everything.', enabled: true, order: 2 },
+    { role: 'manager',   title: 'The Manager',        description: 'The Manager runs operations — stock and inventory, packing and dispatch, customer support, returns and replacements — so every order is fulfilled smoothly.', enabled: true, order: 3 }
+  ],
+  updatedAt: null
+};
+
 // =====================================================
-// DATABASE ADAPTER (MongoDB Mongoose OR NeDB)
+// DATABASE ADAPTER (MongoDB Mongoose primary, NeDB lazy fallback)
 // =====================================================
 let useMongo = false;
 let MongooseModels = {};
 
-// NeDB datastores for offline / fallback
-const nedbStores = {
-  products:      new Datastore({ filename: path.join(DATA_DIR, 'products.db'), autoload: true }),
-  branding:      new Datastore({ filename: path.join(DATA_DIR, 'settings.db'), autoload: true }),
-  categories:    new Datastore({ filename: path.join(DATA_DIR, 'categories.db'), autoload: true }),
-  heroBanners:   new Datastore({ filename: path.join(DATA_DIR, 'banners.db'), autoload: true }),
-  orders:        new Datastore({ filename: path.join(DATA_DIR, 'orders.db'), autoload: true }),
-  users:         new Datastore({ filename: path.join(DATA_DIR, 'users.db'), autoload: true }),
-  coupons:       new Datastore({ filename: path.join(DATA_DIR, 'coupons.db'), autoload: true }),
-  coins:         new Datastore({ filename: path.join(DATA_DIR, 'coins.db'), autoload: true }),
-  reviews:       new Datastore({ filename: path.join(DATA_DIR, 'reviews.db'), autoload: true }),
-  notifications: new Datastore({ filename: path.join(DATA_DIR, 'notifications.db'), autoload: true })
-};
+// NeDB datastores — created LAZILY only if MongoDB is unavailable
+let nedbStores = null;
+let nedbCompactInterval = null;
 
-// Periodic NeDB compact
-setInterval(() => {
-  Object.values(nedbStores).forEach(store => {
-    try { store.compactDatafile(); } catch (e) {}
-  });
-}, 30000);
+function getNedbStores() {
+  if (!nedbStores) {
+    nedbStores = {
+      products:      new Datastore({ filename: path.join(DATA_DIR, 'products.db'), autoload: true }),
+      branding:      new Datastore({ filename: path.join(DATA_DIR, 'settings.db'), autoload: true }),
+      categories:    new Datastore({ filename: path.join(DATA_DIR, 'categories.db'), autoload: true }),
+      heroBanners:   new Datastore({ filename: path.join(DATA_DIR, 'banners.db'), autoload: true }),
+      orders:        new Datastore({ filename: path.join(DATA_DIR, 'orders.db'), autoload: true }),
+      users:         new Datastore({ filename: path.join(DATA_DIR, 'users.db'), autoload: true }),
+      coupons:       new Datastore({ filename: path.join(DATA_DIR, 'coupons.db'), autoload: true }),
+      coins:         new Datastore({ filename: path.join(DATA_DIR, 'coins.db'), autoload: true }),
+      reviews:       new Datastore({ filename: path.join(DATA_DIR, 'reviews.db'), autoload: true }),
+      notifications: new Datastore({ filename: path.join(DATA_DIR, 'notifications.db'), autoload: true }),
+      about:         new Datastore({ filename: path.join(DATA_DIR, 'about.db'), autoload: true })
+    };
+    // Periodic NeDB compact (only when NeDB is active)
+    if (!nedbCompactInterval) {
+      nedbCompactInterval = setInterval(() => {
+        if (nedbStores) {
+          Object.values(nedbStores).forEach(store => {
+            try { store.compactDatafile(); } catch (e) {}
+          });
+        }
+      }, 30000);
+    }
+  }
+  return nedbStores;
+}
 
 // NeDB Async Helpers
 const nedbHelper = {
@@ -142,16 +197,33 @@ const nedbHelper = {
   count: (store, q = {}) => new Promise((res, rej) => store.count(q, (err, n) => err ? rej(err) : res(n)))
 };
 
-// Initialize Mongoose if URI exists
+// Global DB-ready promise — API routes await this before touching the database.
+// Ensures the very first serverless request doesn't hit an uninitialized DB.
+let dbReadyResolve;
+const dbReady = new Promise(resolve => { dbReadyResolve = resolve; });
+
+// Initialize Mongoose with connection caching for Vercel serverless
 async function initMongo() {
+  // If already connected (warm invocation on Vercel), skip
+  if (mongoose.connection.readyState === 1) {
+    useMongo = true;
+    return;
+  }
+
   if (!MONGODB_URI) {
-    console.log('ℹ️ No MONGODB_URI provided. Running NeDB embedded storage.');
+    if (isVercel) {
+      console.error('🚨 CRITICAL: No MONGODB_URI set on Vercel! NeDB data in /tmp will be lost on cold starts.');
+      console.error('🚨 Add MONGODB_URI environment variable in Vercel Dashboard → Settings → Environment Variables.');
+    } else {
+      console.log('ℹ️ No MONGODB_URI provided. Running NeDB embedded storage (local dev only).');
+    }
     return;
   }
   try {
     console.log('🔄 Connecting to MongoDB Atlas...');
     await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 8000
+      serverSelectionTimeoutMS: 8000,
+      maxPoolSize: 10
     });
     useMongo = true;
     console.log('✅ MongoDB Atlas connected successfully!');
@@ -314,6 +386,45 @@ async function initMongo() {
       createdAt: { type: Date, default: Date.now }
     });
 
+    const aboutMemberSchema = new mongoose.Schema({
+      key: String,
+      name: String,
+      role: String,
+      bio: String,
+      photoUrl: String,
+      enabled: { type: Boolean, default: true },
+      order: { type: Number, default: 0 },
+      social: { instagram: String, twitter: String, linkedin: String, email: String }
+    }, { _id: false });
+
+    const aboutSectionSchema = new mongoose.Schema({
+      key: String,
+      label: String,
+      enabled: { type: Boolean, default: true },
+      order: { type: Number, default: 0 }
+    }, { _id: false });
+
+    const aboutWhoSchema = new mongoose.Schema({
+      role: String,
+      title: String,
+      description: String,
+      enabled: { type: Boolean, default: true },
+      order: { type: Number, default: 0 }
+    }, { _id: false });
+
+    const aboutSchema = new mongoose.Schema({
+      pageTitle: { type: String, default: 'About Us' },
+      intro: { type: String, default: '' },
+      story: { type: String, default: '' },
+      mission: { type: String, default: '' },
+      vision: { type: String, default: '' },
+      quality: { type: String, default: '' },
+      sections: { type: [aboutSectionSchema], default: DEFAULT_ABOUT.sections },
+      team: { type: [aboutMemberSchema], default: DEFAULT_ABOUT.team },
+      whoIsWho: { type: [aboutWhoSchema], default: DEFAULT_ABOUT.whoIsWho },
+      updatedAt: { type: Date, default: Date.now }
+    });
+
     MongooseModels = {
       Product: mongoose.models.Product || mongoose.model('Product', productSchema),
       Branding: mongoose.models.Branding || mongoose.model('Branding', brandingSchema),
@@ -324,10 +435,14 @@ async function initMongo() {
       Coupon: mongoose.models.Coupon || mongoose.model('Coupon', couponSchema),
       Coin: mongoose.models.Coin || mongoose.model('Coin', coinSchema),
       Review: mongoose.models.Review || mongoose.model('Review', reviewSchema),
-      Notification: mongoose.models.Notification || mongoose.model('Notification', notificationSchema)
+      Notification: mongoose.models.Notification || mongoose.model('Notification', notificationSchema),
+      About: mongoose.models.About || mongoose.model('About', aboutSchema)
     };
   } catch (err) {
     console.error('⚠️ MongoDB Atlas Connection Error:', err.message);
+    if (isVercel) {
+      console.error('🚨 WARNING: Falling back to NeDB on Vercel — data WILL be lost on cold starts!');
+    }
     console.log('Falling back to local NeDB datastores.');
     useMongo = false;
   }
@@ -340,39 +455,39 @@ const DB = {
     if (useMongo) {
       return await MongooseModels.Product.find(query).lean();
     }
-    return await nedbHelper.find(nedbStores.products, query);
+    return await nedbHelper.find(getNedbStores().products, query);
   },
   async getProductById(id) {
     if (useMongo) {
       return await MongooseModels.Product.findOne({ id }).lean();
     }
-    return await nedbHelper.findOne(nedbStores.products, { id });
+    return await nedbHelper.findOne(getNedbStores().products, { id });
   },
   async addProduct(doc) {
     if (useMongo) {
       return await MongooseModels.Product.create(doc);
     }
-    return await nedbHelper.insert(nedbStores.products, doc);
+    return await nedbHelper.insert(getNedbStores().products, doc);
   },
   async updateProduct(id, updates) {
     delete updates._id;
     if (useMongo) {
       return await MongooseModels.Product.findOneAndUpdate({ id }, { $set: updates }, { new: true }).lean();
     }
-    await nedbHelper.update(nedbStores.products, { id }, updates);
-    return await nedbHelper.findOne(nedbStores.products, { id });
+    await nedbHelper.update(getNedbStores().products, { id }, updates);
+    return await nedbHelper.findOne(getNedbStores().products, { id });
   },
   async deleteProduct(id) {
     if (useMongo) {
       const res = await MongooseModels.Product.deleteOne({ id });
       return res.deletedCount > 0;
     }
-    const n = await nedbHelper.remove(nedbStores.products, { id });
+    const n = await nedbHelper.remove(getNedbStores().products, { id });
     return n > 0;
   },
   async countProducts(q = {}) {
     if (useMongo) return await MongooseModels.Product.countDocuments(q);
-    return await nedbHelper.count(nedbStores.products, q);
+    return await nedbHelper.count(getNedbStores().products, q);
   },
 
   // Branding / Settings
@@ -384,9 +499,9 @@ const DB = {
       }
       return b;
     }
-    let b = await nedbHelper.findOne(nedbStores.branding, {});
+    let b = await nedbHelper.findOne(getNedbStores().branding, {});
     if (!b) {
-      b = await nedbHelper.insert(nedbStores.branding, INITIAL_SETTINGS);
+      b = await nedbHelper.insert(getNedbStores().branding, INITIAL_SETTINGS);
     }
     return b;
   },
@@ -401,12 +516,12 @@ const DB = {
       await b.save();
       return b.toObject();
     }
-    const existing = await nedbHelper.findOne(nedbStores.branding, {});
+    const existing = await nedbHelper.findOne(getNedbStores().branding, {});
     if (!existing) {
-      return await nedbHelper.insert(nedbStores.branding, { ...INITIAL_SETTINGS, ...updates });
+      return await nedbHelper.insert(getNedbStores().branding, { ...INITIAL_SETTINGS, ...updates });
     }
-    await nedbHelper.update(nedbStores.branding, { _id: existing._id }, updates);
-    return await nedbHelper.findOne(nedbStores.branding, {});
+    await nedbHelper.update(getNedbStores().branding, { _id: existing._id }, updates);
+    return await nedbHelper.findOne(getNedbStores().branding, {});
   },
 
   // Orders
@@ -414,17 +529,17 @@ const DB = {
     if (useMongo) {
       return await MongooseModels.Order.find(q).sort({ createdAt: -1 }).lean();
     }
-    const orders = await nedbHelper.find(nedbStores.orders, q);
+    const orders = await nedbHelper.find(getNedbStores().orders, q);
     orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return orders;
   },
   async getOrderById(orderId) {
     if (useMongo) return await MongooseModels.Order.findOne({ orderId }).lean();
-    return await nedbHelper.findOne(nedbStores.orders, { orderId });
+    return await nedbHelper.findOne(getNedbStores().orders, { orderId });
   },
   async addOrder(doc) {
     if (useMongo) return await MongooseModels.Order.create(doc);
-    return await nedbHelper.insert(nedbStores.orders, doc);
+    return await nedbHelper.insert(getNedbStores().orders, doc);
   },
   async updateOrderStatus(orderId, status, message) {
     const trackingEntry = {
@@ -442,30 +557,30 @@ const DB = {
         { new: true }
       ).lean();
     }
-    const order = await nedbHelper.findOne(nedbStores.orders, { orderId });
+    const order = await nedbHelper.findOne(getNedbStores().orders, { orderId });
     if (!order) return null;
     const timeline = order.trackingTimeline || [];
     timeline.push(trackingEntry);
-    await nedbHelper.update(nedbStores.orders, { orderId }, { status, trackingTimeline: timeline });
-    return await nedbHelper.findOne(nedbStores.orders, { orderId });
+    await nedbHelper.update(getNedbStores().orders, { orderId }, { status, trackingTimeline: timeline });
+    return await nedbHelper.findOne(getNedbStores().orders, { orderId });
   },
   async deleteOrder(orderId) {
     if (useMongo) {
       const res = await MongooseModels.Order.deleteOne({ orderId });
       return res.deletedCount > 0;
     }
-    const n = await nedbHelper.remove(nedbStores.orders, { orderId });
+    const n = await nedbHelper.remove(getNedbStores().orders, { orderId });
     return n > 0;
   },
   async countOrders(q = {}) {
     if (useMongo) return await MongooseModels.Order.countDocuments(q);
-    return await nedbHelper.count(nedbStores.orders, q);
+    return await nedbHelper.count(getNedbStores().orders, q);
   },
 
   // Users
   async getUsers(q = {}) {
     if (useMongo) return await MongooseModels.User.find(q).select('-password').sort({ createdAt: -1 }).lean();
-    const users = await nedbHelper.find(nedbStores.users, q);
+    const users = await nedbHelper.find(getNedbStores().users, q);
     return users.map(u => {
       const safe = { ...u };
       delete safe.password;
@@ -474,16 +589,16 @@ const DB = {
   },
   async getUserById(userId) {
     if (useMongo) return await MongooseModels.User.findOne({ userId }).lean();
-    return await nedbHelper.findOne(nedbStores.users, { userId });
+    return await nedbHelper.findOne(getNedbStores().users, { userId });
   },
   async getUserByEmail(email) {
     const clean = email.trim().toLowerCase();
     if (useMongo) return await MongooseModels.User.findOne({ email: clean }).lean();
-    return await nedbHelper.findOne(nedbStores.users, { email: clean });
+    return await nedbHelper.findOne(getNedbStores().users, { email: clean });
   },
   async addUser(doc) {
     if (useMongo) return await MongooseModels.User.create(doc);
-    return await nedbHelper.insert(nedbStores.users, doc);
+    return await nedbHelper.insert(getNedbStores().users, doc);
   },
   async updateUser(userId, updates) {
     delete updates._id;
@@ -491,50 +606,50 @@ const DB = {
     if (useMongo) {
       return await MongooseModels.User.findOneAndUpdate({ userId }, { $set: updates }, { new: true }).select('-password').lean();
     }
-    await nedbHelper.update(nedbStores.users, { userId }, updates);
-    const u = await nedbHelper.findOne(nedbStores.users, { userId });
+    await nedbHelper.update(getNedbStores().users, { userId }, updates);
+    const u = await nedbHelper.findOne(getNedbStores().users, { userId });
     if (u) delete u.password;
     return u;
   },
   async countUsers(q = {}) {
     if (useMongo) return await MongooseModels.User.countDocuments(q);
-    return await nedbHelper.count(nedbStores.users, q);
+    return await nedbHelper.count(getNedbStores().users, q);
   },
 
   // Categories
   async getCategories() {
     if (useMongo) return await MongooseModels.Category.find().sort({ sortOrder: 1 }).lean();
-    const cats = await nedbHelper.find(nedbStores.categories, {});
+    const cats = await nedbHelper.find(getNedbStores().categories, {});
     cats.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
     return cats;
   },
   async addCategory(doc) {
     if (useMongo) return await MongooseModels.Category.create(doc);
-    return await nedbHelper.insert(nedbStores.categories, doc);
+    return await nedbHelper.insert(getNedbStores().categories, doc);
   },
   async deleteCategory(id) {
     if (useMongo) {
       const res = await MongooseModels.Category.deleteOne({ id });
       return res.deletedCount > 0;
     }
-    const n = await nedbHelper.remove(nedbStores.categories, { id });
+    const n = await nedbHelper.remove(getNedbStores().categories, { id });
     return n > 0;
   },
 
   // Coupons
   async getCoupons() {
     if (useMongo) return await MongooseModels.Coupon.find().lean();
-    return await nedbHelper.find(nedbStores.coupons, {});
+    return await nedbHelper.find(getNedbStores().coupons, {});
   },
   async getCouponByCode(code) {
     const clean = code.trim().toUpperCase();
     if (useMongo) return await MongooseModels.Coupon.findOne({ code: clean }).lean();
-    return await nedbHelper.findOne(nedbStores.coupons, { code: clean });
+    return await nedbHelper.findOne(getNedbStores().coupons, { code: clean });
   },
   async addCoupon(doc) {
     doc.code = doc.code.trim().toUpperCase();
     if (useMongo) return await MongooseModels.Coupon.create(doc);
-    return await nedbHelper.insert(nedbStores.coupons, doc);
+    return await nedbHelper.insert(getNedbStores().coupons, doc);
   },
   async deleteCoupon(code) {
     const clean = code.trim().toUpperCase();
@@ -542,18 +657,18 @@ const DB = {
       const res = await MongooseModels.Coupon.deleteOne({ code: clean });
       return res.deletedCount > 0;
     }
-    const n = await nedbHelper.remove(nedbStores.coupons, { code: clean });
+    const n = await nedbHelper.remove(getNedbStores().coupons, { code: clean });
     return n > 0;
   },
 
   // Coins
   async logCoinTransaction(doc) {
     if (useMongo) return await MongooseModels.Coin.create(doc);
-    return await nedbHelper.insert(nedbStores.coins, doc);
+    return await nedbHelper.insert(getNedbStores().coins, doc);
   },
   async getCoinHistory(userId) {
     if (useMongo) return await MongooseModels.Coin.find({ userId }).sort({ createdAt: -1 }).lean();
-    const list = await nedbHelper.find(nedbStores.coins, { userId });
+    const list = await nedbHelper.find(getNedbStores().coins, { userId });
     list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return list;
   },
@@ -561,13 +676,40 @@ const DB = {
   // Notifications
   async addNotification(doc) {
     if (useMongo) return await MongooseModels.Notification.create(doc);
-    return await nedbHelper.insert(nedbStores.notifications, doc);
+    return await nedbHelper.insert(getNedbStores().notifications, doc);
   },
   async getNotifications(userId) {
     if (useMongo) return await MongooseModels.Notification.find({ userId }).sort({ createdAt: -1 }).lean();
-    const list = await nedbHelper.find(nedbStores.notifications, { userId });
+    const list = await nedbHelper.find(getNedbStores().notifications, { userId });
     list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return list;
+  },
+
+  // About Us
+  async getAboutUs() {
+    if (useMongo) {
+      let a = await MongooseModels.About.findOne().lean();
+      if (!a) a = await MongooseModels.About.create(DEFAULT_ABOUT);
+      return a;
+    }
+    let a = await nedbHelper.findOne(getNedbStores().about, {});
+    if (!a) a = await nedbHelper.insert(getNedbStores().about, DEFAULT_ABOUT);
+    return a;
+  },
+  async updateAboutUs(updates) {
+    delete updates._id;
+    updates.updatedAt = new Date();
+    if (useMongo) {
+      let a = await MongooseModels.About.findOne();
+      if (!a) return await MongooseModels.About.create({ ...DEFAULT_ABOUT, ...updates });
+      Object.assign(a, updates);
+      await a.save();
+      return a.toObject();
+    }
+    const existing = await nedbHelper.findOne(getNedbStores().about, {});
+    if (!existing) return await nedbHelper.insert(getNedbStores().about, { ...DEFAULT_ABOUT, ...updates });
+    await nedbHelper.update(getNedbStores().about, { _id: existing._id }, updates);
+    return await nedbHelper.findOne(getNedbStores().about, {});
   }
 };
 
@@ -629,6 +771,23 @@ async function getAdminPasskey() {
   return (b && b.adminPasskey) ? b.adminPasskey : ADMIN_PASSKEY;
 }
 
+// Admin route protection — mutating admin endpoints require a valid passkey header
+async function adminAuth(req, res, next) {
+  try {
+    const key = req.headers['x-admin-passkey'];
+    if (!key) {
+      return res.status(401).json({ error: 'Unauthorized: admin credentials required' });
+    }
+    const currentKey = await getAdminPasskey();
+    if (key === currentKey || key === ADMIN_PASSKEY) {
+      return next();
+    }
+    return res.status(401).json({ error: 'Unauthorized: invalid admin credentials' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+}
+
 // Admin Auth Verify
 app.post('/api/auth/verify', async (req, res) => {
   try {
@@ -645,7 +804,7 @@ app.post('/api/auth/verify', async (req, res) => {
 });
 
 // Admin Change Passkey
-app.post('/api/auth/change-passkey', async (req, res) => {
+app.post('/api/auth/change-passkey', adminAuth, async (req, res) => {
   try {
     const { currentPasskey, newPasskey } = req.body;
     if (!newPasskey || newPasskey.trim().length < 4) {
@@ -674,7 +833,7 @@ app.get('/api/settings', async (req, res) => {
   }
 });
 
-app.post('/api/settings', async (req, res) => {
+app.post('/api/settings', adminAuth, async (req, res) => {
   try {
     const { storeName, tagline, storePhone, announcementText, faviconUrl, coinEarnRate, coinRedeemRate } = req.body;
     const updated = await DB.updateBranding({
@@ -695,7 +854,7 @@ app.post('/api/settings', async (req, res) => {
 });
 
 // Logo Upload
-app.post('/api/settings/logo', upload.single('logo'), async (req, res) => {
+app.post('/api/settings/logo', adminAuth, upload.single('logo'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     const logoUrl = `/uploads/${req.file.filename}`;
@@ -707,10 +866,53 @@ app.post('/api/settings/logo', upload.single('logo'), async (req, res) => {
 });
 
 // Remove Logo Permanently
-app.delete('/api/settings/logo', async (req, res) => {
+app.delete('/api/settings/logo', adminAuth, async (req, res) => {
   try {
     await DB.updateBranding({ logoUrl: '' });
     res.json({ success: true, message: 'Logo removed permanently. Default monogram will display.' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ─── ABOUT US (Storefront page content) ──────────────
+// Public read — powers about.html (no mock data: real DB or error state)
+app.get('/api/about', async (req, res) => {
+  try {
+    const about = await DB.getAboutUs();
+    res.json(about);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Admin-only update of About Us content
+app.put('/api/about', adminAuth, async (req, res) => {
+  try {
+    const { pageTitle, intro, story, mission, vision, quality, sections, team, whoIsWho } = req.body;
+    const updates = {
+      ...(pageTitle !== undefined && { pageTitle: String(pageTitle).slice(0, 200) }),
+      ...(intro !== undefined && { intro: String(intro).slice(0, 5000) }),
+      ...(story !== undefined && { story: String(story).slice(0, 5000) }),
+      ...(mission !== undefined && { mission: String(mission).slice(0, 5000) }),
+      ...(vision !== undefined && { vision: String(vision).slice(0, 5000) }),
+      ...(quality !== undefined && { quality: String(quality).slice(0, 5000) }),
+      ...(Array.isArray(sections) && { sections: sections.slice(0, 20) }),
+      ...(Array.isArray(team) && { team: team.slice(0, 20) }),
+      ...(Array.isArray(whoIsWho) && { whoIsWho: whoIsWho.slice(0, 20) })
+    };
+    const updated = await DB.updateAboutUs(updates);
+    res.json({ success: true, about: updated });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Team member photo upload — persistent files in /uploads (same system as logo)
+app.post('/api/about/photo', adminAuth, uploadPhoto.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No photo uploaded' });
+    res.json({ success: true, photoUrl: `/uploads/${req.file.filename}` });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -762,7 +964,7 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
-app.post('/api/products', uploadMedia, async (req, res) => {
+app.post('/api/products', adminAuth, uploadMedia, async (req, res) => {
   try {
     const b = req.body;
     const files = req.files || {};
@@ -810,7 +1012,7 @@ app.post('/api/products', uploadMedia, async (req, res) => {
   }
 });
 
-app.put('/api/products/:id', uploadMedia, async (req, res) => {
+app.put('/api/products/:id', adminAuth, uploadMedia, async (req, res) => {
   try {
     const { id } = req.params;
     const b = req.body;
@@ -848,7 +1050,7 @@ app.put('/api/products/:id', uploadMedia, async (req, res) => {
 });
 
 // Permanently Delete Product
-app.delete('/api/products/:id', async (req, res) => {
+app.delete('/api/products/:id', adminAuth, async (req, res) => {
   try {
     const success = await DB.deleteProduct(req.params.id);
     if (!success) return res.status(404).json({ error: 'Watch not found or already deleted' });
@@ -859,7 +1061,7 @@ app.delete('/api/products/:id', async (req, res) => {
 });
 
 // Toggle Product Flag (Hidden, Best Seller, New Arrival, Trending)
-app.patch('/api/products/:id/toggle', async (req, res) => {
+app.patch('/api/products/:id/toggle', adminAuth, async (req, res) => {
   try {
     const { field } = req.body;
     const allowed = ['isHidden', 'isBestSeller', 'isNewArrival', 'isTrending'];
@@ -877,7 +1079,7 @@ app.patch('/api/products/:id/toggle', async (req, res) => {
 });
 
 // Manual Seed Initial Defaults (Admin action only)
-app.post('/api/admin/seed-defaults', async (req, res) => {
+app.post('/api/admin/seed-defaults', adminAuth, async (req, res) => {
   try {
     for (const p of INITIAL_PRODUCTS) {
       const exists = await DB.getProductById(p.id);
@@ -1017,7 +1219,7 @@ app.post('/api/orders', async (req, res) => {
 });
 
 // Update Order Status (Admin)
-app.patch('/api/orders/:id/status', async (req, res) => {
+app.patch('/api/orders/:id/status', adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { status, message } = req.body;
@@ -1046,7 +1248,7 @@ app.patch('/api/orders/:id/status', async (req, res) => {
 });
 
 // Permanently Delete Order (Admin)
-app.delete('/api/orders/:id', async (req, res) => {
+app.delete('/api/orders/:id', adminAuth, async (req, res) => {
   try {
     const success = await DB.deleteOrder(req.params.id);
     if (!success) return res.status(404).json({ error: 'Order not found' });
@@ -1220,7 +1422,7 @@ app.get('/api/coupons', async (req, res) => {
   }
 });
 
-app.post('/api/coupons', async (req, res) => {
+app.post('/api/coupons', adminAuth, async (req, res) => {
   try {
     const { code, discountType, discountValue, minOrder, expiryDate, usageLimit } = req.body;
     if (!code || !discountValue) return res.status(400).json({ error: 'Coupon code and discount are required' });
@@ -1280,7 +1482,7 @@ app.post('/api/coupons/validate', async (req, res) => {
   }
 });
 
-app.delete('/api/coupons/:code', async (req, res) => {
+app.delete('/api/coupons/:code', adminAuth, async (req, res) => {
   try {
     const success = await DB.deleteCoupon(req.params.code);
     if (!success) return res.status(404).json({ error: 'Coupon not found' });
@@ -1300,7 +1502,7 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
-app.post('/api/categories', async (req, res) => {
+app.post('/api/categories', adminAuth, async (req, res) => {
   try {
     const { name, icon, slug } = req.body;
     if (!name) return res.status(400).json({ error: 'Category name is required' });
@@ -1319,7 +1521,7 @@ app.post('/api/categories', async (req, res) => {
   }
 });
 
-app.delete('/api/categories/:id', async (req, res) => {
+app.delete('/api/categories/:id', adminAuth, async (req, res) => {
   try {
     const success = await DB.deleteCategory(req.params.id);
     if (!success) return res.status(404).json({ error: 'Category not found' });
@@ -1375,6 +1577,15 @@ app.get('*', (req, res) => {
 // =====================================================
 // SERVER BOOTSTRAP
 // =====================================================
+// JSON error responses for upload failures (size / type rejections)
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  if (err && (err.name === 'MulterError' || /only valid image|only jpg/i.test(err.message || ''))) {
+    return res.status(400).json({ error: err.message });
+  }
+  return next(err);
+});
+
 async function startServer() {
   await initMongo();
   await seedInitialOnce();
