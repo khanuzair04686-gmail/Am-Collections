@@ -132,6 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render Initial Products
   renderProducts();
 
+  // Render Mobile-First Sections (trending rail + promo spotlight)
+  renderTrendingRail();
+  renderMobilePromo();
+
   // Event Listeners
   setupEventListeners();
 
@@ -160,6 +164,8 @@ async function syncWithBackend() {
       if (Array.isArray(prods)) {
         liveProducts = prods;
         renderProducts();
+        renderTrendingRail();
+        renderMobilePromo();
       }
     }
   } catch (e) {
@@ -239,12 +245,13 @@ function setupEventListeners() {
   document.querySelectorAll('.category-filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.category-filter-btn').forEach(b => {
-        b.classList.remove('bg-[#10151C]', 'text-white', 'border-[#10151C]');
+        b.classList.remove('bg-[#10151C]', 'text-white', 'border-[#10151C]', 'is-active');
         b.classList.add('bg-white', 'text-neutral-700', 'border-neutral-200');
       });
 
       const target = e.currentTarget;
       target.classList.remove('bg-white', 'text-neutral-700', 'border-neutral-200');
+      target.classList.add('is-active');
       target.classList.add('bg-[#10151C]', 'text-white', 'border-[#10151C]');
 
       activeCategory = target.getAttribute('data-category');
@@ -510,6 +517,120 @@ function renderProducts() {
   }).join('');
 }
 
+// ===== MOBILE-FIRST: TRENDING RAIL (real product data only) =====
+function renderTrendingRail() {
+  const rail = document.getElementById('trending-rail');
+  if (!rail) return;
+
+  const pool = [...liveProducts]
+    .filter(p => !p.isHidden)
+    .sort((a, b) =>
+      ((b.isTrending ? 2 : 0) + (b.isBestSeller ? 1 : 0)) - ((a.isTrending ? 2 : 0) + (a.isBestSeller ? 1 : 0)) ||
+      (b.rating || 0) - (a.rating || 0) ||
+      (b.originalPrice - b.price) - (a.originalPrice - a.price)
+    )
+    .slice(0, 8);
+
+  const section = document.getElementById('trending-section');
+  if (pool.length === 0) {
+    if (section) section.classList.add('hidden');
+    return;
+  }
+  if (section) section.classList.remove('hidden');
+
+  rail.innerHTML = pool.map(p => {
+    const off = p.originalPrice > p.price ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
+    const stockNum = typeof p.stock === 'number' ? p.stock : 20;
+    const stockCls = stockNum <= 0 ? 'out' : (stockNum <= 5 ? 'low' : 'in');
+    const stockTxt = stockNum <= 0 ? 'Sold Out' : (stockNum <= 5 ? `Only ${stockNum} left` : 'In Stock');
+    return `
+      <div class="trending-card">
+        <div class="trending-img-wrap" onclick="openQuickView('${p.id}')">
+          <span class="trending-badge">${p.badge || '1:1 CLONE'}</span>
+          <span class="trending-stock ${stockCls}">${stockTxt}</span>
+          <img src="${p.image}" alt="${p.brand} ${p.model}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'" />
+        </div>
+        <div class="trending-info">
+          <span class="trending-brand">${p.brand}</span>
+          <h3 class="trending-model" onclick="openQuickView('${p.id}')">${p.model}</h3>
+          <div class="trending-price-row">
+            <span class="trending-price">₹${p.price.toLocaleString('en-IN')}</span>
+            ${off > 0 ? `<span class="trending-compare">₹${p.originalPrice.toLocaleString('en-IN')}</span>` : ''}
+          </div>
+          <button type="button" class="trending-add" onclick="addToCart('${p.id}'); openCartDrawer();">+ Add to Bag</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== MOBILE-FIRST: PROMO SPOTLIGHT (real product data only) =====
+function renderMobilePromo() {
+  const card = document.getElementById('promo-spotlight-card');
+  if (!card) return;
+
+  const visible = [...liveProducts].filter(p => !p.isHidden);
+  if (visible.length === 0) return; // leave section hidden — no mock data
+
+  const pick = visible.filter(p => p.badge && /best|limited|hot|new/i.test(p.badge))
+    .sort((a, b) => (b.originalPrice - b.price) - (a.originalPrice - a.price))[0]
+    || visible.filter(p => (typeof p.stock !== 'number' || p.stock > 0)).sort((a, b) => b.price - a.price)[0]
+    || visible[0];
+
+  const img = document.getElementById('promo-spotlight-img');
+  const name = document.getElementById('promo-spotlight-name');
+  const price = document.getElementById('promo-spotlight-price');
+  const original = document.getElementById('promo-spotlight-original');
+  const cta = document.getElementById('promo-spotlight-cta');
+
+  if (img) {
+    img.src = pick.image || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop';
+    img.alt = `${pick.brand} ${pick.model}`;
+  }
+  if (name) name.textContent = `${pick.brand} ${pick.model}`;
+  if (price) price.textContent = `₹${pick.price.toLocaleString('en-IN')}`;
+  if (original) {
+    original.textContent = pick.originalPrice > pick.price ? `₹${pick.originalPrice.toLocaleString('en-IN')}` : '';
+  }
+  if (cta) cta.onclick = () => openQuickView(pick.id);
+
+  card.classList.remove('hidden');
+}
+
+// ===== MOBILE BOTTOM NAVIGATION =====
+function mobileNavGo(action) {
+  document.querySelectorAll('#mobile-bottom-nav .mnav-btn').forEach(b => b.classList.remove('is-active'));
+  const btn = document.querySelector(`#mobile-bottom-nav .mnav-btn[data-nav="${action}"]`);
+  if (btn) btn.classList.add('is-active');
+
+  if (action === 'home') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (action === 'collections') {
+    const catalog = document.getElementById('catalog');
+    if (catalog) catalog.scrollIntoView({ behavior: 'smooth' });
+  } else if (action === 'search') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      const input = document.getElementById('search-input');
+      if (input) input.focus({ preventScroll: true });
+    }, 420);
+  } else if (action === 'account') {
+    toggleUserDropdownOrOpenModal();
+  } else if (action === 'cart') {
+    openCartDrawer();
+  }
+}
+
+// Footer category shortcut — activates the matching category pill
+function filterByCategory(category) {
+  const pill = document.querySelector(`.category-filter-btn[data-category="${category}"]`);
+  if (pill) {
+    pill.click();
+    const catalog = document.getElementById('catalog');
+    if (catalog) catalog.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
 // Reset All Filters
 function resetFilters() {
   activeCategory = 'all';
@@ -528,9 +649,9 @@ function resetFilters() {
   document.querySelectorAll('.category-filter-btn').forEach(b => {
     if (b.getAttribute('data-category') === 'all') {
       b.classList.remove('bg-white', 'text-neutral-700', 'border-neutral-200');
-      b.classList.add('bg-[#10151C]', 'text-white', 'border-[#10151C]');
+      b.classList.add('bg-[#10151C]', 'text-white', 'border-[#10151C]', 'is-active');
     } else {
-      b.classList.remove('bg-[#10151C]', 'text-white', 'border-[#10151C]');
+      b.classList.remove('bg-[#10151C]', 'text-white', 'border-[#10151C]', 'is-active');
       b.classList.add('bg-white', 'text-neutral-700', 'border-neutral-200');
     }
   });
