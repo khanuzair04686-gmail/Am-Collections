@@ -363,7 +363,9 @@ async function initMongo() {
   try {
     console.log(`🔄 Connecting to MongoDB: ${uri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}...`);
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 4000,
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
       maxPoolSize: 10
     });
     console.log('✅ MongoDB Atlas connected successfully! (Permanent Cloud Storage)');
