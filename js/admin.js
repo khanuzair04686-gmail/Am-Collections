@@ -122,7 +122,8 @@ async function loadDashboardData() {
     loadAdminWatches(),
     loadAdminOrders(),
     loadAdminUsers(),
-    loadAdminCoupons()
+    loadAdminCoupons(),
+    loadAdminAbout()
   ]);
 }
 

@@ -91,12 +91,12 @@ class CheckoutManager {
 
     if (itemsContainer) {
       if (items.length === 0) {
-        itemsContainer.innerHTML = '<p class="text-neutral-500 text-xs py-2">Your bag is empty.</p>';
+        itemsContainer.innerHTML = '<p class="text-[#9CA3AF] text-xs py-2">Your bag is empty.</p>';
       } else {
         itemsContainer.innerHTML = items.map(i => `
-          <div class="flex justify-between items-center text-xs py-1 border-b border-[#F0EDE4] text-neutral-700">
-            <span class="truncate max-w-[200px] font-medium">${i.brand} ${i.model} <span class="text-neutral-400 font-normal">×${i.quantity || 1}</span></span>
-            <span class="font-bold text-neutral-900 font-mono">₹${((i.price) * (i.quantity || 1)).toLocaleString('en-IN')}</span>
+          <div class="flex justify-between items-center text-xs py-1.5 border-b border-[#2D3748] text-[#D1D5DB]">
+            <span class="truncate max-w-[200px] font-medium text-[#F1F0ED]">${i.brand} ${i.model} <span class="text-[#9CA3AF] font-normal">×${i.quantity || 1}</span></span>
+            <span class="font-bold text-[#E2CFA5] font-mono">₹${((i.price) * (i.quantity || 1)).toLocaleString('en-IN')}</span>
           </div>
         `).join('');
       }
@@ -328,15 +328,15 @@ class CheckoutManager {
 
     if (itemsList && order.items) {
       itemsList.innerHTML = order.items.map(i => `
-        <div class="flex items-center justify-between text-xs py-2 border-b border-[#F0EDE4]">
-          <div class="flex items-center gap-2">
-            <img src="${i.image || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=200'}" class="w-10 h-10 object-contain rounded border border-neutral-200" />
+        <div class="flex items-center justify-between text-xs py-2 border-b border-[#2D3748]">
+          <div class="flex items-center gap-2.5">
+            <img src="${i.image || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=200'}" class="w-10 h-10 object-contain rounded-lg border border-[#2D3748] bg-[#0F172A] p-0.5" />
             <div>
-              <p class="font-bold text-neutral-900">${i.brand} ${i.model}</p>
-              <p class="text-[11px] text-neutral-500">Qty: ${i.quantity || 1} • COD Verified</p>
+              <p class="font-bold text-[#F1F0ED]">${i.brand} ${i.model}</p>
+              <p class="text-[11px] text-[#9CA3AF]">Qty: ${i.quantity || 1} • <span class="text-emerald-400">COD Verified</span></p>
             </div>
           </div>
-          <span class="font-bold text-neutral-900 font-mono">₹${((i.price) * (i.quantity || 1)).toLocaleString('en-IN')}</span>
+          <span class="font-bold text-[#E2CFA5] font-mono">₹${((i.price) * (i.quantity || 1)).toLocaleString('en-IN')}</span>
         </div>
       `).join('');
     }

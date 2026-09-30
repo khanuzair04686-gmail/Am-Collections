@@ -245,14 +245,14 @@ function setupEventListeners() {
   document.querySelectorAll('.category-filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.category-filter-btn').forEach(b => {
-        b.classList.remove('bg-[#10151C]', 'text-white', 'border-[#10151C]', 'is-active');
-        b.classList.add('bg-white', 'text-neutral-700', 'border-neutral-200');
+        b.classList.remove('bg-gradient-to-r', 'from-[#D4B475]', 'to-[#B8943F]', 'text-[#1A1207]', 'border-[#C9A96E]', 'is-active');
+        b.classList.add('bg-[#1A2235]', 'text-[#9CA3AF]', 'border-[#2D3748]');
       });
 
       const target = e.currentTarget;
-      target.classList.remove('bg-white', 'text-neutral-700', 'border-neutral-200');
+      target.classList.remove('bg-[#1A2235]', 'text-[#9CA3AF]', 'border-[#2D3748]');
       target.classList.add('is-active');
-      target.classList.add('bg-[#10151C]', 'text-white', 'border-[#10151C]');
+      target.classList.add('bg-gradient-to-r', 'from-[#D4B475]', 'to-[#B8943F]', 'text-[#1A1207]', 'border-[#C9A96E]');
 
       activeCategory = target.getAttribute('data-category');
       renderProducts();
@@ -410,11 +410,11 @@ function renderProducts() {
   if (filtered.length === 0) {
     container.innerHTML = `
       <div class="col-span-4 py-16 text-center">
-        <div class="w-16 h-16 rounded-full bg-[#F6F0E2] flex items-center justify-center mx-auto text-neutral-400 mb-4 border border-[#E8DCBE]">
+        <div class="w-16 h-16 rounded-full bg-[#1A2235] flex items-center justify-center mx-auto text-[#C9A96E] mb-4 border border-[#C9A96E]/20">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
-        <h3 class="text-base font-bold text-neutral-900 mb-1">No matching watches found</h3>
-        <p class="text-xs text-neutral-500 mb-6 max-w-sm mx-auto">We couldn't find any watches matching your criteria. Try adjusting your search or filters.</p>
+        <h3 class="text-base font-bold text-[#F1F0ED] mb-1">No matching watches found</h3>
+        <p class="text-xs text-[#9CA3AF] mb-6 max-w-sm mx-auto">We couldn't find any watches matching your criteria. Try adjusting your search or filters.</p>
         <button onclick="resetFilters()" class="btn-primary px-5 py-2 text-xs">
           Reset All Filters
         </button>
@@ -429,10 +429,10 @@ function renderProducts() {
     const wishlisted = isWishlisted(product.id);
 
     return `
-      <div class="product-card group relative bg-white border border-[#E5E7EB] rounded-xl hover:border-neutral-400 hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden">
+      <div class="product-card group relative bg-[#111827] border border-[#2A3447] rounded-xl hover:border-[#C9A96E]/50 hover:shadow-[0_8px_25px_rgba(0,0,0,0.4)] transition-all duration-300 flex flex-col justify-between overflow-hidden">
         
         <!-- Image Area (Fixed Ratio, Contain, Centered) -->
-        <div onclick="openQuickView('${product.id}')" class="product-image-container relative aspect-square w-full cursor-pointer bg-white p-2 sm:p-3 flex items-center justify-center overflow-hidden">
+        <div onclick="openQuickView('${product.id}')" class="product-image-container relative aspect-square w-full cursor-pointer bg-[#0F172A] p-2 sm:p-3 flex items-center justify-center overflow-hidden">
           <img 
             src="${product.image}" 
             alt="${product.brand} ${product.model}" 
@@ -443,7 +443,7 @@ function renderProducts() {
           
           <!-- Top Left Badge -->
           <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 z-10">
-            <span class="px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold tracking-wider uppercase bg-[#10151C] text-white rounded shadow-sm">
+            <span class="px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold tracking-wider uppercase bg-gradient-to-r from-[#D4B475] to-[#B8943F] text-[#1A1207] rounded shadow-sm">
               ${product.badge || '1:1 CLONE'}
             </span>
           </div>
@@ -456,20 +456,20 @@ function renderProducts() {
             title="${wishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}"
             aria-label="Wishlist"
           >
-            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 ${wishlisted ? 'text-red-500 fill-red-500' : 'text-neutral-500 hover:text-red-500'}" fill="${wishlisted ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 ${wishlisted ? 'text-red-500 fill-red-500' : 'text-neutral-400 hover:text-red-500'}" fill="${wishlisted ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
             </svg>
           </button>
         </div>
 
         <!-- Product Details -->
-        <div class="p-2 sm:p-3 flex-1 flex flex-col justify-between border-t border-neutral-100">
+        <div class="p-2 sm:p-3 flex-1 flex flex-col justify-between border-t border-[#1F2B3D]">
           <div>
             <!-- Brand & Rating Row -->
             <div class="flex items-center justify-between gap-1 mb-0.5">
-              <span class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-neutral-500 truncate" onclick="openQuickView('${product.id}')">${product.brand}</span>
-              <div class="flex items-center gap-0.5 text-[9px] sm:text-[10px] text-neutral-600 font-semibold flex-shrink-0">
-                <span class="text-amber-400">★</span>
+              <span class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-[#C9A96E] truncate" onclick="openQuickView('${product.id}')">${product.brand}</span>
+              <div class="flex items-center gap-0.5 text-[9px] sm:text-[10px] text-amber-400 font-semibold flex-shrink-0">
+                <span>★</span>
                 <span>${product.rating}</span>
               </div>
             </div>
@@ -477,7 +477,7 @@ function renderProducts() {
             <!-- Model Title (Max 2 lines) -->
             <h3 
               onclick="openQuickView('${product.id}')"
-              class="text-[10px] sm:text-xs font-semibold text-neutral-900 hover:text-neutral-700 line-clamp-2 leading-tight cursor-pointer min-h-[26px] sm:min-h-[32px]"
+              class="text-[10px] sm:text-xs font-semibold text-[#F1F0ED] hover:text-[#C9A96E] line-clamp-2 leading-tight cursor-pointer min-h-[26px] sm:min-h-[32px] transition-colors"
               title="${product.model}"
             >
               ${product.model}
@@ -485,26 +485,26 @@ function renderProducts() {
 
             <!-- Price Block -->
             <div class="mt-1 flex flex-wrap items-baseline gap-1">
-              <span class="text-xs sm:text-sm font-bold text-neutral-900">₹${product.price.toLocaleString('en-IN')}</span>
-              <span class="text-[9px] sm:text-[10px] text-neutral-400 line-through">₹${product.originalPrice.toLocaleString('en-IN')}</span>
-              <span class="text-[9px] sm:text-[10px] font-bold text-[#16794C]">${savingsPercent}% OFF</span>
+              <span class="text-xs sm:text-sm font-bold text-[#E2CFA5]">₹${product.price.toLocaleString('en-IN')}</span>
+              <span class="text-[9px] sm:text-[10px] text-neutral-500 line-through">₹${product.originalPrice.toLocaleString('en-IN')}</span>
+              <span class="text-[9px] sm:text-[10px] font-bold text-emerald-400">${savingsPercent}% OFF</span>
             </div>
           </div>
 
           <!-- Compact Action Area -->
-          <div class="mt-2 pt-2 border-t border-neutral-100 grid grid-cols-2 gap-1 sm:gap-1.5 w-full">
+          <div class="mt-2 pt-2 border-t border-[#1F2B3D] grid grid-cols-2 gap-1 sm:gap-1.5 w-full">
             <button 
               type="button"
               onclick="addToCart('${product.id}'); openCartDrawer();"
-              class="py-1.5 px-1 sm:px-2 rounded-md bg-[#10151C] hover:bg-black text-white text-[10px] sm:text-xs font-medium transition-colors flex items-center justify-center gap-1 truncate shadow-sm"
+              class="py-1.5 px-1 sm:px-2 rounded-md bg-[#1A2235] hover:bg-[#253248] border border-[#2D3748] text-[#F1F0ED] text-[10px] sm:text-xs font-medium transition-colors flex items-center justify-center gap-1 truncate shadow-sm"
             >
-              <svg class="w-3.5 h-3.5 hidden sm:inline flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+              <svg class="w-3.5 h-3.5 hidden sm:inline flex-shrink-0 text-[#C9A96E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
               <span class="truncate">+ Bag</span>
             </button>
             <button
               type="button"
               onclick="buyNow('${product.id}')"
-              class="py-1.5 px-1 sm:px-2 rounded-md bg-[#F6F0E2] hover:bg-[#F0E6CC] border border-[#E8DCBE] hover:border-[#D8B878] text-[#7A5C24] text-[10px] sm:text-xs font-semibold transition-colors text-center truncate"
+              class="py-1.5 px-1 sm:px-2 rounded-md btn-primary text-[10px] sm:text-xs font-semibold transition-all text-center truncate shadow-sm"
               title="Buy Now (Cash on Delivery)"
             >
               Buy Now
@@ -648,11 +648,11 @@ function resetFilters() {
 
   document.querySelectorAll('.category-filter-btn').forEach(b => {
     if (b.getAttribute('data-category') === 'all') {
-      b.classList.remove('bg-white', 'text-neutral-700', 'border-neutral-200');
-      b.classList.add('bg-[#10151C]', 'text-white', 'border-[#10151C]', 'is-active');
+      b.classList.remove('bg-[#1A2235]', 'text-[#9CA3AF]', 'border-[#2D3748]');
+      b.classList.add('bg-gradient-to-r', 'from-[#D4B475]', 'to-[#B8943F]', 'text-[#1A1207]', 'border-[#C9A96E]', 'is-active');
     } else {
-      b.classList.remove('bg-[#10151C]', 'text-white', 'border-[#10151C]', 'is-active');
-      b.classList.add('bg-white', 'text-neutral-700', 'border-neutral-200');
+      b.classList.remove('bg-gradient-to-r', 'from-[#D4B475]', 'to-[#B8943F]', 'text-[#1A1207]', 'border-[#C9A96E]', 'is-active');
+      b.classList.add('bg-[#1A2235]', 'text-[#9CA3AF]', 'border-[#2D3748]');
     }
   });
 

@@ -30,14 +30,14 @@
         extend: {
           colors: {
             brand: {
-              black: '#10151C',
-              charcoal: '#1F2937',
-              gray: '#5B6472',
-              lightGray: '#F2EFE7',
-              border: '#E8E3D8',
-              emerald: '#047857',
-              greenText: '#16794C',
-              gold: '#B45309'
+              black: '#0B0F19',
+              charcoal: '#111827',
+              gray: '#9CA3AF',
+              lightGray: '#1A2235',
+              border: '#2D3748',
+              emerald: '#10B981',
+              greenText: '#10B981',
+              gold: '#C9A96E'
             }
           },
           fontFamily: {
@@ -52,35 +52,35 @@
   <!-- Production Custom Stylesheet -->
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
-<body class="bg-[#FAF9F6] text-[#1A1F27] antialiased selection:bg-[#10151C] selection:text-white">
+<body class="bg-[#0B0F19] text-[#F1F0ED] antialiased selection:bg-[#C9A96E] selection:text-[#0B0F19]">
 
   <!-- ================= TOP TRUST ANNOUNCEMENT BAR ================= -->
-  <aside id="top-announcement-bar" aria-label="Announcement" class="bg-[#10151C] text-white text-[11px] sm:text-xs py-2 px-3 tracking-wide text-center flex items-center justify-center gap-2 sm:gap-3 w-full max-w-full overflow-hidden">
+  <aside id="top-announcement-bar" aria-label="Announcement" class="bg-gradient-to-r from-[#0A0E17] via-[#111827] to-[#0A0E17] border-b border-[#C9A96E]/20 text-white text-[11px] sm:text-xs py-2 px-3 tracking-wide text-center flex items-center justify-center gap-2 sm:gap-3 w-full max-w-full overflow-hidden">
     <span id="top-announcement-text">
       ✨ <strong>FREE Pan-India Cash on Delivery</strong> • 7-Day Hassle-Free Replacement • 100% Quality Inspected
     </span>
-    <span class="hidden md:inline text-neutral-500">|</span>
-    <span class="hidden md:inline text-neutral-300">
-      WhatsApp Hotline: <strong class="text-[#D8B878] underline underline-offset-2 decoration-[#C6A15B]/50 cursor-pointer" onclick="document.getElementById('floating-whatsapp').click()">Order in 1-Click</strong>
+    <span class="hidden md:inline text-neutral-600">|</span>
+    <span class="hidden md:inline text-[#9CA3AF]">
+      WhatsApp Hotline: <strong class="text-[#E2CFA5] underline underline-offset-2 decoration-[#C9A96E]/50 cursor-pointer" onclick="document.getElementById('floating-whatsapp').click()">Order in 1-Click</strong>
     </span>
   </aside>
 
   <!-- ================= COMPACT STICKY E-COMMERCE HEADER ================= -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E8E3D8] shadow-[0_1px_10px_rgba(16,21,28,0.07)]">
+  <header class="sticky top-0 z-40 bg-[#111827]/95 backdrop-blur-xl border-b border-[#C9A96E]/20 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
       <div class="header-inner flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-3">
         
         <!-- Left: Brand Logo -->
-        <a href="#" class="header-logo flex items-center gap-2 sm:gap-2.5 flex-shrink-0 group focus:outline-none">
-          <div id="header-logo-container" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#232C39] to-[#10151C] ring-1 ring-[#C6A15B]/60 text-white flex items-center justify-center font-bold text-xs sm:text-sm tracking-wider overflow-hidden">
+        <a href="/" class="header-logo flex items-center gap-2 sm:gap-2.5 flex-shrink-0 group focus:outline-none">
+          <div id="header-logo-container" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#1A2235] to-[#0B0F19] ring-1 ring-[#C9A96E]/60 text-white flex items-center justify-center font-bold text-xs sm:text-sm tracking-wider overflow-hidden">
             <img id="header-logo-img" src="" alt="Logo" class="w-full h-full object-contain hidden" />
             <span id="header-logo-monogram" class="font-heading font-black text-[#E8D5AE]">AM</span>
           </div>
           <div class="flex flex-col">
-            <span id="header-store-name" class="font-heading text-sm sm:text-base font-extrabold tracking-wider text-[#10151C]">
+            <span id="header-store-name" class="font-heading text-sm sm:text-base font-extrabold tracking-wider text-[#F1F0ED]">
               AM COLLECTION
             </span>
-            <span id="header-store-tagline" class="text-[9px] uppercase tracking-widest text-[#A87F3D] font-semibold hidden sm:block">
+            <span id="header-store-tagline" class="text-[9px] uppercase tracking-widest text-[#C9A96E] font-semibold hidden sm:block">
               Master Copy Horology
             </span>
           </div>
@@ -89,16 +89,16 @@
         <!-- Center: Instant Search Bar (Desktop & Tablet) -->
         <div class="header-search flex-1 max-w-lg mx-1 sm:mx-4 relative">
           <div class="relative w-full">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#9CA3AF]">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#6B7280]">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </span>
             <input 
               id="search-input" 
               type="text" 
               placeholder="Search Rolex, Patek, Cartier, AP, Casio..." 
-              class="w-full pl-9 pr-8 py-2 text-xs bg-[#F7F5EF] border border-[#E8E3D8] rounded-lg text-[#1A1F27] placeholder-[#9CA3AF] focus:bg-white focus:border-[#10151C] transition-all"
+              class="w-full pl-9 pr-8 py-2 text-xs bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] placeholder-[#6B7280] focus:bg-[#1F2B3D] focus:border-[#C9A96E] transition-all"
             />
-            <button id="search-clear-btn" type="button" class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-[#9CA3AF] hover:text-[#10151C]" title="Clear search">
+            <button id="search-clear-btn" type="button" class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-[#9CA3AF] hover:text-[#C9A96E]" title="Clear search">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
           </div>
@@ -111,7 +111,7 @@
           <button 
             type="button" 
             onclick="openWishlistModal()" 
-            class="relative p-2 rounded-lg text-[#4B5563] hover:text-[#10151C] hover:bg-[#F2EFE7] transition-colors"
+            class="relative p-2 rounded-lg text-[#9CA3AF] hover:text-[#C9A96E] hover:bg-[#1A2235] transition-colors"
             title="Wishlist"
             aria-label="Wishlist"
           >
@@ -126,31 +126,31 @@
             <button 
               id="user-auth-btn" 
               onclick="toggleUserDropdownOrOpenModal()" 
-              class="flex items-center gap-1.5 py-1.5 px-2 sm:px-3 rounded-lg text-xs font-semibold text-[#1A1F27] hover:bg-[#F2EFE7] transition-colors border border-transparent hover:border-[#E8E3D8]"
+              class="flex items-center gap-1.5 py-1.5 px-2 sm:px-3 rounded-lg text-xs font-semibold text-[#F1F0ED] hover:bg-[#1A2235] transition-colors border border-transparent hover:border-[#2D3748]"
               title="My Account"
               type="button"
             >
-              <div id="user-avatar-icon" class="w-6 h-6 rounded-full bg-neutral-100 flex items-center justify-center text-[#1A1F27] flex-shrink-0">
+              <div id="user-avatar-icon" class="w-6 h-6 rounded-full bg-[#1A2235] flex items-center justify-center text-[#C9A96E] flex-shrink-0">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
               </div>
               <span id="user-auth-btn-text" class="hidden sm:inline">Sign In</span>
             </button>
 
             <!-- User Dropdown Menu -->
-            <div id="user-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-white border border-[#E8E3D8] rounded-xl shadow-lg p-2 z-50 text-xs space-y-1">
-              <div class="px-3 py-2 border-b border-[#F2EFE7] bg-[#F7F5EF] rounded-lg mb-1">
-                <p class="font-bold text-neutral-900 text-xs truncate" id="user-dropdown-name">User</p>
-                <p class="text-[11px] text-neutral-500 font-mono truncate" id="user-dropdown-email">user@example.com</p>
+            <div id="user-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-[#111827] border border-[#2D3748] rounded-xl shadow-2xl p-2 z-50 text-xs space-y-1">
+              <div class="px-3 py-2 border-b border-[#2D3748] bg-[#1A2235] rounded-lg mb-1">
+                <p class="font-bold text-[#F1F0ED] text-xs truncate" id="user-dropdown-name">User</p>
+                <p class="text-[11px] text-[#9CA3AF] font-mono truncate" id="user-dropdown-email">user@example.com</p>
               </div>
-              <button onclick="openProfileModal()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#F2EFE7] text-neutral-700 hover:text-neutral-900 flex items-center gap-2 font-medium">
+              <button onclick="openProfileModal()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#1A2235] text-[#D1D5DB] hover:text-[#F1F0ED] flex items-center gap-2 font-medium">
                 <span>👤</span>
                 <span>Profile &amp; Addresses</span>
               </button>
-              <button onclick="openMyOrdersModal()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#F2EFE7] text-neutral-700 hover:text-neutral-900 flex items-center gap-2 font-medium">
+              <button onclick="openMyOrdersModal()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#1A2235] text-[#D1D5DB] hover:text-[#F1F0ED] flex items-center gap-2 font-medium">
                 <span>📦</span>
                 <span>My Orders</span>
               </button>
-              <button onclick="handleCustomerLogout()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-red-50 text-red-600 flex items-center gap-2 font-medium">
+              <button onclick="handleCustomerLogout()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-red-950/40 text-red-400 flex items-center gap-2 font-medium">
                 <span>🚪</span>
                 <span>Sign Out</span>
               </button>
@@ -159,7 +159,7 @@
 
           <!-- Cart Drawer Button -->
           <button 
-            class="cart-drawer-trigger relative flex items-center gap-1.5 py-1.5 px-2 sm:px-3 rounded-lg bg-[#10151C] text-white text-xs font-semibold hover:bg-black transition-colors"
+            class="cart-drawer-trigger relative flex items-center gap-1.5 py-1.5 px-2 sm:px-3 rounded-lg bg-gradient-to-r from-[#D4B475] to-[#B8943F] text-[#1A1207] text-xs font-semibold hover:from-[#E2CFA5] hover:to-[#C9A96E] transition-all"
             aria-label="Shopping Cart"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
@@ -170,12 +170,12 @@
           </button>
 
           <!-- Admin Link (Discreet) -->
-          <a href="/admin.html" class="hidden xl:flex items-center text-[11px] text-neutral-400 hover:text-neutral-900 p-1 font-medium" title="Admin Dashboard">
+          <a href="/admin.html" class="hidden xl:flex items-center text-[11px] text-neutral-400 hover:text-[#C9A96E] p-1 font-medium transition-colors" title="Admin Dashboard">
             Admin
           </a>
 
           <!-- Mobile Hamburger Toggle -->
-          <button id="mobile-menu-toggle" class="lg:hidden p-1.5 text-neutral-600 hover:text-neutral-900" aria-label="Menu">
+          <button id="mobile-menu-toggle" class="lg:hidden p-1.5 text-neutral-400 hover:text-white" aria-label="Menu">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
           </button>
         </div>
@@ -184,17 +184,17 @@
     </div>
 
     <!-- Mobile Navigation Drawer / Dropdown -->
-    <div id="mobile-menu" class="hidden lg:hidden border-t border-[#E8E3D8] bg-white px-4 py-3 space-y-2 text-xs font-medium">
-      <button onclick="toggleUserDropdownOrOpenModal()" class="w-full py-2 px-3 rounded-lg bg-neutral-100 text-left text-neutral-900 font-semibold flex items-center justify-between">
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-[#C9A96E]/20 bg-[#111827] px-4 py-3 space-y-2 text-xs font-medium">
+      <button onclick="toggleUserDropdownOrOpenModal()" class="w-full py-2 px-3 rounded-lg bg-[#1A2235] text-left text-[#F1F0ED] font-semibold flex items-center justify-between border border-[#2D3748]">
         <span id="mobile-user-text">Sign In / Register</span>
         <span>→</span>
       </button>
       <div class="grid grid-cols-2 gap-2 pt-1">
-        <a href="#catalog" class="py-2 px-2 text-neutral-700 hover:text-black">All Watches</a>
-        <a href="#trust-section" class="py-2 px-2 text-neutral-700 hover:text-black">Why 1:1 Clones</a>
-        <a href="#reviews" class="py-2 px-2 text-neutral-700 hover:text-black">Verified Reviews</a>
-        <a href="#faq" class="py-2 px-2 text-neutral-700 hover:text-black">Delivery &amp; COD</a>
-        <a href="/about.html" class="py-2 px-2 text-neutral-700 hover:text-black">About Us</a>
+        <a href="/#catalog" class="py-2 px-2 text-[#9CA3AF] hover:text-[#C9A96E]">All Watches</a>
+        <a href="/#trust-section" class="py-2 px-2 text-[#9CA3AF] hover:text-[#C9A96E]">Why 1:1 Clones</a>
+        <a href="/#reviews" class="py-2 px-2 text-[#9CA3AF] hover:text-[#C9A96E]">Verified Reviews</a>
+        <a href="/#faq" class="py-2 px-2 text-[#9CA3AF] hover:text-[#C9A96E]">Delivery &amp; COD</a>
+        <a href="/about.html" class="py-2 px-2 text-[#E2CFA5] font-bold">About Us</a>
       </div>
     </div>
   </header>
@@ -232,15 +232,15 @@
       intro(about) {
         if (!about.intro) return '';
         return `
-        <section class="relative overflow-hidden bg-[#10151C] text-white">
-          <div class="absolute inset-0 opacity-[0.06]" style="background-image:radial-gradient(circle at 1px 1px, #C6A15B 1px, transparent 0); background-size:28px 28px;"></div>
+        <section class="relative overflow-hidden bg-gradient-to-b from-[#111827] to-[#0B0F19] text-white border-b border-[#C9A96E]/20">
+          <div class="absolute inset-0 opacity-[0.05]" style="background-image:radial-gradient(circle at 1px 1px, #C9A96E 1px, transparent 0); background-size:28px 28px;"></div>
           <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center rise-in">
-            <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#D8B878]">
-              <span class="h-px w-8 bg-[#C6A15B]/60"></span> The House <span class="h-px w-8 bg-[#C6A15B]/60"></span>
+            <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#C9A96E]">
+              <span class="h-px w-8 bg-[#C9A96E]/60"></span> The House <span class="h-px w-8 bg-[#C9A96E]/60"></span>
             </span>
-            <h1 class="mt-5 font-heading text-3xl sm:text-5xl font-black leading-tight">${escapeHtml(about.pageTitle || 'About Us')}</h1>
-            <p class="mt-6 text-sm sm:text-base text-neutral-300 leading-relaxed max-w-2xl mx-auto">${escapeHtml(about.intro)}</p>
-            <a href="/#catalog" class="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#C6A15B] hover:bg-[#D8B878] text-[#10151C] text-xs font-bold uppercase tracking-widest transition-colors">
+            <h1 class="mt-5 font-heading text-3xl sm:text-5xl font-black leading-tight text-[#F1F0ED]">${escapeHtml(about.pageTitle || 'About Us')}</h1>
+            <p class="mt-6 text-sm sm:text-base text-[#9CA3AF] leading-relaxed max-w-2xl mx-auto">${escapeHtml(about.intro)}</p>
+            <a href="/#catalog" class="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl btn-primary text-xs font-bold uppercase tracking-widest transition-all">
               Explore The Collection <span aria-hidden="true">→</span>
             </a>
           </div>
@@ -251,10 +251,10 @@
         if (!about.story) return '';
         return `
         <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
-          <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#A87F3D]">
-            <span class="h-px w-8 bg-[#C6A15B]/60"></span> Our Story
+          <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#C9A96E]">
+            <span class="h-px w-8 bg-[#C9A96E]/60"></span> Our Story
           </span>
-          <div class="mt-5 border-l-2 border-[#C6A15B] pl-5 sm:pl-8 space-y-4 text-sm sm:text-[15px] text-neutral-600 leading-relaxed">
+          <div class="mt-5 border-l-2 border-[#C9A96E] pl-5 sm:pl-8 space-y-4 text-sm sm:text-[15px] text-[#D1D5DB] leading-relaxed">
             ${nl2p(about.story)}
           </div>
         </section>`;
@@ -263,21 +263,21 @@
       mission(about) {
         if (!about.mission && !about.vision) return '';
         const card = (title, text) => text ? `
-          <div class="rounded-2xl bg-white border border-[#E8E3D8] p-7 sm:p-8 shadow-sm hover:shadow-md hover:border-[#D8B878] transition-all h-full">
-            <div class="w-11 h-11 rounded-xl bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center">
-              <span class="w-2.5 h-2.5 rotate-45 bg-[#C6A15B]"></span>
+          <div class="rounded-2xl bg-[#111827] border border-[#2D3748] hover:border-[#C9A96E]/40 p-7 sm:p-8 shadow-xl transition-all h-full">
+            <div class="w-11 h-11 rounded-xl bg-[#1A2235] border border-[#C9A96E]/30 flex items-center justify-center">
+              <span class="w-2.5 h-2.5 rotate-45 bg-[#C9A96E]"></span>
             </div>
-            <h3 class="mt-5 font-heading text-lg font-extrabold text-[#10151C]">${title}</h3>
-            <div class="mt-3 text-sm text-neutral-600 leading-relaxed space-y-3">${nl2p(text)}</div>
+            <h3 class="mt-5 font-heading text-lg font-extrabold text-[#F1F0ED]">${title}</h3>
+            <div class="mt-3 text-sm text-[#9CA3AF] leading-relaxed space-y-3">${nl2p(text)}</div>
           </div>` : '';
         return `
-        <section class="bg-[#FBF8F1] border-y border-[#E8E3D8]">
+        <section class="bg-[#111827]/40 border-y border-[#C9A96E]/15">
           <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
             <div class="text-center">
-              <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#A87F3D]">
-                <span class="h-px w-8 bg-[#C6A15B]/60"></span> Purpose <span class="h-px w-8 bg-[#C6A15B]/60"></span>
+              <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#C9A96E]">
+                <span class="h-px w-8 bg-[#C9A96E]/60"></span> Purpose <span class="h-px w-8 bg-[#C9A96E]/60"></span>
               </span>
-              <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black text-[#10151C]">Mission &amp; Vision</h2>
+              <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black text-[#F1F0ED]">Mission &amp; Vision</h2>
             </div>
             <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-5">
               ${card('Our Mission', about.mission)}
@@ -290,22 +290,22 @@
       team(about) {
         const members = (about.team || []).filter(m => m.enabled !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
         if (!members.length) return '';
-        const socialBtn = (label, href) => href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-lg border border-[#E8E3D8] text-[10px] font-bold text-neutral-500 hover:text-[#10151C] hover:border-[#D8B878] transition-colors">${label}</a>` : '';
+        const socialBtn = (label, href) => href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-lg border border-[#2D3748] bg-[#1A2235] text-[10px] font-bold text-[#9CA3AF] hover:text-[#C9A96E] hover:border-[#C9A96E] transition-colors">${label}</a>` : '';
         const cards = members.map(m => {
           const initials = (m.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
           const photo = m.photoUrl
             ? `<img src="${escapeHtml(m.photoUrl)}" alt="${escapeHtml(m.name)}" loading="lazy" class="w-full h-64 sm:h-72 object-cover object-top">`
-            : `<div class="w-full h-64 sm:h-72 flex items-center justify-center bg-[#F6F0E2] border-b border-[#E8DCBE]">
-                 <span class="font-heading text-4xl font-black text-[#C6A15B]">${escapeHtml(initials)}</span>
+            : `<div class="w-full h-64 sm:h-72 flex items-center justify-center bg-[#0F172A] border-b border-[#2D3748]">
+                 <span class="font-heading text-4xl font-black text-[#C9A96E]">${escapeHtml(initials)}</span>
                </div>`;
-          const socials = [socialBtn('Instagram', m.social && m.social.instagram), socialBtn('X', m.social && m.social.twitter), socialBtn('LinkedIn', m.social && m.social.linkedin), m.social && m.social.email ? `<a href="mailto:${escapeHtml(m.social.email)}" class="px-2.5 py-1 rounded-lg border border-[#E8E3D8] text-[10px] font-bold text-neutral-500 hover:text-[#10151C] hover:border-[#D8B878] transition-colors">Email</a>` : ''].join('');
+          const socials = [socialBtn('Instagram', m.social && m.social.instagram), socialBtn('X', m.social && m.social.twitter), socialBtn('LinkedIn', m.social && m.social.linkedin), m.social && m.social.email ? `<a href="mailto:${escapeHtml(m.social.email)}" class="px-2.5 py-1 rounded-lg border border-[#2D3748] bg-[#1A2235] text-[10px] font-bold text-[#9CA3AF] hover:text-[#C9A96E] hover:border-[#C9A96E] transition-colors">Email</a>` : ''].join('');
           return `
-          <article class="rounded-2xl bg-white border border-[#E8E3D8] overflow-hidden shadow-sm hover:shadow-lg hover:border-[#D8B878] hover:-translate-y-1 transition-all">
+          <article class="rounded-2xl bg-[#111827] border border-[#2D3748] overflow-hidden shadow-xl hover:shadow-2xl hover:border-[#C9A96E]/50 hover:-translate-y-1 transition-all">
             ${photo}
             <div class="p-6">
-              <span class="inline-block px-2.5 py-1 rounded-lg bg-[#F6F0E2] border border-[#E8DCBE] text-[10px] font-bold tracking-wider uppercase text-[#7A5C24]">${escapeHtml(m.role || 'Team Member')}</span>
-              <h3 class="mt-3 font-heading text-lg font-extrabold text-[#10151C]">${escapeHtml(m.name || 'Team Member')}</h3>
-              ${m.bio ? `<p class="mt-2 text-xs text-neutral-600 leading-relaxed">${escapeHtml(m.bio)}</p>` : ''}
+              <span class="inline-block px-2.5 py-1 rounded-lg bg-[#1A2235] border border-[#C9A96E]/30 text-[10px] font-bold tracking-wider uppercase text-[#E2CFA5]">${escapeHtml(m.role || 'Team Member')}</span>
+              <h3 class="mt-3 font-heading text-lg font-extrabold text-[#F1F0ED]">${escapeHtml(m.name || 'Team Member')}</h3>
+              ${m.bio ? `<p class="mt-2 text-xs text-[#9CA3AF] leading-relaxed">${escapeHtml(m.bio)}</p>` : ''}
               ${socials.trim() ? `<div class="mt-4 flex flex-wrap gap-1.5">${socials}</div>` : ''}
             </div>
           </article>`;
@@ -313,11 +313,11 @@
         return `
         <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
           <div class="text-center">
-            <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#A87F3D]">
-              <span class="h-px w-8 bg-[#C6A15B]/60"></span> The People <span class="h-px w-8 bg-[#C6A15B]/60"></span>
+            <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#C9A96E]">
+              <span class="h-px w-8 bg-[#C9A96E]/60"></span> The People <span class="h-px w-8 bg-[#C9A96E]/60"></span>
             </span>
-            <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black text-[#10151C]">Meet The Team</h2>
-            <p class="mt-3 text-xs text-neutral-500">The small, obsessive crew behind every timepiece we ship.</p>
+            <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black text-[#F1F0ED]">Meet The Team</h2>
+            <p class="mt-3 text-xs text-[#9CA3AF]">The small, obsessive crew behind every timepiece we ship.</p>
           </div>
           <div class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">${cards}</div>
         </section>`;
@@ -327,24 +327,24 @@
         const entries = (about.whoIsWho || []).filter(w => w.enabled !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
         if (!entries.length) return '';
         const rows = entries.map(w => `
-          <div class="flex gap-4 sm:gap-6 rounded-2xl bg-white border border-[#E8E3D8] p-6 shadow-sm hover:border-[#D8B878] hover:shadow-md transition-all">
-            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-[#F6F0E2] border border-[#E8DCBE] flex items-center justify-center">
-              <span class="w-2 h-2 rotate-45 bg-[#C6A15B]"></span>
+          <div class="flex gap-4 sm:gap-6 rounded-2xl bg-[#111827] border border-[#2D3748] hover:border-[#C9A96E]/40 p-6 shadow-md transition-all">
+            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-[#1A2235] border border-[#C9A96E]/30 flex items-center justify-center">
+              <span class="w-2 h-2 rotate-45 bg-[#C9A96E]"></span>
             </div>
             <div>
-              <h3 class="font-heading text-sm font-extrabold text-[#10151C]">${escapeHtml(w.title || w.role || '')}</h3>
-              <p class="mt-1.5 text-xs text-neutral-600 leading-relaxed">${escapeHtml(w.description || '')}</p>
+              <h3 class="font-heading text-sm font-extrabold text-[#F1F0ED]">${escapeHtml(w.title || w.role || '')}</h3>
+              <p class="mt-1.5 text-xs text-[#9CA3AF] leading-relaxed">${escapeHtml(w.description || '')}</p>
             </div>
           </div>`).join('');
         return `
-        <section class="bg-[#10151C] text-white">
+        <section class="bg-[#0B0F19] text-white">
           <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
             <div class="text-center">
-              <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#D8B878]">
-                <span class="h-px w-8 bg-[#C6A15B]/60"></span> Who Is Who <span class="h-px w-8 bg-[#C6A15B]/60"></span>
+              <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#C9A96E]">
+                <span class="h-px w-8 bg-[#C9A96E]/60"></span> Who Is Who <span class="h-px w-8 bg-[#C9A96E]/60"></span>
               </span>
-              <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black">Who Does What</h2>
-              <p class="mt-3 text-xs text-neutral-400">A clear look at each role keeping AM COLLECTION running.</p>
+              <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black text-[#F1F0ED]">Who Does What</h2>
+              <p class="mt-3 text-xs text-[#9CA3AF]">A clear look at each role keeping AM COLLECTION running.</p>
             </div>
             <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">${rows}</div>
           </div>
@@ -355,12 +355,12 @@
         if (!about.quality) return '';
         return `
         <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 rise-in">
-          <div class="rounded-3xl bg-[#FBF8F1] border border-[#E8DCBE] p-8 sm:p-10 text-center">
-            <span class="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.25em] uppercase text-[#A87F3D]">
+          <div class="rounded-3xl bg-[#111827] border border-[#C9A96E]/25 p-8 sm:p-10 text-center shadow-xl">
+            <span class="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.25em] uppercase text-[#C9A96E]">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
               The Quality Standard
             </span>
-            <p class="mt-4 text-sm sm:text-[15px] text-neutral-700 leading-relaxed">${escapeHtml(about.quality)}</p>
+            <p class="mt-4 text-sm sm:text-[15px] text-[#D1D5DB] leading-relaxed">${escapeHtml(about.quality)}</p>
           </div>
         </section>`;
       }
@@ -382,8 +382,8 @@
 
     async function loadAbout() {
       showState(`
-        <div class="inline-block h-8 w-8 border-2 border-[#C6A15B] border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-xs font-bold text-neutral-500 uppercase tracking-[0.25em]">Loading Our Story</p>`);
+        <div class="inline-block h-8 w-8 border-2 border-[#C9A96E] border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-xs font-bold text-[#C9A96E] uppercase tracking-[0.25em]">Loading Our Story</p>`);
       try {
         const res = await fetch('/api/about', { headers: { 'Accept': 'application/json' } });
         if (!res.ok) throw new Error('Server responded with status ' + res.status);
@@ -392,12 +392,12 @@
         renderAbout(about);
       } catch (e) {
         showState(`
-          <div class="mx-auto w-14 h-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center">
-            <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+          <div class="mx-auto w-14 h-14 rounded-2xl bg-red-950/40 border border-red-500/30 flex items-center justify-center">
+            <svg class="w-7 h-7 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
           </div>
-          <h2 class="mt-5 font-heading text-lg font-extrabold text-[#10151C]">Unable To Load About Us</h2>
-          <p class="mt-2 text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">The content could not be loaded from the database. Please check your connection and try again.</p>
-          <button onclick="window.aboutLoadRetry()" class="mt-6 px-6 py-2.5 rounded-xl bg-[#10151C] text-white text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors">Retry</button>`);
+          <h2 class="mt-5 font-heading text-lg font-extrabold text-[#F1F0ED]">Unable To Load About Us</h2>
+          <p class="mt-2 text-xs text-[#9CA3AF] max-w-sm mx-auto leading-relaxed">The content could not be loaded from the database. Please check your connection and try again.</p>
+          <button onclick="window.aboutLoadRetry()" class="mt-6 px-6 py-2.5 rounded-xl btn-primary text-xs font-bold uppercase tracking-widest transition-all">Retry</button>`);
       }
     }
 
@@ -407,49 +407,49 @@
   </script>
 
   <!-- ================= PRODUCTION COMPACT FOOTER ================= -->
-  <footer class="bg-[#0C1016] text-white border-t border-[#232B38] pt-12 pb-8 text-xs">
+  <footer class="bg-[#060911] text-white border-t border-[#C9A96E]/15 pt-12 pb-8 text-xs">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 pb-8 border-b border-[#1C2430]">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 pb-8 border-b border-[#C9A96E]/10">
         
         <!-- Col 1 -->
         <div class="space-y-2">
-          <div class="font-heading font-black text-sm text-white tracking-wider">AM COLLECTION</div>
-          <p class="text-neutral-400 text-[11px] leading-relaxed">
+          <div class="font-heading font-black text-sm text-[#F1F0ED] tracking-wider">AM COLLECTION</div>
+          <p class="text-[#9CA3AF] text-[11px] leading-relaxed">
             India's dedicated luxury master copy marketplace. Exceptional horological clones with Pan-India doorstep delivery.
           </p>
         </div>
 
         <!-- Col 2 -->
         <div class="space-y-2">
-          <p class="font-bold text-[#D8B878]">Shop Brands</p>
-          <ul class="space-y-1.5 text-neutral-400">
-            <li><a href="#catalog" onclick="filterByCategory('rolex')" class="hover:text-white">Rolex Clones</a></li>
-            <li><a href="#catalog" onclick="filterByCategory('patek')" class="hover:text-white">Patek Philippe</a></li>
-            <li><a href="#catalog" onclick="filterByCategory('ap')" class="hover:text-white">Audemars Piguet</a></li>
-            <li><a href="#catalog" onclick="filterByCategory('cartier')" class="hover:text-white">Cartier</a></li>
+          <p class="font-bold text-[#C9A96E]">Shop Brands</p>
+          <ul class="space-y-1.5 text-[#9CA3AF]">
+            <li><a href="/#catalog" onclick="filterByCategory('rolex')" class="hover:text-[#C9A96E] transition-colors">Rolex Clones</a></li>
+            <li><a href="/#catalog" onclick="filterByCategory('patek')" class="hover:text-[#C9A96E] transition-colors">Patek Philippe</a></li>
+            <li><a href="/#catalog" onclick="filterByCategory('ap')" class="hover:text-[#C9A96E] transition-colors">Audemars Piguet</a></li>
+            <li><a href="/#catalog" onclick="filterByCategory('cartier')" class="hover:text-[#C9A96E] transition-colors">Cartier</a></li>
           </ul>
         </div>
 
         <!-- Col 3 -->
         <div class="space-y-2">
-          <p class="font-bold text-[#D8B878]">Customer Care</p>
-          <ul class="space-y-1.5 text-neutral-400">
-            <li><a href="#faq" class="hover:text-white">Cash on Delivery Info</a></li>
-            <li><a href="#faq" class="hover:text-white">7-Day Replacement Policy</a></li>
-            <li><a href="#faq" class="hover:text-white">Track Order</a></li>
-            <li><a href="/about.html" class="hover:text-white">About Us</a></li>
-            <li><button onclick="document.getElementById('floating-whatsapp').click()" class="hover:text-white">WhatsApp Support</button></li>
+          <p class="font-bold text-[#C9A96E]">Customer Care</p>
+          <ul class="space-y-1.5 text-[#9CA3AF]">
+            <li><a href="/#faq" class="hover:text-[#C9A96E] transition-colors">Cash on Delivery Info</a></li>
+            <li><a href="/#faq" class="hover:text-[#C9A96E] transition-colors">7-Day Replacement Policy</a></li>
+            <li><a href="/#faq" class="hover:text-[#C9A96E] transition-colors">Track Order</a></li>
+            <li><a href="/about.html" class="text-[#E2CFA5] font-bold">About Us</a></li>
+            <li><button onclick="document.getElementById('floating-whatsapp').click()" class="hover:text-[#C9A96E] transition-colors">WhatsApp Support</button></li>
           </ul>
         </div>
 
         <!-- Col 4 -->
         <div class="space-y-2">
-          <p class="font-bold text-[#D8B878]">Payment &amp; Trust</p>
-          <p class="text-neutral-400 text-[11px]">
+          <p class="font-bold text-[#C9A96E]">Payment &amp; Trust</p>
+          <p class="text-[#9CA3AF] text-[11px]">
             Cash on Delivery • UPI • RuPay • Visa • Mastercard
           </p>
           <div class="pt-2">
-            <span class="inline-block px-2 py-1 rounded bg-[#0E7A5F]/15 border border-[#0E7A5F]/40 text-emerald-400 text-[10px] font-bold">
+            <span class="inline-block px-2 py-1 rounded bg-emerald-950/50 border border-emerald-500/40 text-emerald-400 text-[10px] font-bold">
               100% SECURE CHECKOUT
             </span>
           </div>
@@ -466,24 +466,24 @@
     </div>
   </footer>
 
-  <!-- ================= SLIDING CART DRAWER (WHITE AESTHETIC) ================= -->
-  <div id="cart-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden opacity-0 transition-opacity"></div>
+  <!-- ================= SLIDING CART DRAWER (DARK LUXURY) ================= -->
+  <div id="cart-backdrop" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity"></div>
   
-  <aside id="cart-drawer" aria-label="Shopping Bag Drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white border-l border-[#E8E3D8] z-50 flex flex-col translate-x-full shadow-2xl transition-transform duration-300">
+  <aside id="cart-drawer" aria-label="Shopping Bag Drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-[#111827] border-l border-[#C9A96E]/20 z-50 flex flex-col translate-x-full shadow-[0_0_50px_rgba(0,0,0,0.8)] transition-transform duration-300">
     
     <!-- Header -->
-    <div class="p-4 border-b border-[#E8E3D8] flex items-center justify-between bg-[#F7F5EF]">
+    <div class="p-4 border-b border-[#2D3748] flex items-center justify-between bg-[#1A2235]">
       <div class="flex items-center gap-2">
-        <svg class="w-5 h-5 text-neutral-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-        <h3 class="font-heading text-sm font-bold text-neutral-900 uppercase tracking-wider">YOUR SHOPPING BAG</h3>
+        <svg class="w-5 h-5 text-[#C9A96E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        <h3 class="font-heading text-sm font-bold text-[#F1F0ED] uppercase tracking-wider">YOUR SHOPPING BAG</h3>
       </div>
-      <button id="cart-close-btn" class="p-1.5 text-neutral-400 hover:text-neutral-900 rounded-lg hover:bg-neutral-100" aria-label="Close cart">
+      <button id="cart-close-btn" class="p-1.5 text-neutral-400 hover:text-[#C9A96E] rounded-lg hover:bg-[#111827] transition-colors" aria-label="Close cart">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
     </div>
 
     <!-- Free Delivery Notice -->
-    <div class="bg-emerald-50 border-b border-emerald-100 px-4 py-2 text-xs text-emerald-800 font-medium flex items-center gap-1.5">
+    <div class="bg-emerald-950/40 border-b border-emerald-500/20 px-4 py-2 text-xs text-emerald-400 font-medium flex items-center gap-1.5">
       <span>🚚</span>
       <span><strong>Free Pan-India Delivery</strong> unlocked on all Cash on Delivery orders!</span>
     </div>
@@ -495,18 +495,18 @@
 
     <!-- Empty State -->
     <div id="cart-empty-state" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center">
-      <div class="w-14 h-14 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-400 mb-3">
+      <div class="w-14 h-14 rounded-full bg-[#1A2235] border border-[#2D3748] flex items-center justify-center text-[#C9A96E] mb-3">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
       </div>
-      <h4 class="font-heading text-sm font-bold text-neutral-900 mb-1">Your Bag is Empty</h4>
-      <p class="text-xs text-neutral-500 mb-4 max-w-xs">Explore our collection of 1:1 master copy watches and add your favorite piece.</p>
-      <button onclick="closeCartDrawer(); window.location.href='#catalog';" class="btn-primary px-5 py-2 text-xs">
+      <h4 class="font-heading text-sm font-bold text-[#F1F0ED] mb-1">Your Bag is Empty</h4>
+      <p class="text-xs text-[#9CA3AF] mb-4 max-w-xs">Explore our collection of 1:1 master copy watches and add your favorite piece.</p>
+      <button onclick="closeCartDrawer(); window.location.href='/#catalog';" class="btn-primary px-5 py-2 text-xs">
         Explore Watches
       </button>
     </div>
 
     <!-- Drawer Footer -->
-    <div id="cart-drawer-footer" class="p-4 border-t border-[#E8E3D8] bg-[#F7F5EF] space-y-3">
+    <div id="cart-drawer-footer" class="p-4 border-t border-[#2D3748] bg-[#1A2235] space-y-3">
       
       <!-- Coupon Form -->
       <form id="cart-coupon-form" class="flex gap-2">
@@ -514,30 +514,30 @@
           id="coupon-input" 
           type="text" 
           placeholder="Coupon (WELCOME500)" 
-          class="flex-1 bg-white border border-[#E8E3D8] rounded-lg px-3 py-1.5 text-xs text-neutral-900 uppercase focus:border-[#10151C]"
+          class="flex-1 bg-[#111827] border border-[#2D3748] rounded-lg px-3 py-1.5 text-xs text-[#F1F0ED] uppercase focus:border-[#C9A96E] placeholder-[#6B7280]"
         />
-        <button type="submit" class="px-3 py-1.5 bg-neutral-900 hover:bg-black text-white text-xs font-semibold rounded-lg">
+        <button type="submit" class="px-3 py-1.5 bg-gradient-to-r from-[#D4B475] to-[#B8943F] text-[#1A1207] hover:from-[#E2CFA5] hover:to-[#C9A96E] text-xs font-semibold rounded-lg transition-all">
           Apply
         </button>
       </form>
 
       <!-- Totals Breakdown -->
       <div class="space-y-1 text-xs">
-        <div class="flex justify-between text-neutral-500">
+        <div class="flex justify-between text-[#9CA3AF]">
           <span>Total MRP</span>
-          <span id="cart-subtotal-val" class="text-neutral-900 font-semibold">₹0</span>
+          <span id="cart-subtotal-val" class="text-[#F1F0ED] font-semibold">₹0</span>
         </div>
-        <div id="cart-discount-row" class="flex justify-between text-emerald-700 font-semibold hidden">
+        <div id="cart-discount-row" class="flex justify-between text-emerald-400 font-semibold hidden">
           <span>Special Discount</span>
           <span id="cart-discount-val">-₹0</span>
         </div>
-        <div class="flex justify-between text-neutral-500">
+        <div class="flex justify-between text-[#9CA3AF]">
           <span>Pan-India Shipping</span>
-          <span class="text-emerald-700 font-bold">FREE</span>
+          <span class="text-emerald-400 font-bold">FREE</span>
         </div>
-        <div class="flex justify-between text-sm font-extrabold text-neutral-900 pt-2 border-t border-[#E8E3D8]">
+        <div class="flex justify-between text-sm font-extrabold text-[#F1F0ED] pt-2 border-t border-[#2D3748]">
           <span>Total Payable (COD)</span>
-          <span id="cart-total-val" class="text-neutral-900">₹0</span>
+          <span id="cart-total-val" class="text-[#E2CFA5]">₹0</span>
         </div>
       </div>
 
@@ -558,25 +558,25 @@
 
   <!-- ================= CHECKOUT MODAL (COD & WHATSAPP) ================= -->
   <div id="checkout-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 modal-overlay overflow-y-auto">
-    <div class="bg-white border border-[#E8E3D8] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-6 relative">
+    <div class="bg-[#111827] border border-[#C9A96E]/25 rounded-2xl w-full max-w-xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] my-6 relative">
       
       <!-- Modal Header -->
-      <div class="p-4 border-b border-[#E8E3D8] bg-[#F7F5EF] flex items-center justify-between">
+      <div class="p-4 border-b border-[#2D3748] bg-[#1A2235] flex items-center justify-between">
         <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Doorstep Cash on Delivery</span>
-          <h3 class="font-heading text-base font-bold text-neutral-900">Complete Your Order</h3>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Doorstep Cash on Delivery</span>
+          <h3 class="font-heading text-base font-bold text-[#F1F0ED]">Complete Your Order</h3>
         </div>
-        <button id="checkout-modal-close" class="text-neutral-400 hover:text-neutral-900 p-1.5 rounded-lg" aria-label="Close">
+        <button id="checkout-modal-close" class="text-neutral-400 hover:text-[#C9A96E] p-1.5 rounded-lg transition-colors" aria-label="Close">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
       <!-- Mode Tabs -->
-      <div class="grid grid-cols-2 border-b border-[#E8E3D8] text-xs font-semibold">
-        <button id="tab-btn-cod" onclick="switchCheckoutTab('cod')" class="py-2.5 text-center border-b-2 border-[#C6A15B] text-[#10151C] font-bold">
+      <div class="grid grid-cols-2 border-b border-[#2D3748] text-xs font-semibold">
+        <button id="tab-btn-cod" onclick="switchCheckoutTab('cod')" class="py-2.5 text-center border-b-2 border-[#C9A96E] text-[#E2CFA5] font-bold bg-[#111827]">
           Cash on Delivery (COD)
         </button>
-        <button id="tab-btn-wa" onclick="switchCheckoutTab('wa')" class="py-2.5 text-center border-b-2 border-transparent text-neutral-500 hover:text-[#10151C]">
+        <button id="tab-btn-wa" onclick="switchCheckoutTab('wa')" class="py-2.5 text-center border-b-2 border-transparent text-[#9CA3AF] hover:text-[#E2CFA5] bg-[#0F172A]">
           Order via WhatsApp
         </button>
       </div>
@@ -584,51 +584,51 @@
       <div class="p-4 sm:p-6 max-h-[75vh] overflow-y-auto space-y-4">
         
         <!-- Order Summary Pill with Coins & Coupons -->
-        <div class="bg-[#F7F5EF] border border-[#E8E3D8] rounded-xl p-3 space-y-2">
+        <div class="bg-[#1A2235] border border-[#2D3748] rounded-xl p-3 space-y-2">
           <div class="flex items-center justify-between">
-            <p class="text-[11px] font-bold uppercase text-neutral-500">Order Summary</p>
-            <span id="checkout-coins-earned-badge" class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">+0 AM Coins on this order</span>
+            <p class="text-[11px] font-bold uppercase text-[#9CA3AF]">Order Summary</p>
+            <span id="checkout-coins-earned-badge" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full">+0 AM Coins on this order</span>
           </div>
           <div id="checkout-items-summary" class="space-y-1"></div>
 
           <!-- Coupon Code Input -->
-          <div class="pt-2 border-t border-neutral-200">
+          <div class="pt-2 border-t border-[#2D3748]">
             <div class="flex gap-2">
-              <input id="checkout-coupon-input" type="text" placeholder="Promo code (e.g. WELCOME500)" class="flex-1 px-3 py-1.5 text-xs bg-white border border-[#E8E3D8] rounded-lg uppercase font-mono placeholder:normal-case" />
+              <input id="checkout-coupon-input" type="text" placeholder="Promo code (e.g. WELCOME500)" class="flex-1 px-3 py-1.5 text-xs bg-[#111827] border border-[#2D3748] rounded-lg uppercase font-mono text-[#F1F0ED] placeholder:normal-case placeholder-[#6B7280] focus:border-[#C9A96E]" />
               <button type="button" onclick="checkoutManager.applyCouponCode(document.getElementById('checkout-coupon-input').value)" class="px-3 py-1.5 btn-secondary text-xs font-semibold">
                 Apply
               </button>
             </div>
-            <div id="checkout-coupon-discount-row" class="hidden flex justify-between text-xs text-emerald-700 font-semibold pt-1.5">
+            <div id="checkout-coupon-discount-row" class="hidden flex justify-between text-xs text-emerald-400 font-semibold pt-1.5">
               <span>Coupon Discount:</span>
               <span id="checkout-coupon-discount-val">-₹0</span>
             </div>
           </div>
 
           <!-- AM Coins Redemption Checkbox -->
-          <div class="pt-2 border-t border-neutral-200">
-            <div class="p-2.5 rounded-lg bg-amber-50/70 border border-amber-200 flex items-center justify-between">
+          <div class="pt-2 border-t border-[#2D3748]">
+            <div class="p-2.5 rounded-lg bg-amber-950/20 border border-amber-500/20 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="text-base">🪙</span>
                 <div>
-                  <p class="text-xs font-bold text-neutral-900">Redeem AM Coins</p>
-                  <p class="text-[10px] text-neutral-500">Balance: <span id="checkout-coins-balance" class="font-bold text-amber-700 font-mono">0 AM Coins</span> (1 Coin = ₹1 OFF)</p>
+                  <p class="text-xs font-bold text-[#F1F0ED]">Redeem AM Coins</p>
+                  <p class="text-[10px] text-[#9CA3AF]">Balance: <span id="checkout-coins-balance" class="font-bold text-[#E2CFA5] font-mono">0 AM Coins</span> (1 Coin = ₹1 OFF)</p>
                 </div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="checkout-use-coins-toggle" onchange="checkoutManager.toggleUseCoins(this.checked)" class="sr-only peer" />
-                <div class="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                <div class="w-9 h-5 bg-[#2D3748] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#111827] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#E2CFA5] after:border-neutral-700 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
               </label>
             </div>
-            <div id="checkout-coins-discount-row" class="hidden flex justify-between text-xs text-amber-800 font-semibold pt-1.5">
+            <div id="checkout-coins-discount-row" class="hidden flex justify-between text-xs text-amber-300 font-semibold pt-1.5">
               <span>Coins Redeemed:</span>
               <span id="checkout-coins-discount-val">-₹0</span>
             </div>
           </div>
 
-          <div class="flex justify-between text-xs font-bold text-neutral-900 pt-2 border-t border-neutral-200 mt-2">
+          <div class="flex justify-between text-xs font-bold text-[#F1F0ED] pt-2 border-t border-[#2D3748] mt-2">
             <span>Total Payable (COD):</span>
-            <span id="checkout-total-val" class="font-mono text-sm">₹0</span>
+            <span id="checkout-total-val" class="font-mono text-sm text-[#E2CFA5]">₹0</span>
           </div>
         </div>
 
@@ -637,44 +637,44 @@
           <form id="checkout-cod-form" class="space-y-3 text-xs">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-medium text-neutral-700 mb-1">Full Name *</label>
-                <input id="cod-name" type="text" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+                <label class="block font-medium text-[#D1D5DB] mb-1">Full Name *</label>
+                <input id="cod-name" type="text" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
               </div>
               <div>
-                <label class="block font-medium text-neutral-700 mb-1">Mobile Phone (10-digit) *</label>
-                <input id="cod-phone" type="tel" required placeholder="e.g. 9876543210" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+                <label class="block font-medium text-[#D1D5DB] mb-1">Mobile Phone (10-digit) *</label>
+                <input id="cod-phone" type="tel" required placeholder="e.g. 9876543210" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
               </div>
             </div>
 
             <div>
-              <label class="block font-medium text-neutral-700 mb-1">Alternate WhatsApp (Optional)</label>
-              <input id="cod-alt-phone" type="tel" placeholder="For dispatch updates" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+              <label class="block font-medium text-[#D1D5DB] mb-1">Alternate WhatsApp (Optional)</label>
+              <input id="cod-alt-phone" type="tel" placeholder="For dispatch updates" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
             </div>
 
             <div>
-              <label class="block font-medium text-neutral-700 mb-1">House / Flat / Street Address *</label>
-              <input id="cod-address" type="text" required placeholder="House/Flat No., Apartment, Street" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+              <label class="block font-medium text-[#D1D5DB] mb-1">House / Flat / Street Address *</label>
+              <input id="cod-address" type="text" required placeholder="House/Flat No., Apartment, Street" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div>
-                <label class="block font-medium text-neutral-700 mb-1">City *</label>
-                <input id="cod-city" type="text" required placeholder="e.g. Mumbai" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+                <label class="block font-medium text-[#D1D5DB] mb-1">City *</label>
+                <input id="cod-city" type="text" required placeholder="e.g. Mumbai" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
               </div>
               <div>
-                <label class="block font-medium text-neutral-700 mb-1">State *</label>
-                <input id="cod-state" type="text" required placeholder="e.g. Maharashtra" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+                <label class="block font-medium text-[#D1D5DB] mb-1">State *</label>
+                <input id="cod-state" type="text" required placeholder="e.g. Maharashtra" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
               </div>
               <div class="col-span-2 sm:col-span-1">
-                <label class="block font-medium text-neutral-700 mb-1">Pincode (6-digit) *</label>
-                <input id="cod-pincode" type="text" required maxlength="6" placeholder="400001" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+                <label class="block font-medium text-[#D1D5DB] mb-1">Pincode (6-digit) *</label>
+                <input id="cod-pincode" type="text" required maxlength="6" placeholder="400001" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
               </div>
             </div>
 
             <button type="submit" class="w-full py-3 px-4 rounded-lg btn-primary text-xs font-bold uppercase tracking-wider mt-3">
               Confirm Cash on Delivery Order
             </button>
-            <p class="text-[10px] text-neutral-500 text-center">
+            <p class="text-[10px] text-[#9CA3AF] text-center">
               🔒 No online payment needed now. Pay in cash to courier agent upon delivery.
             </p>
           </form>
@@ -683,17 +683,17 @@
         <!-- WhatsApp Checkout Form -->
         <div id="tab-content-wa" class="hidden">
           <form id="checkout-wa-form" class="space-y-3 text-xs">
-            <p class="text-neutral-600 text-xs">
+            <p class="text-[#9CA3AF] text-xs">
               Prefer speaking directly with our executive on WhatsApp? Enter your basic info and we will connect you directly.
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-medium text-neutral-700 mb-1">Your Name</label>
-                <input id="wa-name" type="text" placeholder="Name" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+                <label class="block font-medium text-[#D1D5DB] mb-1">Your Name</label>
+                <input id="wa-name" type="text" placeholder="Name" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
               </div>
               <div>
-                <label class="block font-medium text-neutral-700 mb-1">Phone Number</label>
-                <input id="wa-phone" type="tel" placeholder="10-digit number" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+                <label class="block font-medium text-[#D1D5DB] mb-1">Phone Number</label>
+                <input id="wa-phone" type="tel" placeholder="10-digit number" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
               </div>
             </div>
             <button type="submit" class="w-full py-3 px-4 rounded-lg btn-whatsapp text-xs font-bold uppercase tracking-wider mt-2">
@@ -709,16 +709,16 @@
 
   <!-- ================= QUICK VIEW / DETAIL MODAL ================= -->
   <div id="quick-view-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 modal-overlay overflow-y-auto">
-    <div class="bg-white border border-[#E8E3D8] rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl my-6 relative max-h-[90vh] flex flex-col">
+    <div class="bg-[#111827] border border-[#C9A96E]/25 rounded-2xl w-full max-w-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] my-6 relative max-h-[90vh] flex flex-col">
       
       <!-- Modal Header -->
-      <div class="p-4 border-b border-[#E8E3D8] bg-[#F7F5EF] flex items-center justify-between">
+      <div class="p-4 border-b border-[#2D3748] bg-[#1A2235] flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <span id="qv-brand" class="text-xs font-bold uppercase tracking-wider text-neutral-500">ROLEX</span>
-          <span class="text-neutral-300">•</span>
-          <span id="qv-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">1:1 MASTER CLONE</span>
+          <span id="qv-brand" class="text-xs font-bold uppercase tracking-wider text-[#C9A96E]">ROLEX</span>
+          <span class="text-neutral-600">•</span>
+          <span id="qv-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r from-[#D4B475] to-[#B8943F] text-[#1A1207]">1:1 MASTER CLONE</span>
         </div>
-        <button id="quick-view-close-btn" class="text-neutral-400 hover:text-neutral-900 p-1.5 rounded-lg" aria-label="Close">
+        <button id="quick-view-close-btn" class="text-neutral-400 hover:text-[#C9A96E] p-1.5 rounded-lg transition-colors" aria-label="Close">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -728,56 +728,56 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           
           <!-- Image Showcase -->
-          <div class="bg-neutral-50 rounded-xl border border-[#E8E3D8] p-4 flex items-center justify-center aspect-square">
+          <div class="bg-[#0F172A] rounded-xl border border-[#2D3748] p-4 flex items-center justify-center aspect-square">
             <img id="qv-image" src="" alt="Watch Preview" class="w-full h-full object-contain" />
           </div>
 
           <!-- Watch Specs & Details -->
           <div class="space-y-3">
-            <h3 id="qv-model" class="font-heading text-lg sm:text-xl font-bold text-neutral-900 leading-snug">Watch Model</h3>
-            <p id="qv-tagline" class="text-xs text-neutral-500">Master Edition Clone</p>
+            <h3 id="qv-model" class="font-heading text-lg sm:text-xl font-bold text-[#F1F0ED] leading-snug">Watch Model</h3>
+            <p id="qv-tagline" class="text-xs text-[#9CA3AF]">Master Edition Clone</p>
 
             <!-- Price Row -->
             <div class="flex items-baseline gap-2 pt-1">
-              <span id="qv-price" class="text-xl sm:text-2xl font-black text-neutral-900">₹0</span>
-              <span id="qv-original-price" class="text-xs sm:text-sm text-neutral-400 line-through">₹0</span>
-              <span id="qv-savings-badge" class="text-xs font-bold text-[#16794C]">Save 99%</span>
+              <span id="qv-price" class="text-xl sm:text-2xl font-black text-[#E2CFA5]">₹0</span>
+              <span id="qv-original-price" class="text-xs sm:text-sm text-neutral-500 line-through">₹0</span>
+              <span id="qv-savings-badge" class="text-xs font-bold text-emerald-400">Save 99%</span>
             </div>
-            <div class="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+            <div class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
               <span>✔ In Stock • Free Pan-India Cash on Delivery</span>
             </div>
 
-            <p id="qv-description" class="text-xs text-neutral-600 leading-relaxed pt-1">
+            <p id="qv-description" class="text-xs text-[#D1D5DB] leading-relaxed pt-1">
               Watch description
             </p>
 
             <!-- Specs Grid -->
-            <div class="border-t border-[#E8E3D8] pt-3">
-              <p class="text-[11px] font-bold text-neutral-900 uppercase mb-2">Technical Specifications</p>
+            <div class="border-t border-[#2D3748] pt-3">
+              <p class="text-[11px] font-bold text-[#C9A96E] uppercase mb-2">Technical Specifications</p>
               <div class="grid grid-cols-2 gap-2 text-[11px]">
-                <div class="p-2 rounded bg-neutral-50 border border-neutral-100">
-                  <span class="text-neutral-500 block">Movement:</span>
-                  <span id="qv-spec-movement" class="font-semibold text-neutral-800">Japanese Automatic</span>
+                <div class="p-2 rounded bg-[#1A2235] border border-[#2D3748]">
+                  <span class="text-[#9CA3AF] block">Movement:</span>
+                  <span id="qv-spec-movement" class="font-semibold text-[#F1F0ED]">Japanese Automatic</span>
                 </div>
-                <div class="p-2 rounded bg-neutral-50 border border-neutral-100">
-                  <span class="text-neutral-500 block">Glass:</span>
-                  <span id="qv-spec-glass" class="font-semibold text-neutral-800">Sapphire Crystal</span>
+                <div class="p-2 rounded bg-[#1A2235] border border-[#2D3748]">
+                  <span class="text-[#9CA3AF] block">Glass:</span>
+                  <span id="qv-spec-glass" class="font-semibold text-[#F1F0ED]">Sapphire Crystal</span>
                 </div>
-                <div class="p-2 rounded bg-neutral-50 border border-neutral-100">
-                  <span class="text-neutral-500 block">Case Diameter:</span>
-                  <span id="qv-spec-dial" class="font-semibold text-neutral-800">41 mm</span>
+                <div class="p-2 rounded bg-[#1A2235] border border-[#2D3748]">
+                  <span class="text-[#9CA3AF] block">Case Diameter:</span>
+                  <span id="qv-spec-dial" class="font-semibold text-[#F1F0ED]">41 mm</span>
                 </div>
-                <div class="p-2 rounded bg-neutral-50 border border-neutral-100">
-                  <span class="text-neutral-500 block">Strap Material:</span>
-                  <span id="qv-spec-strap" class="font-semibold text-neutral-800">Solid 904L Steel</span>
+                <div class="p-2 rounded bg-[#1A2235] border border-[#2D3748]">
+                  <span class="text-[#9CA3AF] block">Strap Material:</span>
+                  <span id="qv-spec-strap" class="font-semibold text-[#F1F0ED]">Solid 904L Steel</span>
                 </div>
               </div>
             </div>
 
             <!-- Features Checklist -->
             <div class="pt-2">
-              <p class="text-[11px] font-bold text-neutral-900 uppercase mb-1.5">Master Features</p>
-              <ul id="qv-features-list" class="space-y-1"></ul>
+              <p class="text-[11px] font-bold text-[#C9A96E] uppercase mb-1.5">Master Features</p>
+              <ul id="qv-features-list" class="space-y-1 text-xs text-[#D1D5DB]"></ul>
             </div>
 
           </div>
@@ -785,9 +785,9 @@
         </div>
 
         <!-- Video Section (if applicable) -->
-        <div id="qv-video-section" class="hidden border-t border-[#E8E3D8] pt-4">
-          <p class="text-xs font-bold text-neutral-900 uppercase mb-2">Live Watch Video Inspection</p>
-          <div class="aspect-video w-full rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200">
+        <div id="qv-video-section" class="hidden border-t border-[#2D3748] pt-4">
+          <p class="text-xs font-bold text-[#C9A96E] uppercase mb-2">Live Watch Video Inspection</p>
+          <div class="aspect-video w-full rounded-xl overflow-hidden bg-[#0F172A] border border-[#2D3748]">
             <video id="qv-video-player" controls class="w-full h-full hidden"></video>
             <iframe id="qv-video-iframe" class="w-full h-full hidden" frameborder="0" allowfullscreen></iframe>
           </div>
@@ -796,7 +796,7 @@
       </div>
 
       <!-- Action Buttons Footer -->
-      <div class="p-4 border-t border-[#E8E3D8] bg-[#F7F5EF] flex flex-wrap items-center gap-2.5">
+      <div class="p-4 border-t border-[#2D3748] bg-[#1A2235] flex flex-wrap items-center gap-2.5">
         <button id="qv-buy-now-btn" class="flex-1 py-2.5 px-4 rounded-lg btn-primary text-xs font-bold uppercase tracking-wider">
           Buy Now (COD)
         </button>
@@ -813,25 +813,25 @@
 
   <!-- ================= CUSTOMER AUTH MODAL (SIGN IN / REGISTER) ================= -->
   <div id="customer-auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 modal-overlay overflow-y-auto">
-    <div class="bg-white border border-[#E8E3D8] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl my-6 relative">
+    <div class="bg-[#111827] border border-[#C9A96E]/25 rounded-2xl w-full max-w-md overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] my-6 relative">
       
       <!-- Modal Header -->
-      <div class="p-4 border-b border-[#E8E3D8] bg-[#F7F5EF] flex items-center justify-between">
+      <div class="p-4 border-b border-[#2D3748] bg-[#1A2235] flex items-center justify-between">
         <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Privilege Access</span>
-          <h3 class="font-heading text-base font-bold text-neutral-900">AM COLLECTION Account</h3>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-[#C9A96E]">Privilege Access</span>
+          <h3 class="font-heading text-base font-bold text-[#F1F0ED]">AM COLLECTION Account</h3>
         </div>
-        <button onclick="closeAuthModal()" class="text-neutral-400 hover:text-neutral-900 p-1.5 rounded-lg" aria-label="Close">
+        <button onclick="closeAuthModal()" class="text-neutral-400 hover:text-[#C9A96E] p-1.5 rounded-lg transition-colors" aria-label="Close">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
       <!-- Tab Switcher -->
-      <div class="grid grid-cols-2 p-2 gap-1 bg-neutral-100 m-4 rounded-lg text-xs font-semibold text-center">
-        <button id="tab-btn-signin" onclick="switchAuthTab('signin')" class="py-2 rounded-lg bg-neutral-900 text-white font-semibold text-xs transition-all">
+      <div class="grid grid-cols-2 p-2 gap-1 bg-[#0F172A] m-4 rounded-xl text-xs font-semibold text-center border border-[#2D3748]">
+        <button id="tab-btn-signin" onclick="switchAuthTab('signin')" class="py-2 rounded-lg bg-gradient-to-r from-[#D4B475] to-[#B8943F] text-[#1A1207] font-bold text-xs transition-all">
           Sign In
         </button>
-        <button id="tab-btn-register" onclick="switchAuthTab('register')" class="py-2 rounded-lg text-neutral-500 hover:text-neutral-900 font-medium text-xs transition-all">
+        <button id="tab-btn-register" onclick="switchAuthTab('register')" class="py-2 rounded-lg text-[#9CA3AF] hover:text-[#F1F0ED] font-medium text-xs transition-all">
           Create Account
         </button>
       </div>
@@ -841,12 +841,12 @@
         <!-- Sign In Form -->
         <form id="customer-signin-form" class="space-y-3 text-xs">
           <div>
-            <label class="block font-medium text-neutral-700 mb-1">Email Address</label>
-            <input id="signin-email" type="email" required placeholder="you@example.com" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+            <label class="block font-medium text-[#D1D5DB] mb-1">Email Address</label>
+            <input id="signin-email" type="email" required placeholder="you@example.com" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
           </div>
           <div>
-            <label class="block font-medium text-neutral-700 mb-1">Password</label>
-            <input id="signin-password" type="password" required placeholder="••••••••" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+            <label class="block font-medium text-[#D1D5DB] mb-1">Password</label>
+            <input id="signin-password" type="password" required placeholder="••••••••" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
           </div>
           <button type="submit" class="w-full py-2.5 px-4 rounded-lg btn-primary text-xs font-bold uppercase tracking-wider mt-2">
             Sign In &amp; Continue
@@ -856,20 +856,20 @@
         <!-- Register Form (No OTP) -->
         <form id="customer-register-form" class="space-y-3 text-xs hidden">
           <div>
-            <label class="block font-medium text-neutral-700 mb-1">Full Name</label>
-            <input id="reg-name" type="text" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+            <label class="block font-medium text-[#D1D5DB] mb-1">Full Name</label>
+            <input id="reg-name" type="text" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
           </div>
           <div>
-            <label class="block font-medium text-neutral-700 mb-1">Email Address</label>
-            <input id="reg-email" type="email" required placeholder="you@example.com" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+            <label class="block font-medium text-[#D1D5DB] mb-1">Email Address</label>
+            <input id="reg-email" type="email" required placeholder="you@example.com" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
           </div>
           <div>
-            <label class="block font-medium text-neutral-700 mb-1">Phone Number (Optional)</label>
-            <input id="reg-phone" type="tel" placeholder="10-digit mobile" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+            <label class="block font-medium text-[#D1D5DB] mb-1">Phone Number (Optional)</label>
+            <input id="reg-phone" type="tel" placeholder="10-digit mobile" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
           </div>
           <div>
-            <label class="block font-medium text-neutral-700 mb-1">Set Password</label>
-            <input id="reg-password" type="password" required placeholder="Min 6 characters" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+            <label class="block font-medium text-[#D1D5DB] mb-1">Set Password</label>
+            <input id="reg-password" type="password" required placeholder="Min 6 characters" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
           </div>
           <button type="submit" class="w-full py-2.5 px-4 rounded-lg btn-primary text-xs font-bold uppercase tracking-wider mt-2">
             Create Account &amp; Continue
@@ -883,64 +883,64 @@
 
   <!-- ================= CUSTOMER PROFILE MODAL ================= -->
   <div id="customer-profile-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 modal-overlay overflow-y-auto">
-    <div class="bg-white border border-[#E8E3D8] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl my-6 relative">
-      <div class="p-4 border-b border-[#E8E3D8] bg-[#F7F5EF] flex items-center justify-between">
+    <div class="bg-[#111827] border border-[#C9A96E]/25 rounded-2xl w-full max-w-md overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] my-6 relative">
+      <div class="p-4 border-b border-[#2D3748] bg-[#1A2235] flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <div id="profile-avatar-badge" class="w-7 h-7 rounded-full bg-neutral-900 text-white font-bold flex items-center justify-center text-xs">U</div>
-          <h3 id="profile-heading-name" class="font-heading text-sm font-bold text-neutral-900">My Profile</h3>
+          <div id="profile-avatar-badge" class="w-7 h-7 rounded-full bg-gradient-to-r from-[#D4B475] to-[#B8943F] text-[#1A1207] font-bold flex items-center justify-center text-xs">U</div>
+          <h3 id="profile-heading-name" class="font-heading text-sm font-bold text-[#F1F0ED]">My Profile</h3>
         </div>
-        <button onclick="closeProfileModal()" class="text-neutral-400 hover:text-neutral-900 p-1.5 rounded-lg" aria-label="Close">
+        <button onclick="closeProfileModal()" class="text-neutral-400 hover:text-[#C9A96E] p-1.5 rounded-lg transition-colors" aria-label="Close">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
       <div class="p-5">
         
         <!-- AM Privilege Wallet Card -->
-        <div class="grid grid-cols-3 gap-2 p-3 bg-neutral-50 rounded-xl border border-neutral-200 text-center mb-3">
+        <div class="grid grid-cols-3 gap-2 p-3 bg-[#1A2235] rounded-xl border border-[#2D3748] text-center mb-3">
           <div>
-            <span class="text-[10px] text-neutral-500 block uppercase font-semibold">AM Coins</span>
-            <span id="profile-coins-balance" class="text-base font-black text-amber-600 font-mono">50</span>
+            <span class="text-[10px] text-[#9CA3AF] block uppercase font-semibold">AM Coins</span>
+            <span id="profile-coins-balance" class="text-base font-black text-amber-400 font-mono">50</span>
           </div>
           <div>
-            <span class="text-[10px] text-neutral-500 block uppercase font-semibold">Total Spent</span>
-            <span id="profile-total-spent" class="text-base font-black text-neutral-900 font-mono">₹0</span>
+            <span class="text-[10px] text-[#9CA3AF] block uppercase font-semibold">Total Spent</span>
+            <span id="profile-total-spent" class="text-base font-black text-[#E2CFA5] font-mono">₹0</span>
           </div>
           <div>
-            <span class="text-[10px] text-neutral-500 block uppercase font-semibold">Orders</span>
-            <span id="profile-total-orders" class="text-base font-black text-neutral-900 font-mono">0</span>
+            <span class="text-[10px] text-[#9CA3AF] block uppercase font-semibold">Orders</span>
+            <span id="profile-total-orders" class="text-base font-black text-[#F1F0ED] font-mono">0</span>
           </div>
         </div>
         <form id="customer-profile-form" class="space-y-3 text-xs">
           <div>
-            <label class="block font-medium text-neutral-700 mb-1">Full Name</label>
-            <input id="prof-name" type="text" required class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+            <label class="block font-medium text-[#D1D5DB] mb-1">Full Name</label>
+            <input id="prof-name" type="text" required class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-medium text-neutral-700 mb-1">Phone</label>
-              <input id="prof-phone" type="tel" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+              <label class="block font-medium text-[#D1D5DB] mb-1">Phone</label>
+              <input id="prof-phone" type="tel" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
             </div>
             <div>
-              <label class="block font-medium text-neutral-700 mb-1">Email (Read Only)</label>
-              <input id="prof-email" type="email" readonly class="w-full px-3 py-2 bg-neutral-100 border border-[#E8E3D8] rounded-lg text-neutral-500 cursor-not-allowed" />
+              <label class="block font-medium text-[#D1D5DB] mb-1">Email (Read Only)</label>
+              <input id="prof-email" type="email" readonly class="w-full px-3 py-2 bg-[#0F172A] border border-[#2D3748] rounded-lg text-[#6B7280] cursor-not-allowed" />
             </div>
           </div>
           <div>
-            <label class="block font-medium text-neutral-700 mb-1">Saved Address</label>
-            <input id="prof-address" type="text" placeholder="Address for delivery" class="w-full px-3 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+            <label class="block font-medium text-[#D1D5DB] mb-1">Saved Address</label>
+            <input id="prof-address" type="text" placeholder="Address for delivery" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
           </div>
           <div class="grid grid-cols-3 gap-2">
             <div>
-              <label class="block font-medium text-neutral-700 mb-1">City</label>
-              <input id="prof-city" type="text" class="w-full px-2 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+              <label class="block font-medium text-[#D1D5DB] mb-1">City</label>
+              <input id="prof-city" type="text" class="w-full px-2 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
             </div>
             <div>
-              <label class="block font-medium text-neutral-700 mb-1">State</label>
-              <input id="prof-state" type="text" class="w-full px-2 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+              <label class="block font-medium text-[#D1D5DB] mb-1">State</label>
+              <input id="prof-state" type="text" class="w-full px-2 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
             </div>
             <div>
-              <label class="block font-medium text-neutral-700 mb-1">Pincode</label>
-              <input id="prof-pincode" type="text" maxlength="6" class="w-full px-2 py-2 bg-white border border-[#E8E3D8] rounded-lg text-neutral-900" />
+              <label class="block font-medium text-[#D1D5DB] mb-1">Pincode</label>
+              <input id="prof-pincode" type="text" maxlength="6" class="w-full px-2 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
             </div>
           </div>
           <button type="submit" class="w-full py-2.5 px-4 rounded-lg btn-primary text-xs font-bold uppercase tracking-wider mt-2">
@@ -953,13 +953,13 @@
 
   <!-- ================= WISHLIST MODAL ================= -->
   <div id="wishlist-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 modal-overlay overflow-y-auto">
-    <div class="bg-white border border-[#E8E3D8] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-6 relative max-h-[85vh] flex flex-col">
-      <div class="p-4 border-b border-[#E8E3D8] bg-[#F7F5EF] flex items-center justify-between">
+    <div class="bg-[#111827] border border-[#C9A96E]/25 rounded-2xl w-full max-w-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] my-6 relative max-h-[85vh] flex flex-col">
+      <div class="p-4 border-b border-[#2D3748] bg-[#1A2235] flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="text-red-500">❤️</span>
-          <h3 class="font-heading text-sm font-bold text-neutral-900">Saved Timepieces</h3>
+          <h3 class="font-heading text-sm font-bold text-[#F1F0ED]">Saved Timepieces</h3>
         </div>
-        <button onclick="closeWishlistModal()" class="text-neutral-400 hover:text-neutral-900 p-1.5 rounded-lg" aria-label="Close">
+        <button onclick="closeWishlistModal()" class="text-neutral-400 hover:text-[#C9A96E] p-1.5 rounded-lg transition-colors" aria-label="Close">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -971,10 +971,10 @@
 
   <!-- ================= CUSTOMER ORDERS MODAL ================= -->
   <div id="customer-orders-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 modal-overlay overflow-y-auto">
-    <div class="bg-white border border-[#E8E3D8] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-6 relative max-h-[85vh] flex flex-col">
-      <div class="p-4 border-b border-[#E8E3D8] bg-[#F7F5EF] flex items-center justify-between">
-        <h3 class="font-heading text-sm font-bold text-neutral-900">My Orders &amp; Tracking</h3>
-        <button onclick="closeMyOrdersModal()" class="text-neutral-400 hover:text-neutral-900 p-1.5 rounded-lg" aria-label="Close">
+    <div class="bg-[#111827] border border-[#C9A96E]/25 rounded-2xl w-full max-w-lg overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] my-6 relative max-h-[85vh] flex flex-col">
+      <div class="p-4 border-b border-[#2D3748] bg-[#1A2235] flex items-center justify-between">
+        <h3 class="font-heading text-sm font-bold text-[#F1F0ED]">My Orders &amp; Tracking</h3>
+        <button onclick="closeMyOrdersModal()" class="text-neutral-400 hover:text-[#C9A96E] p-1.5 rounded-lg transition-colors" aria-label="Close">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -1002,76 +1002,76 @@
   <div id="order-success-screen" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
     <canvas id="order-confetti-canvas" class="fixed inset-0 pointer-events-none z-10 w-full h-full"></canvas>
 
-    <div class="bg-white border border-[#E8E3D8] rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl my-6 relative z-20 text-center animate-in fade-in zoom-in-95 duration-300">
+    <div class="bg-[#111827] border border-[#C9A96E]/30 rounded-3xl w-full max-w-lg overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.9)] my-6 relative z-20 text-center animate-in fade-in zoom-in-95 duration-300">
       
       <!-- Top Celebration Header -->
-      <div class="p-6 bg-gradient-to-b from-emerald-50 to-white border-b border-neutral-100 space-y-4">
+      <div class="p-6 bg-gradient-to-b from-[#1A2235] to-[#111827] border-b border-[#2D3748] space-y-4">
         <!-- Animated Green Check Circle -->
-        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto text-emerald-600 success-check-circle shadow-lg shadow-emerald-500/20">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-950/70 border border-emerald-500/40 flex items-center justify-center mx-auto text-emerald-400 success-check-circle shadow-lg shadow-emerald-500/20">
           <svg class="w-10 h-10 sm:w-12 sm:h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12" class="success-check-path"></polyline>
           </svg>
         </div>
 
         <div>
-          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider mb-1">
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-950/80 border border-emerald-500/30 text-emerald-400 uppercase tracking-wider mb-1">
             <span>✔</span>
             <span>Cash on Delivery Confirmed</span>
           </span>
-          <h2 class="font-heading text-xl sm:text-2xl font-black text-neutral-900 mt-1">Order Placed Successfully! 🎉</h2>
-          <p class="text-xs text-neutral-500 mt-1">Thank you for choosing AM COLLECTION. Your luxury timepiece is being prepped for dispatch.</p>
+          <h2 class="font-heading text-xl sm:text-2xl font-black text-[#F1F0ED] mt-1">Order Placed Successfully! 🎉</h2>
+          <p class="text-xs text-[#9CA3AF] mt-1">Thank you for choosing AM COLLECTION. Your luxury timepiece is being prepped for dispatch.</p>
         </div>
       </div>
 
       <div class="p-5 sm:p-6 space-y-4 text-left">
         
         <!-- Order Meta Info Pill -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-3 rounded-2xl bg-neutral-50 border border-neutral-200/80 text-xs">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-3 rounded-2xl bg-[#1A2235] border border-[#2D3748] text-xs">
           <div>
-            <span class="text-[10px] text-neutral-500 uppercase font-semibold block">Order ID</span>
-            <span id="success-screen-order-id" class="font-mono font-bold text-neutral-900">#AMC-00000</span>
+            <span class="text-[10px] text-[#9CA3AF] uppercase font-semibold block">Order ID</span>
+            <span id="success-screen-order-id" class="font-mono font-bold text-[#E2CFA5]">#AMC-00000</span>
           </div>
           <div>
-            <span class="text-[10px] text-neutral-500 uppercase font-semibold block">Est. Delivery</span>
-            <span id="success-screen-delivery-date" class="font-bold text-emerald-700">4-5 Days</span>
+            <span class="text-[10px] text-[#9CA3AF] uppercase font-semibold block">Est. Delivery</span>
+            <span id="success-screen-delivery-date" class="font-bold text-emerald-400">4-5 Days</span>
           </div>
           <div class="col-span-2 sm:col-span-1">
-            <span class="text-[10px] text-neutral-500 uppercase font-semibold block">Payment Mode</span>
-            <span class="font-semibold text-neutral-800">Cash on Delivery</span>
+            <span class="text-[10px] text-[#9CA3AF] uppercase font-semibold block">Payment Mode</span>
+            <span class="font-semibold text-[#F1F0ED]">Cash on Delivery</span>
           </div>
         </div>
 
         <!-- AM Coins Reward Celebration Banner -->
-        <div id="success-screen-coins-badge" class="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between">
+        <div id="success-screen-coins-badge" class="p-3.5 bg-amber-950/30 border border-amber-500/30 rounded-2xl flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <span class="text-2xl coin-anim">🪙</span>
             <div>
-              <p class="font-bold text-amber-900 text-xs sm:text-sm" id="success-screen-coins-val">+50 AM Coins Earned!</p>
-              <p class="text-[10px] text-amber-700">Credited to your AM Privilege Wallet. Redeem on future orders!</p>
+              <p class="font-bold text-amber-300 text-xs sm:text-sm" id="success-screen-coins-val">+50 AM Coins Earned!</p>
+              <p class="text-[10px] text-amber-400/80">Credited to your AM Privilege Wallet. Redeem on future orders!</p>
             </div>
           </div>
-          <span class="text-[11px] font-bold text-amber-800 bg-amber-200/80 px-2.5 py-1 rounded-full whitespace-nowrap">Reward</span>
+          <span class="text-[11px] font-bold text-amber-300 bg-amber-900/50 border border-amber-500/30 px-2.5 py-1 rounded-full whitespace-nowrap">Reward</span>
         </div>
 
         <!-- Delivery Address Box -->
-        <div class="p-3 rounded-2xl bg-white border border-neutral-200 text-xs space-y-1">
-          <div class="flex items-center justify-between text-neutral-500 text-[10px] font-bold uppercase">
+        <div class="p-3 rounded-2xl bg-[#1A2235] border border-[#2D3748] text-xs space-y-1">
+          <div class="flex items-center justify-between text-[#9CA3AF] text-[10px] font-bold uppercase">
             <span>Delivery Destination</span>
-            <span>Pan-India Free Express</span>
+            <span class="text-emerald-400">Pan-India Free Express</span>
           </div>
-          <p id="success-screen-name" class="font-bold text-neutral-900">Customer Name</p>
-          <p id="success-screen-address" class="text-neutral-600 leading-relaxed text-[11px]">Address</p>
+          <p id="success-screen-name" class="font-bold text-[#F1F0ED]">Customer Name</p>
+          <p id="success-screen-address" class="text-[#D1D5DB] leading-relaxed text-[11px]">Address</p>
         </div>
 
         <!-- Items Summary List -->
         <div>
-          <p class="text-[11px] font-bold uppercase text-neutral-500 mb-1">Timepieces in this order</p>
-          <div id="success-screen-items-list" class="max-h-36 overflow-y-auto divide-y divide-neutral-100">
+          <p class="text-[11px] font-bold uppercase text-[#C9A96E] mb-1">Timepieces in this order</p>
+          <div id="success-screen-items-list" class="max-h-36 overflow-y-auto divide-y divide-[#2D3748]">
             <!-- Dynamically populated items -->
           </div>
-          <div class="flex justify-between items-center text-xs font-bold text-neutral-900 pt-2 border-t border-neutral-200 mt-2">
+          <div class="flex justify-between items-center text-xs font-bold text-[#F1F0ED] pt-2 border-t border-[#2D3748] mt-2">
             <span>Total Payable Amount (COD):</span>
-            <span id="success-screen-total" class="font-mono text-sm text-neutral-900">₹0</span>
+            <span id="success-screen-total" class="font-mono text-sm text-[#E2CFA5]">₹0</span>
           </div>
         </div>
 
@@ -1085,7 +1085,7 @@
               View My Orders
             </button>
           </div>
-          <button onclick="checkoutManager.closeOrderSuccessScreen(); window.location.href='#catalog';" class="w-full py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-semibold transition-colors">
+          <button onclick="checkoutManager.closeOrderSuccessScreen(); window.location.href='#catalog';" class="w-full py-2.5 rounded-xl bg-[#1A2235] hover:bg-[#253248] border border-[#2D3748] text-[#F1F0ED] text-xs font-semibold transition-colors">
             Continue Shopping
           </button>
         </div>
