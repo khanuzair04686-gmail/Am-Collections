@@ -609,7 +609,9 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Admin Passkey Helper
+// ENV VAR always takes priority as master override (Vercel production safety)
 async function getAdminPasskey() {
+  if (process.env.ADMIN_PASSKEY) return process.env.ADMIN_PASSKEY;
   const b = await DB.getBranding();
   return (b && b.adminPasskey) ? b.adminPasskey : ADMIN_PASSKEY;
 }
@@ -635,8 +637,12 @@ async function adminAuth(req, res, next) {
 app.post('/api/auth/verify', async (req, res) => {
   try {
     const { passkey } = req.body;
+    // Always allow ENV VAR passkey as master override
+    if (passkey && process.env.ADMIN_PASSKEY && passkey === process.env.ADMIN_PASSKEY) {
+      return res.json({ success: true });
+    }
     const currentKey = await getAdminPasskey();
-    if (passkey === currentKey || passkey === ADMIN_PASSKEY) {
+    if (passkey === currentKey) {
       res.json({ success: true });
     } else {
       res.status(401).json({ success: false, error: 'Invalid admin passkey' });
