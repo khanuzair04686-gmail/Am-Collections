@@ -7,6 +7,10 @@ let currentSort = 'featured';
 let activeQuickViewProduct = null;
 window.pendingCheckoutAction = null;
 
+// Neutral "image unavailable" tile. Deliberately NOT a watch photo: a missing
+// image must never masquerade as another product's picture.
+const AMC_IMAGE_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Crect width='240' height='240' fill='%230F172A'/%3E%3Ccircle cx='120' cy='126' r='52' fill='none' stroke='%23C9A96E' stroke-width='5'/%3E%3Cpath d='M120 96v32l20 12' fill='none' stroke='%23C9A96E' stroke-width='5' stroke-linecap='round'/%3E%3Ctext x='120' y='206' fill='%236B7280' font-family='sans-serif' font-size='13' text-anchor='middle'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+
 // Customer Privilege Authentication State
 let currentCustomer = null;
 try {
@@ -138,6 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Setup Mobile Nav
   setupMobileMenu();
 
+  // Real-time sync with Admin Panel changes (no page refresh needed)
+  setupRealtimeSync();
+
   // Fetch watches immediately from MongoDB Atlas
   syncWithBackend();
 });
@@ -243,6 +250,47 @@ async function fetchSettings() {
 function syncWithBackend() {
   fetchProducts();
   fetchSettings();
+}
+
+// ─── REAL-TIME STOREFRONT SYNC ─────────────────────────────
+// The Admin Panel broadcasts a change signal only; this page always re-reads
+// the authoritative documents from the MongoDB-backed API. No product data is
+// ever taken from localStorage, and nothing is polled on a timer.
+let storefrontSyncChannel = null;
+const lastRefreshAt = { catalog: 0, settings: 0 };
+
+function refreshFromBackend(scope = 'catalog') {
+  const now = Date.now();
+  if (now - lastRefreshAt[scope] < 500) return;
+  lastRefreshAt[scope] = now;
+  if (scope === 'settings') fetchSettings();
+  else syncWithBackend();
+}
+
+function setupRealtimeSync() {
+  if (typeof BroadcastChannel !== 'undefined') {
+    try {
+      storefrontSyncChannel = new BroadcastChannel('amc-store-sync');
+      storefrontSyncChannel.onmessage = (e) => {
+        const type = e && e.data && e.data.type;
+        refreshFromBackend(type === 'settings-changed' ? 'settings' : 'catalog');
+      };
+    } catch (err) {
+      storefrontSyncChannel = null;
+    }
+  }
+
+  // Cross-tab fallback signal (the timestamp is a signal, never product data)
+  window.addEventListener('storage', (e) => {
+    if (!e.newValue) return;
+    if (e.key === 'amc_settings_sync') refreshFromBackend('settings');
+    else if (e.key === 'amc_catalog_sync') refreshFromBackend('catalog');
+  });
+
+  // Recovers a tab that was hidden while edits were made
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshFromBackend('catalog');
+  });
 }
 
 function applyBrandingSettings(settings) {
@@ -510,7 +558,7 @@ function renderProducts() {
             alt="${product.brand} ${product.model}" 
             loading="lazy" 
             class="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-            onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'"
+            onerror="this.onerror=null;this.src=AMC_IMAGE_PLACEHOLDER"
           />
           
           <!-- Top Left Badge -->
@@ -620,7 +668,7 @@ function renderTrendingRail() {
         <div class="trending-img-wrap" onclick="openQuickView('${p.id}')">
           <span class="trending-badge">${p.badge || '1:1 CLONE'}</span>
           <span class="trending-stock ${stockCls}">${stockTxt}</span>
-          <img src="${p.image}" alt="${p.brand} ${p.model}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'" />
+          <img src="${p.image}" alt="${p.brand} ${p.model}" loading="lazy" onerror="this.onerror=null;this.src=AMC_IMAGE_PLACEHOLDER" />
         </div>
         <div class="trending-info">
           <span class="trending-brand">${p.brand}</span>

@@ -75,6 +75,22 @@ function adminHeaders(json = true) {
   return h;
 }
 
+// ─── REAL-TIME STOREFRONT SYNC ─────────────────────────────
+// Signal only — MongoDB stays the single source of truth. The storefront
+// reacts by re-fetching /api/products, it never reads data from here.
+let adminSyncChannel = null;
+try {
+  if (typeof BroadcastChannel !== 'undefined') adminSyncChannel = new BroadcastChannel('amc-store-sync');
+} catch (e) { adminSyncChannel = null; }
+
+function broadcastStoreChange(scope = 'catalog') {
+  const type = scope === 'settings' ? 'settings-changed' : 'catalog-changed';
+  if (adminSyncChannel) {
+    try { adminSyncChannel.postMessage({ type, at: Date.now() }); } catch (e) {}
+  }
+  try { localStorage.setItem(scope === 'settings' ? 'amc_settings_sync' : 'amc_catalog_sync', String(Date.now())); } catch (e) {}
+}
+
 // Setup Event Listeners
 function setupAdminListeners() {
   const authForm = document.getElementById('auth-form');
@@ -211,6 +227,7 @@ async function handleSettingsSubmit(e) {
 
     if (res.ok) {
       showToast('Store settings saved successfully! 💎', 'success');
+      broadcastStoreChange('settings');
     } else {
       showToast('Failed to update settings', 'error');
     }
@@ -247,6 +264,7 @@ async function handleLogoUpload(e) {
       placeholder.classList.add('hidden');
       fileInput.value = '';
       showToast('Logo updated successfully! ✨', 'success');
+      broadcastStoreChange('settings');
     } else {
       showToast('Failed to upload logo image', 'error');
     }
@@ -266,6 +284,7 @@ async function handleRemoveLogo() {
       preview.classList.add('hidden');
       placeholder.classList.remove('hidden');
       showToast('Logo removed permanently.', 'success');
+      broadcastStoreChange('settings');
     }
   } catch (e) {
     showToast('Error removing logo', 'error');
@@ -441,6 +460,7 @@ async function handleDeleteWatchPermanently(id, title) {
     if (res.ok) {
       showToast(`"${title}" permanently removed from database! 🗑️`, 'success');
       await loadAdminWatches();
+      broadcastStoreChange('catalog');
     } else {
       showToast('Failed to delete watch', 'error');
     }
@@ -459,6 +479,7 @@ async function toggleWatchHidden(id) {
     });
     if (res.ok) {
       await loadAdminWatches();
+      broadcastStoreChange('catalog');
     }
   } catch (e) {}
 }
@@ -472,6 +493,7 @@ async function handleSeedCatalog() {
     if (res.ok) {
       showToast('Curated collection populated! 🌟', 'success');
       await loadAdminWatches();
+      broadcastStoreChange('catalog');
     }
   } catch (e) {
     showToast('Error populating catalog', 'error');
@@ -547,6 +569,35 @@ function previewWatchVideo(input) {
   }
 }
 
+// Serverless disk is ephemeral, so an uploaded file can vanish while its URL stays
+// in the database. Downsizing the image and storing it inside the product document
+// keeps MongoDB the only source of truth for the picture too.
+async function imageToEmbeddedDataUrl(file, maxDim = 900, quality = 0.8) {
+  if (!file || !file.type.startsWith('image/')) return null;
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = reject;
+      el.src = objectUrl;
+    });
+    const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', quality);
+  } catch (err) {
+    return null;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 async function handleWatchFormSubmit(e) {
   e.preventDefault();
 
@@ -591,11 +642,18 @@ async function handleWatchFormSubmit(e) {
   formData.append('description', description);
   formData.append('features', features);
 
+  let embeddedImage = imageUrl;
   if (fileInput && fileInput.files[0]) {
-    formData.append('image', fileInput.files[0]);
-  } else if (imageUrl) {
-    formData.append('imageUrl', imageUrl);
+    const dataUrl = await imageToEmbeddedDataUrl(fileInput.files[0]);
+    if (dataUrl) {
+      embeddedImage = dataUrl;
+    } else {
+      // Formats canvas can't re-encode (gif/svg/…) still go through as a file
+      formData.append('image', fileInput.files[0]);
+      embeddedImage = '';
+    }
   }
+  if (embeddedImage) formData.append('imageUrl', embeddedImage);
 
   if (videoInput && videoInput.files[0]) {
     formData.append('video', videoInput.files[0]);
@@ -612,9 +670,21 @@ async function handleWatchFormSubmit(e) {
     const res = await fetch(endpoint, { method, headers: adminHeaders(false), body: formData });
 
     if (res.ok) {
+      // Use the document MongoDB actually returned, not a locally guessed object
+      const data = await res.json().catch(() => null);
+      const savedProduct = data && data.product ? data.product : null;
+
+      if (savedProduct) {
+        const idx = adminWatches.findIndex(w => w.id === savedProduct.id);
+        if (idx > -1) adminWatches[idx] = savedProduct;
+        else adminWatches.unshift(savedProduct);
+        renderWatchesTable();
+      }
+
       showToast(isEdit ? 'Watch updated permanently! ✅' : 'New watch uploaded successfully! ⌚', 'success');
       closeWatchModal();
       await loadAdminWatches();
+      broadcastStoreChange('catalog');
     } else {
       const err = await res.json();
       showToast(err.error || 'Failed to save watch', 'error');

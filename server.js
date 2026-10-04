@@ -47,7 +47,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB media
+  limits: { fileSize: 200 * 1024 * 1024, fieldSize: 12 * 1024 * 1024 }, // 200MB media, large embedded image fields
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|webp|svg|gif|mp4|webm|mov|avi|mkv|m4v|ico/;
     const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
@@ -943,7 +943,9 @@ app.post('/api/products', adminAuth, uploadMedia, async (req, res) => {
     const b = req.body;
     const files = req.files || {};
 
-    let image = b.imageUrl || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop';
+    // Neutral placeholder — never a real watch photo, so a product can never
+    // appear to carry another product's image.
+    let image = b.imageUrl || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Crect width='240' height='240' fill='%230F172A'/%3E%3Ccircle cx='120' cy='126' r='52' fill='none' stroke='%23C9A96E' stroke-width='5'/%3E%3Cpath d='M120 96v32l20 12' fill='none' stroke='%23C9A96E' stroke-width='5' stroke-linecap='round'/%3E%3Ctext x='120' y='206' fill='%236B7280' font-family='sans-serif' font-size='13' text-anchor='middle'%3EImage unavailable%3C/text%3E%3C/svg%3E";
     if (files.image && files.image[0]) image = `/uploads/${files.image[0].filename}`;
 
     let videoUrl = b.videoUrl || '';
@@ -1007,6 +1009,7 @@ app.put('/api/products/:id', adminAuth, uploadMedia, async (req, res) => {
 
     if (files.image && files.image[0]) updates.image = `/uploads/${files.image[0].filename}`;
     else if (b.imageUrl) updates.image = b.imageUrl;
+    delete updates.imageUrl;
 
     if (files.video && files.video[0]) updates.videoUrl = `/uploads/${files.video[0].filename}`;
     else if (b.videoUrl !== undefined) updates.videoUrl = b.videoUrl;
