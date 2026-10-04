@@ -40,6 +40,9 @@
 
   <!-- Google Fonts & Custom Styles -->
   <link rel="stylesheet" href="/css/styles.css" />
+  <!-- Leaflet Map CSS & JS for saved order delivery locations -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="bg-[#08090D] text-neutral-200 antialiased selection:bg-amber-500 selection:text-black min-h-screen flex flex-col font-sans">
 
@@ -92,7 +95,7 @@
         <!-- System Status & Quick Links -->
         <div class="flex items-center gap-3 text-xs">
           <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#12161F] border border-[#1F2632] text-neutral-400 font-mono">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="db-status-dot" class="w-2 h-2 rounded-full bg-neutral-400"></span>
             <span id="db-status-pill">Checking DB...</span>
           </div>
           
@@ -507,7 +510,7 @@
             <h3 class="font-heading text-base font-bold text-white">ACTIVE STORE COUPONS</h3>
             <button onclick="loadAdminCoupons()" class="text-xs text-amber-400 hover:underline">Refresh</button>
           </div>
-          <div id="coupons-list-container" class="divide-y divide-[#1F2632]>
+          <div id="coupons-list-container" class="divide-y divide-[#1F2632]">
             <!-- Populated via admin.js -->
           </div>
         </div>
@@ -515,249 +518,271 @@
     </section>
 
 
-    <!-- ================= TAB 6: ABOUT US ================= -->
+    <!-- ================= TAB 6: ABOUT US CMS ================= -->
     <section id="admin-tab-about" class="hidden space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      
+      <!-- Top Action Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-6 rounded-3xl bg-[#10131A]/90 border border-[#1F2632] shadow-xl">
         <div>
-          <h2 class="font-heading text-lg font-bold text-white">ABOUT US PAGE</h2>
-          <p class="text-[11px] text-neutral-400 mt-1">Everything saved here is published live to <span class="text-amber-400">/about.html</span> from the database.</p>
+          <div class="flex items-center gap-2">
+            <h2 class="font-heading text-lg font-bold text-white tracking-wide">ABOUT US CMS &amp; CONTENT EDITOR</h2>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold uppercase">Live Sync</span>
+          </div>
+          <p class="text-[11px] text-neutral-400 mt-1">Manage brand story, founder profile, team members, and craftsmanship promises published live to <span class="text-amber-400 font-mono">/about.html</span>.</p>
         </div>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="loadAdminAbout(true)" class="px-4 py-2 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[11px] font-bold uppercase tracking-wider transition-colors">Refresh</button>
-          <button type="button" onclick="window.open('/about.html','_blank')" class="px-4 py-2 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[11px] font-bold uppercase tracking-wider transition-colors">Preview ↗</button>
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <button type="button" onclick="loadAdminAbout(true)" class="px-4 py-2.5 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            Refresh
+          </button>
+          <button type="button" onclick="window.open('/about.html','_blank')" class="px-4 py-2.5 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5">
+            Preview Live Page ↗
+          </button>
+          <button type="button" onclick="document.getElementById('about-form-submit-btn').click()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-black uppercase tracking-wider text-xs shadow-lg shadow-amber-500/20 transition-all inline-flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            Save Changes
+          </button>
         </div>
       </div>
 
       <form id="about-form" class="space-y-6" autocomplete="off">
-        <!-- General Content -->
-        <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
-          <h3 class="font-heading text-base font-bold text-white">GENERAL CONTENT</h3>
-          <div>
-            <label class="block font-semibold text-neutral-300 mb-1">Page Title</label>
-            <input type="text" id="about-page-title" maxlength="200" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="e.g. About AM COLLECTION" />
-          </div>
-          <div>
-            <label class="block font-semibold text-neutral-300 mb-1">Brand Introduction</label>
-            <textarea id="about-intro" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="Short premium intro shown in the hero…"></textarea>
-          </div>
-          <div>
-            <label class="block font-semibold text-neutral-300 mb-1">Our Story</label>
-            <textarea id="about-story" rows="4" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="How the brand began and grew…"></textarea>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- CARD 1: GENERAL PAGE CONTENT -->
+        <div class="p-6 sm:p-8 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-5">
+          <div class="flex items-center justify-between border-b border-[#1F2632] pb-4">
             <div>
-              <label class="block font-semibold text-neutral-300 mb-1">Mission</label>
-              <textarea id="about-mission" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="What you promise every customer…"></textarea>
+              <h3 class="font-heading text-base font-bold text-white tracking-wide">1. BRAND STORY &amp; MAIN PAGE CONTENT</h3>
+              <p class="text-[11px] text-neutral-400">Main hero introduction, company narrative, and purpose.</p>
             </div>
-            <div>
-              <label class="block font-semibold text-neutral-300 mb-1">Vision</label>
-              <textarea id="about-vision" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="Where the brand is headed…"></textarea>
-            </div>
+            <span class="text-xs text-amber-400 font-mono">/about.html</span>
           </div>
-          <div>
-            <label class="block font-semibold text-neutral-300 mb-1">Quality Statement</label>
-            <textarea id="about-quality" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" placeholder="Your inspection / quality promise…"></textarea>
-          </div>
-        </div>
 
-        <!-- Section Visibility & Order -->
-        <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
-          <h3 class="font-heading text-base font-bold text-white">SECTIONS ON THE PAGE</h3>
-          <p class="text-[11px] text-neutral-400">Toggle sections on/off and set the order they appear (1 = first).</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="about-sections-grid">
-            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
-              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-intro" class="accent-amber-500 w-4 h-4" /> Introduction</label>
-              <input type="number" id="about-sec-order-intro" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label class="block font-semibold text-neutral-300 mb-1 text-xs">Page Title (Hero Heading)</label>
+              <input type="text" id="about-page-title" maxlength="200" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500 transition-colors" placeholder="e.g. About AM COLLECTION" />
             </div>
-            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
-              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-story" class="accent-amber-500 w-4 h-4" /> Our Story</label>
-              <input type="number" id="about-sec-order-story" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+            <div>
+              <label class="block font-semibold text-neutral-300 mb-1 text-xs">Brand Introduction (Hero Subtitle)</label>
+              <textarea id="about-intro" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500 transition-colors leading-relaxed" placeholder="Short luxury intro shown in the hero section…"></textarea>
             </div>
-            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
-              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-mission" class="accent-amber-500 w-4 h-4" /> Mission &amp; Vision</label>
-              <input type="number" id="about-sec-order-mission" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+            <div>
+              <label class="block font-semibold text-neutral-300 mb-1 text-xs">Our Story (Brand Narrative)</label>
+              <textarea id="about-story" rows="4" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500 transition-colors leading-relaxed" placeholder="How AM COLLECTION began, the horological passion, and growth…"></textarea>
             </div>
-            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
-              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-team" class="accent-amber-500 w-4 h-4" /> Meet The Team</label>
-              <input type="number" id="about-sec-order-team" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-semibold text-neutral-300 mb-1 text-xs">Our Mission</label>
+                <textarea id="about-mission" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500 transition-colors leading-relaxed" placeholder="Our promise to every collector and customer…"></textarea>
+              </div>
+              <div>
+                <label class="block font-semibold text-neutral-300 mb-1 text-xs">Our Vision</label>
+                <textarea id="about-vision" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500 transition-colors leading-relaxed" placeholder="Where the brand is headed in India's luxury market…"></textarea>
+              </div>
             </div>
-            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
-              <label class="flex items-center gap-2 text-[11px] font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-whoIsWho" class="accent-amber-500 w-4 h-4" /> Who Is Who</label>
-              <input type="number" id="about-sec-order-whoIsWho" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1.5 text-white text-xs" />
+            <div>
+              <label class="block font-semibold text-neutral-300 mb-1 text-xs">Core Values (Separated by • or newlines)</label>
+              <input type="text" id="about-values" maxlength="1000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500 transition-colors" placeholder="Precision Craftsmanship • Absolute Transparency • Collector-Grade 1:1 Perfection • Pan-India Doorstep Trust" />
+            </div>
+            <div>
+              <label class="block font-semibold text-neutral-300 mb-1 text-xs">Quality &amp; Craftsmanship Statement (27-Point Inspection)</label>
+              <textarea id="about-quality" rows="3" maxlength="5000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500 transition-colors leading-relaxed" placeholder="Your testing, movement accuracy, glass clarity, and water resistance guarantee…"></textarea>
             </div>
           </div>
         </div>
 
-        <!-- Team Members -->
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="font-heading text-base font-bold text-white">TEAM MEMBERS</h3>
-            <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">JPG / JPEG / PNG / WebP • Max 5MB</span>
+        <!-- CARD 2: OWNER & FOUNDER PROFILE -->
+        <div class="p-6 sm:p-8 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-5">
+          <div class="flex items-center justify-between border-b border-[#1F2632] pb-4">
+            <div>
+              <h3 class="font-heading text-base font-bold text-amber-400 tracking-wide">2. OWNER &amp; FOUNDER PROFILE</h3>
+              <p class="text-[11px] text-neutral-400">Featured executive profile highlighting leadership and horology philosophy.</p>
+            </div>
+            <label class="flex items-center gap-2 text-xs font-semibold text-neutral-200 cursor-pointer">
+              <input type="checkbox" id="about-founder-enabled" class="accent-amber-500 w-4 h-4" checked />
+              <span>Show Founder Profile</span>
+            </label>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
-            <!-- FOUNDER & CEO -->
-            <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
-              <div class="flex items-center justify-between">
-                <h4 class="font-heading text-sm font-bold text-amber-400">FOUNDER &amp; CEO (CEO PHOTO)</h4>
-                <label class="flex items-center gap-2 text-[11px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-founder-enabled" class="accent-amber-500 w-4 h-4" /> Show on page</label>
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+            <!-- Photo Upload Area -->
+            <div class="md:col-span-4 flex flex-col items-center p-5 rounded-2xl bg-[#0B0E13] border border-[#1F2632] text-center space-y-3">
+              <div class="relative w-32 h-32 rounded-2xl overflow-hidden border-2 border-[#1F2632] bg-[#12161F] flex items-center justify-center shadow-lg group">
+                <div id="about-founder-placeholder" class="font-heading text-3xl font-black text-amber-500">CEO</div>
+                <img id="about-founder-preview" alt="Founder Photo" class="hidden absolute inset-0 w-full h-full object-cover object-top" />
               </div>
-              <div class="flex flex-col items-center gap-3">
-                <div class="relative w-24 h-24">
-                  <div id="about-founder-placeholder" class="w-24 h-24 rounded-2xl bg-[#12161F] border border-[#1F2632] flex items-center justify-center font-heading text-xl font-black text-amber-500">F</div>
-                  <img id="about-founder-preview" alt="Founder photo" class="hidden absolute inset-0 w-24 h-24 rounded-2xl object-cover border border-[#1F2632]" />
-                </div>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="document.getElementById('about-founder-file').click()" class="px-3 py-1.5 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[10px] font-bold uppercase tracking-wider transition-colors">Upload</button>
-                  <button type="button" id="about-founder-remove" onclick="removeAboutPhoto('founder')" class="hidden px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 hover:bg-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-colors">Remove</button>
-                </div>
-                <input type="file" id="about-founder-file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" onchange="handleAboutPhoto('founder', this)" />
-                <input type="hidden" id="about-founder-photo" />
+              
+              <div class="flex items-center gap-2 w-full">
+                <button type="button" onclick="document.getElementById('about-founder-file').click()" class="flex-1 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold uppercase tracking-wider transition-colors inline-flex items-center justify-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  Upload Photo
+                </button>
+                <button type="button" id="about-founder-remove" onclick="removeAboutPhoto('founder')" class="hidden px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-[11px] font-bold uppercase tracking-wider transition-colors">
+                  Remove
+                </button>
               </div>
-              <div class="space-y-3">
+              <input type="file" id="about-founder-file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" onchange="handleAboutPhoto('founder', this)" />
+              <input type="hidden" id="about-founder-photo" />
+              <p class="text-[10px] text-neutral-500">JPG, PNG, WebP • Permanent Cloud Storage</p>
+            </div>
+
+            <!-- Details -->
+            <div class="md:col-span-8 space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block font-semibold text-neutral-300 mb-1">Name</label>
-                  <input type="text" id="about-founder-name" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Founder Name" />
+                  <label class="block font-semibold text-neutral-300 mb-1 text-xs">Full Name</label>
+                  <input type="text" id="about-founder-name" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Founder & CEO Name" />
                 </div>
                 <div>
-                  <label class="block font-semibold text-neutral-300 mb-1">Role</label>
-                  <input type="text" id="about-founder-role" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Founder & CEO" />
+                  <label class="block font-semibold text-neutral-300 mb-1 text-xs">Role / Title</label>
+                  <input type="text" id="about-founder-role" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Founder & CEO" />
                 </div>
-                <div>
-                  <label class="block font-semibold text-neutral-300 mb-1">Bio</label>
-                  <textarea id="about-founder-bio" rows="3" maxlength="1000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Short bio…"></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
+              </div>
+
+              <div>
+                <label class="block font-semibold text-neutral-300 mb-1 text-xs">Short Bio</label>
+                <textarea id="about-founder-bio" rows="2" maxlength="1000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Short executive summary…"></textarea>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-neutral-300 mb-1 text-xs">Long Horology Philosophy / About Founder</label>
+                <textarea id="about-founder-longbio" rows="3" maxlength="2000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Detailed vision and commitment to perfection…"></textarea>
+              </div>
+
+              <!-- Social & Contact Links -->
+              <div>
+                <label class="block font-semibold text-neutral-300 mb-2 text-xs">Social &amp; Contact Links</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                   <input type="text" id="about-founder-instagram" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Instagram URL" />
                   <input type="text" id="about-founder-twitter" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="X / Twitter URL" />
                   <input type="text" id="about-founder-linkedin" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="LinkedIn URL" />
-                  <input type="email" id="about-founder-email" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Email" />
+                  <input type="email" id="about-founder-email" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Email Address" />
+                  <input type="text" id="about-founder-phone" maxlength="50" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Phone / WhatsApp" />
                 </div>
               </div>
             </div>
-
-            <!-- DEVELOPER -->
-            <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
-              <div class="flex items-center justify-between">
-                <h4 class="font-heading text-sm font-bold text-amber-400">LEAD DEVELOPER (DEVELOPER PHOTO)</h4>
-                <label class="flex items-center gap-2 text-[11px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-developer-enabled" class="accent-amber-500 w-4 h-4" /> Show on page</label>
-              </div>
-              <div class="flex flex-col items-center gap-3">
-                <div class="relative w-24 h-24">
-                  <div id="about-developer-placeholder" class="w-24 h-24 rounded-2xl bg-[#12161F] border border-[#1F2632] flex items-center justify-center font-heading text-xl font-black text-amber-500">D</div>
-                  <img id="about-developer-preview" alt="Developer photo" class="hidden absolute inset-0 w-24 h-24 rounded-2xl object-cover border border-[#1F2632]" />
-                </div>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="document.getElementById('about-developer-file').click()" class="px-3 py-1.5 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[10px] font-bold uppercase tracking-wider transition-colors">Upload</button>
-                  <button type="button" id="about-developer-remove" onclick="removeAboutPhoto('developer')" class="hidden px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 hover:bg-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-colors">Remove</button>
-                </div>
-                <input type="file" id="about-developer-file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" onchange="handleAboutPhoto('developer', this)" />
-                <input type="hidden" id="about-developer-photo" />
-              </div>
-              <div class="space-y-3">
-                <div>
-                  <label class="block font-semibold text-neutral-300 mb-1">Name</label>
-                  <input type="text" id="about-developer-name" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Developer Name" />
-                </div>
-                <div>
-                  <label class="block font-semibold text-neutral-300 mb-1">Role</label>
-                  <input type="text" id="about-developer-role" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Lead Developer" />
-                </div>
-                <div>
-                  <label class="block font-semibold text-neutral-300 mb-1">Bio</label>
-                  <textarea id="about-developer-bio" rows="3" maxlength="1000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Short bio…"></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <input type="text" id="about-developer-instagram" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Instagram URL" />
-                  <input type="text" id="about-developer-twitter" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="X / Twitter URL" />
-                  <input type="text" id="about-developer-linkedin" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="LinkedIn URL" />
-                  <input type="email" id="about-developer-email" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Email" />
-                </div>
-              </div>
-            </div>
-
-            <!-- MANAGER -->
-            <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
-              <div class="flex items-center justify-between">
-                <h4 class="font-heading text-sm font-bold text-amber-400">OPERATIONS MANAGER (MANAGER PHOTO)</h4>
-                <label class="flex items-center gap-2 text-[11px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-manager-enabled" class="accent-amber-500 w-4 h-4" /> Show on page</label>
-              </div>
-              <div class="flex flex-col items-center gap-3">
-                <div class="relative w-24 h-24">
-                  <div id="about-manager-placeholder" class="w-24 h-24 rounded-2xl bg-[#12161F] border border-[#1F2632] flex items-center justify-center font-heading text-xl font-black text-amber-500">M</div>
-                  <img id="about-manager-preview" alt="Manager photo" class="hidden absolute inset-0 w-24 h-24 rounded-2xl object-cover border border-[#1F2632]" />
-                </div>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="document.getElementById('about-manager-file').click()" class="px-3 py-1.5 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[10px] font-bold uppercase tracking-wider transition-colors">Upload</button>
-                  <button type="button" id="about-manager-remove" onclick="removeAboutPhoto('manager')" class="hidden px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 hover:bg-red-500/20 text-[10px] font-bold uppercase tracking-wider transition-colors">Remove</button>
-                </div>
-                <input type="file" id="about-manager-file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" onchange="handleAboutPhoto('manager', this)" />
-                <input type="hidden" id="about-manager-photo" />
-              </div>
-              <div class="space-y-3">
-                <div>
-                  <label class="block font-semibold text-neutral-300 mb-1">Name</label>
-                  <input type="text" id="about-manager-name" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Manager Name" />
-                </div>
-                <div>
-                  <label class="block font-semibold text-neutral-300 mb-1">Role</label>
-                  <input type="text" id="about-manager-role" maxlength="120" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Operations Manager" />
-                </div>
-                <div>
-                  <label class="block font-semibold text-neutral-300 mb-1">Bio</label>
-                  <textarea id="about-manager-bio" rows="3" maxlength="1000" class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Short bio…"></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <input type="text" id="about-manager-instagram" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Instagram URL" />
-                  <input type="text" id="about-manager-twitter" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="X / Twitter URL" />
-                  <input type="text" id="about-manager-linkedin" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="LinkedIn URL" />
-                  <input type="email" id="about-manager-email" maxlength="300" class="bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-[11px] focus:outline-none focus:border-amber-500" placeholder="Email" />
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
 
-        <!-- Who Is Who -->
-        <div class="p-6 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-4">
-          <h3 class="font-heading text-base font-bold text-white">WHO IS WHO</h3>
-          <p class="text-[11px] text-neutral-400">Explain what each role is responsible for — shown at the bottom of the page.</p>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- CARD 3: TEAM MEMBERS MANAGEMENT -->
+        <div class="p-6 sm:p-8 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#1F2632] pb-4">
+            <div>
+              <h3 class="font-heading text-base font-bold text-white tracking-wide">3. TEAM MEMBERS MANAGEMENT</h3>
+              <p class="text-[11px] text-neutral-400">Add, edit, reorder, or delete key team members.</p>
+            </div>
+            <button type="button" onclick="addNewTeamMember()" class="px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+              Add Team Member
+            </button>
+          </div>
+
+          <!-- Dynamic Team Members Container -->
+          <div id="about-team-members-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <!-- Dynamically populated via admin.js -->
+          </div>
+        </div>
+
+        <!-- CARD 4: SECTIONS VISIBILITY & DISPLAY ORDER -->
+        <div class="p-6 sm:p-8 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-5">
+          <div class="border-b border-[#1F2632] pb-4">
+            <h3 class="font-heading text-base font-bold text-white tracking-wide">4. SECTIONS VISIBILITY &amp; ORDERING</h3>
+            <p class="text-[11px] text-neutral-400">Toggle sections on/off and configure their display order (1 = Top of Page).</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5" id="about-sections-grid">
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-intro" class="accent-amber-500 w-4 h-4" checked /> Introduction</label>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-sec-order-intro" min="1" max="15" value="1" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-story" class="accent-amber-500 w-4 h-4" checked /> Our Story</label>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-sec-order-story" min="1" max="15" value="2" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-mission" class="accent-amber-500 w-4 h-4" checked /> Mission &amp; Vision</label>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-sec-order-mission" min="1" max="15" value="3" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-values" class="accent-amber-500 w-4 h-4" checked /> Core Values</label>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-sec-order-values" min="1" max="15" value="4" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-owner" class="accent-amber-500 w-4 h-4" checked /> Founder Profile</label>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-sec-order-owner" min="1" max="15" value="5" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-team" class="accent-amber-500 w-4 h-4" checked /> Meet The Team</label>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-sec-order-team" min="1" max="15" value="6" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-quality" class="accent-amber-500 w-4 h-4" checked /> Quality Standard</label>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-sec-order-quality" min="1" max="15" value="7" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
+            </div>
+            <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-neutral-200 cursor-pointer"><input type="checkbox" id="about-sec-whoIsWho" class="accent-amber-500 w-4 h-4" checked /> Who Is Who</label>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-sec-order-whoIsWho" min="1" max="15" value="8" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 5: WHO IS WHO (ROLE EXPLANATIONS) -->
+        <div class="p-6 sm:p-8 rounded-3xl bg-[#10131A]/80 border border-[#1F2632] space-y-5">
+          <div class="border-b border-[#1F2632] pb-4">
+            <h3 class="font-heading text-base font-bold text-white tracking-wide">5. WHO IS WHO (ROLE EXPLANATIONS)</h3>
+            <p class="text-[11px] text-neutral-400">Explains each department's role to customers for complete brand transparency.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="about-who-container">
             <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Founder</span>
-                <label class="flex items-center gap-2 text-[10px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-who-founder-enabled" class="accent-amber-500 w-3.5 h-3.5" /> Show</label>
+                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">The Founder</span>
+                <label class="flex items-center gap-1.5 text-[10px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-who-founder-enabled" class="accent-amber-500 w-3.5 h-3.5" checked /> Show</label>
               </div>
               <input type="text" id="about-who-founder-title" maxlength="120" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="The Founder" />
-              <textarea id="about-who-founder-desc" rows="4" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="What the founder does…"></textarea>
-              <input type="number" id="about-who-founder-order" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs" placeholder="Order" />
+              <textarea id="about-who-founder-desc" rows="3" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="What the founder does…"></textarea>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-who-founder-order" min="1" max="9" value="1" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
             </div>
+
             <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Developer</span>
-                <label class="flex items-center gap-2 text-[10px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-who-developer-enabled" class="accent-amber-500 w-3.5 h-3.5" /> Show</label>
+                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">The Developer</span>
+                <label class="flex items-center gap-1.5 text-[10px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-who-developer-enabled" class="accent-amber-500 w-3.5 h-3.5" checked /> Show</label>
               </div>
               <input type="text" id="about-who-developer-title" maxlength="120" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="The Developer" />
-              <textarea id="about-who-developer-desc" rows="4" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="What the developer does…"></textarea>
-              <input type="number" id="about-who-developer-order" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs" placeholder="Order" />
+              <textarea id="about-who-developer-desc" rows="3" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="What the developer does…"></textarea>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-who-developer-order" min="1" max="9" value="2" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
             </div>
+
             <div class="rounded-2xl bg-[#0B0E13] border border-[#1F2632] p-4 space-y-3">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Manager</span>
-                <label class="flex items-center gap-2 text-[10px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-who-manager-enabled" class="accent-amber-500 w-3.5 h-3.5" /> Show</label>
+                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">The Manager</span>
+                <label class="flex items-center gap-1.5 text-[10px] font-semibold text-neutral-300 cursor-pointer"><input type="checkbox" id="about-who-manager-enabled" class="accent-amber-500 w-3.5 h-3.5" checked /> Show</label>
               </div>
               <input type="text" id="about-who-manager-title" maxlength="120" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="The Manager" />
-              <textarea id="about-who-manager-desc" rows="4" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="What the manager does…"></textarea>
-              <input type="number" id="about-who-manager-order" min="1" max="9" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs" placeholder="Order" />
+              <textarea id="about-who-manager-desc" rows="3" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="What the manager does…"></textarea>
+              <div class="flex items-center justify-between text-[11px] text-neutral-400"><span>Order:</span><input type="number" id="about-who-manager-order" min="1" max="9" value="3" class="w-16 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-1 text-white text-center text-xs" /></div>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-3 pt-2">
-          <button type="button" onclick="window.open('/about.html','_blank')" class="px-5 py-3 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-xs font-bold uppercase tracking-wider transition-colors">Preview Page ↗</button>
-          <button type="submit" class="px-8 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold uppercase tracking-wider text-xs shadow-lg transition-all">Save About Us</button>
+        <!-- Sticky / Bottom Save Action Bar -->
+        <div class="sticky bottom-4 z-20 flex items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[#0B0E13]/95 backdrop-blur-md border border-amber-500/40 shadow-2xl">
+          <div class="flex items-center gap-2 text-xs text-neutral-400">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span>All modifications save permanently to MongoDB Atlas.</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <button type="button" onclick="window.open('/about.html','_blank')" class="px-4 py-2.5 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-xs font-bold uppercase tracking-wider transition-colors">
+              Preview ↗
+            </button>
+            <button type="submit" id="about-form-submit-btn" class="px-8 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-black uppercase tracking-wider text-xs shadow-xl shadow-amber-500/25 transition-all inline-flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Save Changes
+            </button>
+          </div>
         </div>
+
       </form>
     </section>
 

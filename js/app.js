@@ -129,12 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Wishlist UI
   updateWishlistUI();
 
-  // Render Initial Products
-  renderProducts();
-
-  // Render Mobile-First Sections (trending rail + promo spotlight)
-  renderTrendingRail();
-  renderMobilePromo();
+  // Show instant loading skeleton in products grid
+  renderProductsSkeleton();
 
   // Event Listeners
   setupEventListeners();
@@ -142,35 +138,111 @@ document.addEventListener('DOMContentLoaded', () => {
   // Setup Mobile Nav
   setupMobileMenu();
 
-  // Sync with Backend (Settings & Products)
+  // Fetch watches immediately from MongoDB Atlas
   syncWithBackend();
 });
 
-// Synchronize with Express / MongoDB API
-async function syncWithBackend() {
+// Render Instant Loading Skeletons
+function renderProductsSkeleton() {
+  const container = document.getElementById('products-grid');
+  const countBadge = document.getElementById('products-count-badge');
+  if (!container) return;
+
+  if (countBadge) countBadge.textContent = 'Loading watches...';
+
+  const skeletonHtml = Array(8).fill(0).map(() => `
+    <div class="product-card bg-[#111827] border border-[#2A3447] rounded-xl p-3 flex flex-col justify-between animate-pulse">
+      <div class="aspect-square w-full bg-[#1A2235] rounded-lg mb-3 flex items-center justify-center">
+        <div class="w-10 h-10 rounded-full bg-[#253047]/60"></div>
+      </div>
+      <div class="space-y-2">
+        <div class="h-3 w-1/3 bg-[#253047]/80 rounded"></div>
+        <div class="h-4 w-4/5 bg-[#253047] rounded"></div>
+        <div class="h-3 w-1/2 bg-[#253047]/60 rounded"></div>
+        <div class="flex items-center justify-between pt-2">
+          <div class="h-4 w-16 bg-[#253047] rounded"></div>
+          <div class="h-7 w-14 bg-[#D4B475]/20 rounded-lg"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  container.innerHTML = skeletonHtml;
+}
+
+// Render Database Error State (No fake watches)
+function renderProductsError(message) {
+  const container = document.getElementById('products-grid');
+  const countBadge = document.getElementById('products-count-badge');
+  if (!container) return;
+
+  if (countBadge) countBadge.textContent = 'Database Disconnected';
+
+  container.innerHTML = `
+    <div class="col-span-2 md:col-span-4 py-16 px-4 text-center">
+      <div class="w-16 h-16 rounded-full bg-red-950/40 border border-red-500/30 flex items-center justify-center mx-auto text-red-400 mb-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <h3 class="text-base font-bold text-white mb-1">Database Unavailable</h3>
+      <p class="text-xs text-neutral-400 mb-5 max-w-md mx-auto">${message || 'Could not load watches from MongoDB Atlas. Please ensure MONGO_URI is set.'}</p>
+      <button onclick="syncWithBackend()" class="px-5 py-2.5 rounded-xl bg-[#D4B475] hover:bg-[#B8943F] text-[#0B0F19] font-bold text-xs transition-colors inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        Retry Database Connection
+      </button>
+    </div>
+  `;
+}
+
+// Fast watch loading decoupled from other APIs
+async function fetchProducts() {
   try {
-    const [settingsRes, productsRes] = await Promise.allSettled([
-      fetch('/api/settings'),
-      fetch('/api/products')
-    ]);
+    const res = await fetch('/api/products', {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    });
 
-    if (settingsRes.status === 'fulfilled' && settingsRes.value.ok) {
-      const settings = await settingsRes.value.json();
-      applyBrandingSettings(settings);
-    }
-
-    if (productsRes.status === 'fulfilled' && productsRes.value.ok) {
-      const prods = await productsRes.value.json();
+    if (res.ok) {
+      const prods = await res.json();
       if (Array.isArray(prods)) {
         liveProducts = prods;
         renderProducts();
         renderTrendingRail();
         renderMobilePromo();
+      } else {
+        renderProductsError('Invalid data format received from database.');
       }
+    } else {
+      let errMsg = 'Could not load watches from MongoDB Atlas.';
+      try {
+        const errData = await res.json();
+        if (errData.message || errData.error) errMsg = errData.message || errData.error;
+      } catch (e) {}
+      renderProductsError(errMsg);
     }
   } catch (e) {
-    // Running in static/offline mode, using built-in PRODUCTS_DATA
+    renderProductsError('Network error connecting to MongoDB Atlas backend.');
   }
+}
+
+async function fetchSettings() {
+  try {
+    const res = await fetch('/api/settings', { cache: 'no-store' });
+    if (res.ok) {
+      const settings = await res.json();
+      applyBrandingSettings(settings);
+    }
+  } catch (e) {
+    // Non-blocking for catalog display
+  }
+}
+
+// Synchronize with Express / MongoDB API
+function syncWithBackend() {
+  fetchProducts();
+  fetchSettings();
 }
 
 function applyBrandingSettings(settings) {

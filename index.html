@@ -51,6 +51,10 @@
 
   <!-- Production Custom Stylesheet -->
   <link rel="stylesheet" href="/css/styles.css" />
+
+  <!-- Leaflet Map CSS & JS for Precise Delivery Pinpoint -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="bg-[#0B0F19] text-[#F1F0ED] antialiased selection:bg-[#D4B475] selection:text-black">
 
@@ -796,6 +800,46 @@
             <div>
               <label class="block font-medium text-[#D1D5DB] mb-1">House / Flat / Street Address *</label>
               <input id="cod-address" type="text" required placeholder="House/Flat No., Apartment, Street" class="w-full px-3 py-2 bg-[#1A2235] border border-[#2D3748] rounded-lg text-[#F1F0ED] focus:border-[#C9A96E]" />
+            </div>
+
+            <!-- PRECISE DELIVERY PINPOINT (Leaflet GPS Location) -->
+            <div class="p-3.5 rounded-2xl bg-[#121824] border border-[#C9A96E]/30 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-[#E2CFA5] flex items-center gap-1.5">
+                  <span>📍</span> Precise Delivery Pinpoint
+                </span>
+                <span id="cod-location-badge" class="hidden text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                  ✓ Location Pin Added
+                </span>
+              </div>
+              <p class="text-[11px] text-[#9CA3AF] leading-relaxed">
+                Click below to pinpoint your exact doorstep coordinates for faster, error-free courier delivery.
+              </p>
+              
+              <button type="button" id="cod-use-location-btn" onclick="checkoutManager.requestCurrentLocation()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#1A2333] to-[#253248] hover:from-[#253248] hover:to-[#31415E] text-[#F1F0ED] hover:text-[#E2CFA5] border border-[#C9A96E]/40 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md">
+                <span class="text-sm">📍</span>
+                <span id="cod-use-location-text">Use My Current Location</span>
+              </button>
+
+              <!-- Interactive Map Container (Shown upon click) -->
+              <div id="cod-map-container" class="hidden space-y-2.5 pt-2">
+                <div class="relative w-full rounded-xl overflow-hidden border border-[#C9A96E]/40 shadow-inner">
+                  <div id="cod-leaflet-map" class="w-full h-52 sm:h-60 bg-[#0B0F19]"></div>
+                  <div id="cod-map-loading" class="hidden absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center text-xs text-[#E2CFA5] font-semibold gap-2 z-[500]">
+                    <svg class="animate-spin h-4 w-4 text-[#C9A96E]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>Fetching GPS doorstep location...</span>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-between text-[10px] text-[#9CA3AF] px-1">
+                  <span class="flex items-center gap-1"><span>👆</span> Drag marker to fine-tune exact doorstep</span>
+                  <span id="cod-location-coords" class="font-mono text-[#E2CFA5] text-[10px]"></span>
+                </div>
+
+                <button type="button" onclick="checkoutManager.confirmLocationSelection()" class="w-full py-2 rounded-xl bg-gradient-to-r from-[#D4B475] to-[#B8943F] hover:from-[#E2CFA5] hover:to-[#C9A96E] text-black text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5">
+                  <span>✓</span> Confirm Delivery Location
+                </button>
+              </div>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">

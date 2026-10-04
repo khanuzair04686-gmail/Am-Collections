@@ -130,14 +130,35 @@ async function loadDashboardData() {
 // 1. Health Status & Stats
 async function checkSystemHealth() {
   const pill = document.getElementById('db-status-pill');
+  const dot = document.getElementById('db-status-dot');
   try {
-    const res = await fetch('/api/health');
-    if (res.ok) {
-      const data = await res.json();
-      if (pill) pill.textContent = data.database;
+    const res = await fetch('/api/health', { cache: 'no-store' });
+    const data = await res.json();
+    if (res.ok && data.connected) {
+      if (pill) {
+        pill.textContent = data.database || 'MongoDB Atlas — Connected';
+        pill.className = 'text-emerald-400 font-semibold';
+      }
+      if (dot) {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+      }
+    } else {
+      if (pill) {
+        pill.textContent = data.database || 'MongoDB Atlas — Disconnected';
+        pill.className = 'text-red-400 font-semibold';
+      }
+      if (dot) {
+        dot.className = 'w-2 h-2 rounded-full bg-red-500';
+      }
     }
   } catch (e) {
-    if (pill) pill.textContent = 'Local Mode';
+    if (pill) {
+      pill.textContent = 'MongoDB Atlas — Disconnected';
+      pill.className = 'text-red-400 font-semibold';
+    }
+    if (dot) {
+      dot.className = 'w-2 h-2 rounded-full bg-red-500';
+    }
   }
 }
 
@@ -282,9 +303,40 @@ async function handleChangePasskey(e) {
 
 // 3. Watches Management (PERMANENT CRUD)
 async function loadAdminWatches() {
+  const tbody = document.getElementById('admin-watches-table-body');
+  if (tbody && adminWatches.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="p-8 text-center text-neutral-400">
+          <div class="flex items-center justify-center gap-2">
+            <svg class="animate-spin h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <span class="font-medium text-xs">Loading watches from MongoDB Atlas...</span>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
   try {
-    const res = await fetch('/api/products?includeHidden=true');
-    if (!res.ok) return;
+    const res = await fetch('/api/products?includeHidden=true', {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="p-8 text-center text-red-400 font-semibold">
+              ⚠️ Database Connection Issue: ${errData.message || 'Could not load watches from MongoDB Atlas'}.
+            </td>
+          </tr>
+        `;
+      }
+      return;
+    }
     adminWatches = await res.json();
 
     const statCount = document.getElementById('stat-total-watches');
@@ -293,6 +345,15 @@ async function loadAdminWatches() {
     renderWatchesTable();
   } catch (e) {
     console.error('Failed to load watches', e);
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="p-8 text-center text-red-400 font-semibold">
+            ⚠️ Database Disconnected. Failed to load watches.
+          </td>
+        </tr>
+      `;
+    }
   }
 }
 
@@ -566,7 +627,7 @@ async function handleWatchFormSubmit(e) {
 // 4. Orders Management
 async function loadAdminOrders() {
   try {
-    const res = await fetch('/api/orders');
+    const res = await fetch('/api/orders', { headers: adminHeaders(false) });
     if (!res.ok) return;
     adminOrders = await res.json();
 
@@ -587,6 +648,12 @@ async function loadAdminOrders() {
 function renderOrdersTable() {
   const tbody = document.getElementById('admin-orders-table-body');
   if (!tbody) return;
+
+  // Destroy stale Leaflet instances before re-rendering rows
+  Object.keys(adminOrderMaps).forEach((k) => {
+    try { adminOrderMaps[k].remove(); } catch (e) {}
+    delete adminOrderMaps[k];
+  });
 
   const query = (document.getElementById('admin-search-orders')?.value || '').toLowerCase().trim();
   const filterStatus = document.getElementById('admin-filter-order-status')?.value || 'all';
@@ -614,6 +681,37 @@ function renderOrdersTable() {
 
   tbody.innerHTML = filtered.map(o => {
     const itemsSummary = (o.items || []).map(i => `${i.brand} ${i.model} (×${i.quantity || 1})`).join(', ');
+    const hasLoc = o.deliveryLocation && Number.isFinite(o.deliveryLocation.latitude) && Number.isFinite(o.deliveryLocation.longitude);
+
+    const detailRow = `
+      <tr id="order-detail-row-${o.orderId}" class="hidden">
+        <td colspan="9" class="p-0 bg-[#0A0D12] border-b border-[#1F2632]">
+          <div class="p-4 grid md:grid-cols-2 gap-4 text-xs">
+            <div class="space-y-1">
+              <p class="font-bold text-[#E2CFA5] uppercase tracking-wider text-[10px] mb-2">Customer Address</p>
+              <p class="text-white font-semibold">${escHtml(o.customerName)}</p>
+              <p class="text-neutral-300 font-mono">${escHtml(o.phone)}${o.altPhone ? ` / ${escHtml(o.altPhone)}` : ''}</p>
+              <p class="text-neutral-400 leading-relaxed">${escHtml(o.address)}${o.landmark ? `, ${escHtml(o.landmark)}` : ''}</p>
+              <p class="text-neutral-400">${escHtml(o.city)}, ${escHtml(o.state)}${o.pincode ? ` — ${escHtml(o.pincode)}` : ''}</p>
+            </div>
+            ${hasLoc ? `
+            <div class="space-y-2">
+              <p class="font-bold text-[#E2CFA5] uppercase tracking-wider text-[10px]">📍 Delivery Location</p>
+              <div id="order-map-${o.orderId}" class="w-full h-48 rounded-xl overflow-hidden border border-[#1F2632] bg-[#0B0E13]"></div>
+              <p class="font-mono text-neutral-300">${o.deliveryLocation.latitude}, ${o.deliveryLocation.longitude}${o.deliveryLocation.accuracy ? ` (±${Math.round(o.deliveryLocation.accuracy)}m)` : ''}</p>
+              ${o.deliveryLocation.address ? `<p class="text-neutral-400 leading-relaxed">${escHtml(o.deliveryLocation.address)}</p>` : ''}
+              ${o.locationCapturedAt ? `<p class="text-neutral-500 text-[10px]">Captured: ${new Date(o.locationCapturedAt).toLocaleString('en-IN')}</p>` : ''}
+              <a href="https://www.google.com/maps?q=${o.deliveryLocation.latitude},${o.deliveryLocation.longitude}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161B25] border border-[#C9A96E]/40 text-[#E2CFA5] font-bold hover:border-[#C9A96E] transition-colors">
+                Open in Maps ↗
+              </a>
+            </div>` : `
+            <div class="flex items-center justify-center min-h-[8rem] rounded-xl border border-dashed border-[#1F2632] text-neutral-500 font-semibold">
+              📍 Location not provided
+            </div>`}
+          </div>
+        </td>
+      </tr>
+    `;
 
     return `
       <tr class="hover:bg-[#161B25]/40 transition-colors">
@@ -642,6 +740,9 @@ function renderOrdersTable() {
         </td>
         <td class="p-4 text-right">
           <div class="flex items-center justify-end gap-2">
+            <button onclick="toggleOrderDetails('${o.orderId}')" class="p-1.5 rounded-lg ${hasLoc ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30 hover:border-emerald-400' : 'bg-[#161B25] text-neutral-500 border border-[#1F2632] hover:border-neutral-400'}" title="${hasLoc ? 'View saved delivery location map' : 'Order details'}">
+              📍
+            </button>
             ${o.phone ? `
               <button onclick="chatCustomerWhatsApp('${o.phone}', '${o.orderId}', '${o.customerName}')" class="p-1.5 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-500/30 hover:border-emerald-400" title="Chat on WhatsApp">
                 <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.288.043.088.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.861.174.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/></svg>
@@ -653,8 +754,47 @@ function renderOrdersTable() {
           </div>
         </td>
       </tr>
+      ${detailRow}
     `;
   }).join('');
+}
+
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+const adminOrderMaps = {};
+
+function toggleOrderDetails(orderId) {
+  const row = document.getElementById(`order-detail-row-${orderId}`);
+  if (!row) return;
+  const willShow = row.classList.contains('hidden');
+  row.classList.toggle('hidden');
+  if (!willShow) return;
+  const order = adminOrders.find(o => o.orderId === orderId);
+  if (order && order.deliveryLocation && Number.isFinite(order.deliveryLocation.latitude) && !adminOrderMaps[orderId]) {
+    setTimeout(() => initOrderMap(order), 60);
+  } else if (adminOrderMaps[orderId]) {
+    setTimeout(() => adminOrderMaps[orderId].invalidateSize(), 60);
+  }
+}
+
+// Renders the SAVED customer coordinates only — never the admin's own location
+function initOrderMap(order) {
+  if (typeof L === 'undefined') return;
+  const el = document.getElementById(`order-map-${order.orderId}`);
+  if (!el || adminOrderMaps[order.orderId]) return;
+  const lat = order.deliveryLocation.latitude;
+  const lng = order.deliveryLocation.longitude;
+  const map = L.map(el, { zoomControl: true, scrollWheelZoom: false });
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+  map.setView([lat, lng], 16);
+  L.marker([lat, lng]).addTo(map);
+  if (order.deliveryLocation.accuracy) {
+    L.circle([lat, lng], { radius: order.deliveryLocation.accuracy, color: '#C9A96E', fillColor: '#C9A96E', fillOpacity: 0.12, weight: 1 }).addTo(map);
+  }
+  adminOrderMaps[order.orderId] = map;
+  setTimeout(() => map.invalidateSize(), 80);
 }
 
 async function handleOrderStatusChange(orderId, newStatus) {
@@ -695,7 +835,7 @@ function chatCustomerWhatsApp(phone, orderId, name) {
 // 5. Customers & Users Management
 async function loadAdminUsers() {
   try {
-    const res = await fetch('/api/admin/users');
+    const res = await fetch('/api/admin/users', { headers: adminHeaders(false) });
     if (!res.ok) return;
     adminUsers = await res.json();
 
@@ -843,8 +983,8 @@ function switchAdminTab(tab) {
   if (tab === 'about') loadAdminAbout();
 }
 
-// ===== ABOUT US MANAGEMENT =====
-const ABOUT_MEMBER_KEYS = ['founder', 'developer', 'manager'];
+// ===== ABOUT US CMS & CONTENT MANAGEMENT =====
+let currentAboutTeam = [];
 
 function setAboutPhotoPreview(key, url) {
   const preview = document.getElementById(`about-${key}-preview`);
@@ -864,35 +1004,213 @@ function setAboutPhotoPreview(key, url) {
   }
 }
 
+function renderTeamMembersList() {
+  const container = document.getElementById('about-team-members-container');
+  if (!container) return;
+
+  if (currentAboutTeam.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-8 text-center bg-[#0B0E13] rounded-2xl border border-[#1F2632] p-6 text-neutral-400">
+        <p class="text-xs font-semibold">No team members added yet.</p>
+        <button type="button" onclick="addNewTeamMember()" class="mt-3 px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold uppercase tracking-wider transition-colors">
+          + Add First Team Member
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = currentAboutTeam.map((m, idx) => {
+    const key = m.key || `member_${idx}`;
+    const initials = (m.name || 'TM').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'TM';
+    return `
+      <div class="p-5 rounded-3xl bg-[#0B0E13] border border-[#1F2632] space-y-4 relative group" data-team-index="${idx}">
+        <div class="flex items-center justify-between border-b border-[#1F2632]/80 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span class="font-heading text-xs font-bold text-amber-400 uppercase tracking-wider">${m.role || 'Team Member'}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="flex items-center gap-1.5 text-[10px] font-semibold text-neutral-300 cursor-pointer">
+              <input type="checkbox" onchange="updateTeamMemberField(${idx}, 'enabled', this.checked)" class="accent-amber-500 w-3.5 h-3.5" ${m.enabled !== false ? 'checked' : ''} />
+              <span>Show</span>
+            </label>
+            <button type="button" onclick="deleteTeamMember(${idx})" class="p-1 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Delete Member">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Photo & Basic Info -->
+        <div class="flex items-center gap-4">
+          <div class="relative w-20 h-20 rounded-2xl overflow-hidden border border-[#1F2632] bg-[#12161F] flex items-center justify-center flex-shrink-0">
+            ${m.photoUrl 
+              ? `<img src="${m.photoUrl}" alt="${m.name}" class="w-full h-full object-cover object-top" id="team-photo-preview-${idx}" />`
+              : `<div class="font-heading text-xl font-bold text-amber-500" id="team-photo-placeholder-${idx}">${initials}</div>`
+            }
+          </div>
+          <div class="flex-1 space-y-1.5">
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="document.getElementById('team-file-input-${idx}').click()" class="px-2.5 py-1 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 text-[10px] font-bold uppercase tracking-wider transition-colors">
+                Photo
+              </button>
+              ${m.photoUrl ? `
+                <button type="button" onclick="removeTeamMemberPhoto(${idx})" class="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-wider transition-colors">
+                  Remove
+                </button>
+              ` : ''}
+            </div>
+            <input type="file" id="team-file-input-${idx}" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" onchange="handleTeamMemberPhoto(${idx}, this)" />
+            <div class="flex items-center gap-2 pt-1 text-[11px] text-neutral-400">
+              <span>Order:</span>
+              <input type="number" min="1" max="50" value="${m.order || (idx + 1)}" onchange="updateTeamMemberField(${idx}, 'order', parseInt(this.value, 10) || 1)" class="w-14 bg-[#12161F] border border-[#1F2632] rounded-lg px-2 py-0.5 text-white text-center text-xs" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Fields -->
+        <div class="space-y-2.5 pt-1">
+          <div>
+            <label class="block font-semibold text-neutral-400 text-[10px] uppercase mb-0.5">Name</label>
+            <input type="text" value="${m.name || ''}" oninput="updateTeamMemberField(${idx}, 'name', this.value)" maxlength="120" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-1.5 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="Full Name" />
+          </div>
+          <div>
+            <label class="block font-semibold text-neutral-400 text-[10px] uppercase mb-0.5">Role / Position</label>
+            <input type="text" value="${m.role || ''}" oninput="updateTeamMemberField(${idx}, 'role', this.value)" maxlength="120" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-1.5 text-white text-xs focus:outline-none focus:border-amber-500" placeholder="e.g. Lead Horologist" />
+          </div>
+          <div>
+            <label class="block font-semibold text-neutral-400 text-[10px] uppercase mb-0.5">Bio</label>
+            <textarea rows="2" oninput="updateTeamMemberField(${idx}, 'bio', this.value)" maxlength="1000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3 py-1.5 text-white text-xs focus:outline-none focus:border-amber-500 leading-relaxed" placeholder="Short biography…">${m.bio || ''}</textarea>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <input type="text" value="${(m.social && m.social.instagram) || ''}" oninput="updateTeamMemberSocial(${idx}, 'instagram', this.value)" maxlength="300" class="bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1 text-white text-[10px] focus:outline-none focus:border-amber-500" placeholder="Instagram URL" />
+            <input type="text" value="${(m.social && m.social.twitter) || ''}" oninput="updateTeamMemberSocial(${idx}, 'twitter', this.value)" maxlength="300" class="bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1 text-white text-[10px] focus:outline-none focus:border-amber-500" placeholder="X / Twitter" />
+            <input type="text" value="${(m.social && m.social.linkedin) || ''}" oninput="updateTeamMemberSocial(${idx}, 'linkedin', this.value)" maxlength="300" class="bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1 text-white text-[10px] focus:outline-none focus:border-amber-500" placeholder="LinkedIn" />
+            <input type="email" value="${(m.social && m.social.email) || ''}" oninput="updateTeamMemberSocial(${idx}, 'email', this.value)" maxlength="300" class="bg-[#12161F] border border-[#1F2632] rounded-lg px-2.5 py-1 text-white text-[10px] focus:outline-none focus:border-amber-500" placeholder="Email" />
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addNewTeamMember() {
+  const newIndex = currentAboutTeam.length + 1;
+  currentAboutTeam.push({
+    key: `member_${Date.now()}`,
+    name: 'New Member',
+    role: 'Watch Specialist',
+    bio: 'Dedicated to luxury timepiece inspection, finishing, and customer satisfaction.',
+    photoUrl: '',
+    enabled: true,
+    order: newIndex,
+    social: { instagram: '', twitter: '', linkedin: '', email: '' }
+  });
+  renderTeamMembersList();
+  showToast('New team member card added! Fill in details and click Save Changes.', 'info');
+}
+
+function deleteTeamMember(idx) {
+  const memberName = currentAboutTeam[idx]?.name || 'this team member';
+  if (!confirm(`Are you sure you want to delete ${memberName}?`)) return;
+  currentAboutTeam.splice(idx, 1);
+  renderTeamMembersList();
+  showToast('Team member removed. Click Save Changes to publish.', 'info');
+}
+
+function updateTeamMemberField(idx, field, value) {
+  if (currentAboutTeam[idx]) {
+    currentAboutTeam[idx][field] = value;
+  }
+}
+
+function updateTeamMemberSocial(idx, socialField, value) {
+  if (currentAboutTeam[idx]) {
+    if (!currentAboutTeam[idx].social) currentAboutTeam[idx].social = {};
+    currentAboutTeam[idx].social[socialField] = value;
+  }
+}
+
+async function handleTeamMemberPhoto(idx, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('photo', file);
+
+  try {
+    showToast('Uploading team photo...', 'info');
+    const res = await fetch('/api/about/photo', {
+      method: 'POST',
+      headers: adminHeaders(false),
+      body: formData
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      if (currentAboutTeam[idx]) {
+        currentAboutTeam[idx].photoUrl = data.photoUrl;
+      }
+      renderTeamMembersList();
+      showToast('Photo uploaded! Click "Save Changes" to publish.', 'success');
+    } else {
+      showToast(data.error || 'Photo upload failed', 'error');
+    }
+  } catch (e) {
+    showToast('Photo upload error', 'error');
+  } finally {
+    input.value = '';
+  }
+}
+
+function removeTeamMemberPhoto(idx) {
+  if (currentAboutTeam[idx]) {
+    currentAboutTeam[idx].photoUrl = '';
+    renderTeamMembersList();
+    showToast('Photo removed. Click Save Changes to publish.', 'info');
+  }
+}
+
 function fillAboutForm(about) {
+  if (!about) return;
   const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v == null ? '' : v; };
   const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = v !== false; };
 
-  setVal('about-page-title', about.pageTitle);
-  setVal('about-intro', about.intro);
-  setVal('about-story', about.story);
-  setVal('about-mission', about.mission);
-  setVal('about-vision', about.vision);
-  setVal('about-quality', about.quality);
+  // 1. General Content
+  setVal('about-page-title', about.pageTitle || 'About AM COLLECTION');
+  setVal('about-intro', about.intro || '');
+  setVal('about-story', about.story || '');
+  setVal('about-mission', about.mission || '');
+  setVal('about-vision', about.vision || '');
+  setVal('about-values', about.values || 'Precision Craftsmanship • Absolute Transparency • Collector-Grade 1:1 Perfection • Pan-India Doorstep Trust');
+  setVal('about-quality', about.quality || '');
 
+  // 2. Founder / Owner Profile
+  const owner = about.owner || (Array.isArray(about.team) ? about.team.find(t => t.key === 'founder' || t.role?.includes('Founder')) : null) || {};
+  setChk('about-founder-enabled', owner.enabled !== false);
+  setVal('about-founder-name', owner.name || 'Founder Name');
+  setVal('about-founder-role', owner.role || 'Founder & CEO');
+  setVal('about-founder-bio', owner.bio || '');
+  setVal('about-founder-longbio', owner.longBio || '');
+  setVal('about-founder-photo', owner.photoUrl || '');
+  setVal('about-founder-instagram', (owner.social && owner.social.instagram) || '');
+  setVal('about-founder-twitter', (owner.social && owner.social.twitter) || '');
+  setVal('about-founder-linkedin', (owner.social && owner.social.linkedin) || '');
+  setVal('about-founder-email', (owner.social && owner.social.email) || '');
+  setVal('about-founder-phone', (owner.social && owner.social.phone) || '');
+  setAboutPhotoPreview('founder', owner.photoUrl || '');
+
+  // 3. Dynamic Team Members
+  currentAboutTeam = Array.isArray(about.team) ? JSON.parse(JSON.stringify(about.team)) : [];
+  renderTeamMembersList();
+
+  // 4. Section Visibility & Order
   (about.sections || []).forEach(s => {
     setChk(`about-sec-${s.key}`, s.enabled);
     setVal(`about-sec-order-${s.key}`, s.order);
   });
 
-  (about.team || []).forEach(m => {
-    setChk(`about-${m.key}-enabled`, m.enabled);
-    setVal(`about-${m.key}-name`, m.name);
-    setVal(`about-${m.key}-role`, m.role);
-    setVal(`about-${m.key}-bio`, m.bio);
-    setVal(`about-${m.key}-photo`, m.photoUrl);
-    setVal(`about-${m.key}-instagram`, m.social && m.social.instagram);
-    setVal(`about-${m.key}-twitter`, m.social && m.social.twitter);
-    setVal(`about-${m.key}-linkedin`, m.social && m.social.linkedin);
-    setVal(`about-${m.key}-email`, m.social && m.social.email);
-    setAboutPhotoPreview(m.key, m.photoUrl);
-  });
-
+  // 5. Who Is Who
   (about.whoIsWho || []).forEach(w => {
     setChk(`about-who-${w.role}-enabled`, w.enabled);
     setVal(`about-who-${w.role}-title`, w.title);
@@ -903,23 +1221,31 @@ function fillAboutForm(about) {
 
 async function loadAdminAbout(manual = false) {
   try {
-    const res = await fetch('/api/about');
+    const res = await fetch('/api/about', {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    });
     if (!res.ok) throw new Error('status ' + res.status);
     const about = await res.json();
     fillAboutForm(about);
-    if (manual) showToast('About Us content loaded from database.', 'success');
+    if (manual) showToast('About Us content loaded from MongoDB Atlas! 💎', 'success');
   } catch (e) {
-    showToast('Could not load About Us content from the database.', 'error');
+    showToast('Could not load About Us content from MongoDB Atlas.', 'error');
   }
 }
 
 async function handleAboutPhoto(key, input) {
   const file = input.files && input.files[0];
   if (!file) return;
+
   const formData = new FormData();
   formData.append('photo', file);
+
   try {
-    showToast('Uploading photo...', 'info');
+    showToast('Uploading founder photo...', 'info');
     const res = await fetch('/api/about/photo', {
       method: 'POST',
       headers: adminHeaders(false),
@@ -930,7 +1256,7 @@ async function handleAboutPhoto(key, input) {
       const hidden = document.getElementById(`about-${key}-photo`);
       if (hidden) hidden.value = data.photoUrl;
       setAboutPhotoPreview(key, data.photoUrl);
-      showToast('Photo uploaded! Click "Save About Us" to publish it.', 'success');
+      showToast('Photo uploaded! Click "Save Changes" to publish.', 'success');
     } else {
       showToast(data.error || 'Photo upload failed', 'error');
     }
@@ -945,17 +1271,51 @@ function removeAboutPhoto(key) {
   const hidden = document.getElementById(`about-${key}-photo`);
   if (hidden) hidden.value = '';
   setAboutPhotoPreview(key, '');
-  showToast('Photo removed. Click "Save About Us" to publish the change.', 'info');
+  showToast('Photo removed. Click "Save Changes" to publish.', 'info');
 }
 
 async function handleAboutSubmit(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   const getVal = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
   const getChk = id => { const el = document.getElementById(id); return el ? el.checked : true; };
   const getNum = id => { const el = document.getElementById(id); const n = parseInt(el && el.value, 10); return Number.isFinite(n) ? n : 0; };
 
-  const sectionKeys = ['intro', 'story', 'mission', 'team', 'whoIsWho'];
-  const sectionLabels = { intro: 'Brand Introduction', story: 'Our Story', mission: 'Mission & Vision', team: 'Meet The Team', whoIsWho: 'Who Is Who' };
+  const sectionKeys = ['intro', 'story', 'mission', 'values', 'owner', 'team', 'quality', 'whoIsWho'];
+  const sectionLabels = {
+    intro: 'Brand Introduction',
+    story: 'Our Story',
+    mission: 'Mission & Vision',
+    values: 'Core Values',
+    owner: 'Founder Profile',
+    team: 'Meet The Team',
+    quality: 'Quality Standard',
+    whoIsWho: 'Who Is Who'
+  };
+
+  const owner = {
+    name: getVal('about-founder-name'),
+    role: getVal('about-founder-role'),
+    bio: getVal('about-founder-bio'),
+    longBio: getVal('about-founder-longbio'),
+    photoUrl: getVal('about-founder-photo'),
+    enabled: getChk('about-founder-enabled'),
+    social: {
+      instagram: getVal('about-founder-instagram'),
+      twitter: getVal('about-founder-twitter'),
+      linkedin: getVal('about-founder-linkedin'),
+      email: getVal('about-founder-email'),
+      phone: getVal('about-founder-phone')
+    }
+  };
+
+  const whoRoles = ['founder', 'developer', 'manager'];
+  const whoIsWho = whoRoles.map((k, i) => ({
+    role: k,
+    title: getVal(`about-who-${k}-title`),
+    description: getVal(`about-who-${k}-desc`),
+    enabled: getChk(`about-who-${k}-enabled`),
+    order: getNum(`about-who-${k}-order`) || (i + 1)
+  }));
 
   const payload = {
     pageTitle: getVal('about-page-title'),
@@ -963,34 +1323,24 @@ async function handleAboutSubmit(e) {
     story: getVal('about-story'),
     mission: getVal('about-mission'),
     vision: getVal('about-vision'),
+    values: getVal('about-values'),
     quality: getVal('about-quality'),
-    sections: sectionKeys.map(k => ({ key: k, label: sectionLabels[k], enabled: getChk(`about-sec-${k}`), order: getNum(`about-sec-order-${k}`) })),
-    team: ABOUT_MEMBER_KEYS.map(k => ({
+    owner,
+    sections: sectionKeys.map((k, idx) => ({
       key: k,
-      name: getVal(`about-${k}-name`),
-      role: getVal(`about-${k}-role`),
-      bio: getVal(`about-${k}-bio`),
-      photoUrl: getVal(`about-${k}-photo`),
-      enabled: getChk(`about-${k}-enabled`),
-      order: ABOUT_MEMBER_KEYS.indexOf(k) + 1,
-      social: {
-        instagram: getVal(`about-${k}-instagram`),
-        twitter: getVal(`about-${k}-twitter`),
-        linkedin: getVal(`about-${k}-linkedin`),
-        email: getVal(`about-${k}-email`)
-      }
+      label: sectionLabels[k],
+      enabled: getChk(`about-sec-${k}`),
+      order: getNum(`about-sec-order-${k}`) || (idx + 1)
     })),
-    whoIsWho: ABOUT_MEMBER_KEYS.map((k, i) => ({
-      role: k,
-      title: getVal(`about-who-${k}-title`),
-      description: getVal(`about-who-${k}-desc`),
-      enabled: getChk(`about-who-${k}-enabled`),
-      order: getNum(`about-who-${k}-order`) || (i + 1)
-    }))
+    team: currentAboutTeam.map((m, idx) => ({
+      ...m,
+      order: Number(m.order) || (idx + 1)
+    })),
+    whoIsWho
   };
 
   try {
-    showToast('Saving About Us to database...', 'info');
+    showToast('Saving About Us changes to MongoDB Atlas...', 'info');
     const res = await fetch('/api/about', {
       method: 'PUT',
       headers: adminHeaders(),
@@ -998,13 +1348,13 @@ async function handleAboutSubmit(e) {
     });
     const data = await res.json();
     if (res.ok && data.success) {
-      showToast('About Us saved to database! ✅', 'success');
+      showToast('About Us published successfully to MongoDB Atlas! ✅', 'success');
       if (data.about) fillAboutForm(data.about);
     } else {
       showToast(data.error || 'Failed to save About Us', 'error');
     }
   } catch (e) {
-    showToast('Network error saving About Us', 'error');
+    showToast('Network error saving About Us to database', 'error');
   }
 }
 

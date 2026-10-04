@@ -287,6 +287,65 @@
         </section>`;
       },
 
+      values(about) {
+        if (!about.values) return '';
+        const items = about.values.split(/[•\n]+/).map(v => v.trim()).filter(Boolean);
+        if (!items.length) return '';
+        const cards = items.map(v => `
+          <div class="rounded-2xl bg-[#111827] border border-[#2D3748] hover:border-[#C9A96E]/40 p-6 text-center shadow-lg transition-all">
+            <div class="w-10 h-10 rounded-xl bg-[#1A2235] border border-[#C9A96E]/30 flex items-center justify-center mx-auto mb-3">
+              <span class="w-2.5 h-2.5 rotate-45 bg-[#C9A96E]"></span>
+            </div>
+            <p class="font-heading text-sm font-bold text-[#F1F0ED] leading-relaxed">${escapeHtml(v)}</p>
+          </div>
+        `).join('');
+        return `
+        <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
+          <div class="text-center">
+            <span class="inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.3em] uppercase text-[#C9A96E]">
+              <span class="h-px w-8 bg-[#C9A96E]/60"></span> Principles <span class="h-px w-8 bg-[#C9A96E]/60"></span>
+            </span>
+            <h2 class="mt-4 font-heading text-2xl sm:text-3xl font-black text-[#F1F0ED]">Core Values</h2>
+          </div>
+          <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">${cards}</div>
+        </section>`;
+      },
+
+      owner(about) {
+        const o = about.owner;
+        if (!o || o.enabled === false || (!o.name && !o.bio && !o.longBio && !o.photoUrl)) return '';
+        const initials = (o.name || 'Founder').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const photo = o.photoUrl
+          ? `<img src="${escapeHtml(o.photoUrl)}" alt="${escapeHtml(o.name || 'Founder')}" loading="lazy" class="w-full h-80 sm:h-96 object-cover object-top rounded-3xl border border-[#C9A96E]/30 shadow-2xl">`
+          : `<div class="w-full h-80 sm:h-96 flex items-center justify-center bg-[#0F172A] rounded-3xl border border-[#2D3748]">
+               <span class="font-heading text-5xl font-black text-[#C9A96E]">${escapeHtml(initials)}</span>
+             </div>`;
+        const socialBtn = (label, href) => href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl border border-[#2D3748] bg-[#1A2235] text-xs font-bold text-[#9CA3AF] hover:text-[#C9A96E] hover:border-[#C9A96E] transition-colors">${label}</a>` : '';
+        const socials = [
+          socialBtn('Instagram', o.social && o.social.instagram),
+          socialBtn('X', o.social && o.social.twitter),
+          socialBtn('LinkedIn', o.social && o.social.linkedin),
+          o.social && o.social.email ? `<a href="mailto:${escapeHtml(o.social.email)}" class="px-3 py-1.5 rounded-xl border border-[#2D3748] bg-[#1A2235] text-xs font-bold text-[#9CA3AF] hover:text-[#C9A96E] hover:border-[#C9A96E] transition-colors">Email</a>` : '',
+          o.social && o.social.phone ? `<a href="tel:${escapeHtml(o.social.phone)}" class="px-3 py-1.5 rounded-xl border border-[#2D3748] bg-[#1A2235] text-xs font-bold text-[#9CA3AF] hover:text-[#C9A96E] hover:border-[#C9A96E] transition-colors">Call</a>` : ''
+        ].join('');
+
+        return `
+        <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 rise-in">
+          <div class="rounded-3xl bg-gradient-to-br from-[#111827] via-[#0D121F] to-[#0B0F19] border border-[#C9A96E]/30 p-8 sm:p-12 shadow-2xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            <div class="md:col-span-5">
+              ${photo}
+            </div>
+            <div class="md:col-span-7 space-y-4">
+              <span class="inline-block px-3 py-1 rounded-lg bg-[#1A2235] border border-[#C9A96E]/40 text-xs font-bold tracking-wider uppercase text-[#E2CFA5]">${escapeHtml(o.role || 'Founder & CEO')}</span>
+              <h2 class="font-heading text-2xl sm:text-3xl font-black text-[#F1F0ED]">${escapeHtml(o.name || 'Founder')}</h2>
+              ${o.bio ? `<p class="text-sm font-medium text-[#C9A96E] leading-relaxed">${escapeHtml(o.bio)}</p>` : ''}
+              ${o.longBio ? `<div class="text-xs sm:text-sm text-[#9CA3AF] leading-relaxed space-y-2">${nl2p(o.longBio)}</div>` : ''}
+              ${socials.trim() ? `<div class="pt-2 flex flex-wrap gap-2">${socials}</div>` : ''}
+            </div>
+          </div>
+        </section>`;
+      },
+
       team(about) {
         const members = (about.team || []).filter(m => m.enabled !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
         if (!members.length) return '';
@@ -367,10 +426,10 @@
     };
 
     function renderAbout(about) {
-      const order = { intro: 1, story: 2, mission: 3, team: 4, quality: 5, whoIsWho: 6 };
+      const defaultOrder = { intro: 1, story: 2, mission: 3, values: 4, owner: 5, team: 6, quality: 7, whoIsWho: 8 };
       const sections = Array.isArray(about.sections) && about.sections.length
         ? [...about.sections].sort((a, b) => (a.order || 0) - (b.order || 0))
-        : Object.keys(order).map(k => ({ key: k, enabled: true, order: order[k] }));
+        : Object.keys(defaultOrder).map(k => ({ key: k, enabled: true, order: defaultOrder[k] }));
       const html = sections
         .filter(s => s.enabled !== false && renderers[s.key])
         .map(s => renderers[s.key](about))

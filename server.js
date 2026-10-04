@@ -12,7 +12,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || 'admin123';
-const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || '';
+const MONGODB_URI = process.env.MONGO_URI || process.env.MONGODB_URI || '';
 
 // =====================================================
 // DIRECTORIES
@@ -123,13 +123,25 @@ const DEFAULT_ABOUT = {
   story: 'What began as a passion for horology grew into a mission: to make legendary watchmaking accessible without compromise. Every piece in our vault is measured against the original — weight, finish, movement sweep — before it earns the AM COLLECTION name.',
   mission: 'To deliver impeccably crafted luxury timepieces with transparent pricing, honest quality checks, and service that treats every customer like a collector.',
   vision: 'To become India\'s most trusted destination for master copy watches — where craftsmanship, trust, and timeless style meet.',
-  quality: 'Every watch passes a 27-point inspection covering movement accuracy, case finishing, glass clarity, strap integrity, and water resistance before dispatch. No piece ships unless it would fool a jeweller\'s loupe.',
+  values: 'Precision Craftsmanship • Absolute Transparency • Collector-Grade 1:1 Perfection • Pan-India Doorstep Trust',
+  owner: {
+    name: 'Founder Name',
+    role: 'Founder & CEO',
+    bio: 'Drives the brand vision, curates the collection, and sets the quality standard every watch must meet.',
+    longBio: 'With over a decade of horological appreciation, our founder established AM COLLECTION to bring master-grade timepieces to Indian collectors without exorbitant markups.',
+    photoUrl: '',
+    enabled: true,
+    social: { instagram: '', twitter: '', linkedin: '', email: '', phone: '' }
+  },
   sections: [
     { key: 'intro',    label: 'Brand Introduction', enabled: true, order: 1 },
     { key: 'story',    label: 'Our Story',          enabled: true, order: 2 },
     { key: 'mission',  label: 'Mission & Vision',   enabled: true, order: 3 },
-    { key: 'team',     label: 'Meet The Team',      enabled: true, order: 4 },
-    { key: 'whoIsWho', label: 'Who Is Who',         enabled: true, order: 5 }
+    { key: 'values',   label: 'Core Values',        enabled: true, order: 4 },
+    { key: 'owner',    label: 'Founder Profile',    enabled: true, order: 5 },
+    { key: 'team',     label: 'Meet The Team',      enabled: true, order: 6 },
+    { key: 'quality',  label: 'Quality Standard',   enabled: true, order: 7 },
+    { key: 'whoIsWho', label: 'Who Is Who',         enabled: true, order: 8 }
   ],
   team: [
     { key: 'founder',   name: 'Founder Name',   role: 'Founder & CEO',       bio: 'Drives the brand vision, curates the collection, and sets the quality standard every watch must meet.', photoUrl: '', enabled: true, order: 1, social: { instagram: '', twitter: '', linkedin: '', email: '' } },
@@ -148,8 +160,8 @@ const DEFAULT_ABOUT = {
 // MONGOOSE SCHEMAS & MODELS (Permanent Cloud Database)
 // =====================================================
 const productSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
-  brand: String,
+  id: { type: String, required: true, unique: true, index: true },
+  brand: { type: String, index: true },
   model: String,
   tagline: String,
   price: Number,
@@ -157,7 +169,7 @@ const productSchema = new mongoose.Schema({
   rating: { type: Number, default: 4.9 },
   reviewsCount: { type: Number, default: 50 },
   badge: { type: String, default: '1:1 MASTER' },
-  category: String,
+  category: { type: String, index: true },
   movement: String,
   dialSize: String,
   glass: String,
@@ -166,14 +178,17 @@ const productSchema = new mongoose.Schema({
   videoUrl: String,
   description: String,
   features: [String],
-  isBestSeller: { type: Boolean, default: false },
-  isNewArrival: { type: Boolean, default: false },
-  isTrending: { type: Boolean, default: false },
-  isHidden: { type: Boolean, default: false },
+  isBestSeller: { type: Boolean, default: false, index: true },
+  isNewArrival: { type: Boolean, default: false, index: true },
+  isTrending: { type: Boolean, default: false, index: true },
+  isHidden: { type: Boolean, default: false, index: true },
   stock: { type: Number, default: 20 },
   discount: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now, index: true }
 });
+
+productSchema.index({ isHidden: 1, createdAt: -1 });
+productSchema.index({ isHidden: 1, category: 1, createdAt: -1 });
 
 const brandingSchema = new mongoose.Schema({
   storeName: { type: String, default: 'AM COLLECTION' },
@@ -219,6 +234,16 @@ const orderSchema = new mongoose.Schema({
   city: String,
   state: String,
   pincode: String,
+  deliveryLocation: {
+    latitude: Number,
+    longitude: Number,
+    accuracy: Number,
+    address: String,
+    city: String,
+    state: String,
+    pincode: String
+  },
+  locationCapturedAt: Date,
   items: Array,
   subtotal: Number,
   discount: Number,
@@ -336,7 +361,9 @@ const aboutSchema = new mongoose.Schema({
   story: { type: String, default: '' },
   mission: { type: String, default: '' },
   vision: { type: String, default: '' },
+  values: { type: String, default: '' },
   quality: { type: String, default: '' },
+  owner: { type: Object, default: () => ({ ...DEFAULT_ABOUT.owner }) },
   sections: { type: [aboutSectionSchema], default: DEFAULT_ABOUT.sections },
   team: { type: [aboutMemberSchema], default: DEFAULT_ABOUT.team },
   whoIsWho: { type: [aboutWhoSchema], default: DEFAULT_ABOUT.whoIsWho },
@@ -355,37 +382,65 @@ const Review = mongoose.models.Review || mongoose.model('Review', reviewSchema);
 const Notification = mongoose.models.Notification || mongoose.model('Notification', notificationSchema);
 const About = mongoose.models.About || mongoose.model('About', aboutSchema);
 
-// Connection Manager
-async function initMongo() {
-  if (mongoose.connection.readyState === 1) return;
-
-  const uri = MONGODB_URI || 'mongodb://127.0.0.1:27017/am_collection';
-  try {
-    console.log(`🔄 Connecting to MongoDB: ${uri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}...`);
-    await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 10000,
-      connectTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      maxPoolSize: 10
-    });
-    console.log('✅ MongoDB Atlas connected successfully! (Permanent Cloud Storage)');
-  } catch (err) {
-    console.error('\n======================================================');
-    console.error('🚨 MONGODB CONNECTION NOTICE:');
-    console.error(`Could not connect to MongoDB at: ${uri}`);
-    console.error(`Error: ${err.message}`);
-    console.error('\n👉 TO FIX PERMANENTLY (RECOMMENDED):');
-    console.error('1. Create a FREE MongoDB Atlas database at https://www.mongodb.com/cloud/atlas');
-    console.error('2. Add your connection string in your .env file:');
-    console.error('   MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/am_collection');
-    console.error('3. If running locally, you can also start local MongoDB (mongod).');
-    console.error('======================================================\n');
-  }
+// =====================================================
+// MONGOOSE CACHED CONNECTION (Vercel Serverless + Production Engine)
+// =====================================================
+let cachedMongo = global.mongoose;
+if (!cachedMongo) {
+  cachedMongo = global.mongoose = { conn: null, promise: null };
 }
 
-mongoose.connection.on('connected', () => {
-  seedInitialOnce().catch(err => console.error('Auto-seed error on connect:', err.message));
-});
+async function connectToDatabase() {
+  const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
+  if (!uri) {
+    const err = new Error('MONGO_URI is missing from environment variables');
+    err.code = 'MONGO_URI_MISSING';
+    throw err;
+  }
+
+  if (cachedMongo.conn && mongoose.connection.readyState === 1) {
+    return cachedMongo.conn;
+  }
+
+  if (mongoose.connection.readyState === 0 || mongoose.connection.readyState === 3) {
+    cachedMongo.conn = null;
+    cachedMongo.promise = null;
+  }
+
+  if (!cachedMongo.promise) {
+    const opts = {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+      socketTimeoutMS: 30000,
+      maxPoolSize: 10
+    };
+
+    const sanitizedUri = uri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@');
+    console.log(`🔄 Establishing cached MongoDB Atlas connection: ${sanitizedUri}...`);
+
+    cachedMongo.promise = mongoose.connect(uri, opts).then((m) => {
+      console.log('✅ MongoDB Atlas connected successfully! (Cached Connection)');
+      return m;
+    }).catch((err) => {
+      cachedMongo.promise = null;
+      console.error('🚨 MongoDB Atlas Connection Error:', err.message);
+      throw err;
+    });
+  }
+
+  try {
+    cachedMongo.conn = await cachedMongo.promise;
+  } catch (e) {
+    cachedMongo.promise = null;
+    throw e;
+  }
+
+  return cachedMongo.conn;
+}
+
+// Backward-compatible alias
+const initMongo = connectToDatabase;
 
 // Unified Pure-Mongoose CRUD Layer (No NeDB Fallback)
 const DB = {
@@ -550,22 +605,22 @@ const DB = {
 };
 
 // =====================================================
-// SEED DATABASE (Run only if never initialized before)
+// SEED DATABASE (Run only if database is completely empty and uninitialized)
 // =====================================================
 async function seedInitialOnce() {
   try {
     if (mongoose.connection.readyState !== 1) {
       return;
     }
-    const count = await DB.countProducts();
     const branding = await DB.getBranding();
-    if (branding && branding.isCatalogInitialized && count > 0) {
-      // Catalog has already been initialized and populated before.
+    if (branding && branding.isCatalogInitialized) {
+      // Catalog has already been initialized previously.
       // NEVER auto-seed or restore deleted products!
       return;
     }
 
-    if (count === 0) {
+    const count = await DB.countProducts();
+    if (count === 0 && (!branding || !branding.isCatalogInitialized)) {
       console.log('🌱 Performing one-time initialization of catalog...');
       for (const p of INITIAL_PRODUCTS) {
         await DB.addProduct(p);
@@ -582,31 +637,83 @@ async function seedInitialOnce() {
 }
 
 // =====================================================
+// API CACHE-CONTROL & DATABASE CONNECTION MIDDLEWARE
+// =====================================================
+app.use('/api', async (req, res, next) => {
+  // Prevent browser/proxy caching for real-time persistence
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+
+  // Health endpoint handles its own connection diagnostics
+  if (req.path === '/health') {
+    return next();
+  }
+
+  try {
+    await connectToDatabase();
+    next();
+  } catch (err) {
+    const isMissingUri = err.code === 'MONGO_URI_MISSING' || (!process.env.MONGO_URI && !process.env.MONGODB_URI);
+    return res.status(503).json({
+      error: 'Database connection unavailable',
+      message: isMissingUri 
+        ? 'MONGO_URI is missing in Vercel environment variables.' 
+        : 'Could not connect to MongoDB Atlas cluster.',
+      connected: false
+    });
+  }
+});
+
+// =====================================================
 // REST API ROUTES
 // =====================================================
 
-// Health / Status
+// Real Database Health Check (Actual Ping Verification)
 app.get('/api/health', async (req, res) => {
+  let isConnected = false;
   try {
-    const isConnected = mongoose.connection.readyState === 1;
-    let productsCount = 0;
-    let ordersCount = 0;
-    let usersCount = 0;
-    if (isConnected) {
-      productsCount = await DB.countProducts();
-      ordersCount = await DB.countOrders();
-      usersCount = await DB.countUsers();
+    await connectToDatabase();
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.db.admin().ping();
+      isConnected = true;
     }
-    res.json({
-      status: isConnected ? 'ok' : 'db_disconnected',
-      database: isConnected ? 'MongoDB Atlas (Connected)' : 'MongoDB Atlas (Disconnected - Set MONGO_URI in .env)',
-      products: productsCount,
-      orders: ordersCount,
-      customers: usersCount,
-      uptime: Math.round(process.uptime()) + 's'
-    });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    isConnected = false;
+  }
+
+  if (isConnected) {
+    try {
+      const [productsCount, ordersCount, usersCount] = await Promise.all([
+        DB.countProducts(),
+        DB.countOrders(),
+        DB.countUsers()
+      ]);
+      return res.json({
+        status: 'ok',
+        database: 'MongoDB Atlas — Connected',
+        connected: true,
+        products: productsCount,
+        orders: ordersCount,
+        customers: usersCount,
+        uptime: Math.round(process.uptime()) + 's'
+      });
+    } catch (e) {
+      return res.status(500).json({
+        status: 'error',
+        database: 'MongoDB Atlas — Disconnected',
+        connected: false,
+        error: 'Database query error'
+      });
+    }
+  } else {
+    return res.status(503).json({
+      status: 'disconnected',
+      database: 'MongoDB Atlas — Disconnected',
+      connected: false,
+      error: 'MongoDB Atlas is disconnected. Please check MONGO_URI.'
+    });
   }
 });
 
@@ -737,33 +844,44 @@ app.get('/api/about', async (req, res) => {
   }
 });
 
-// Admin-only update of About Us content
-app.put('/api/about', adminAuth, async (req, res) => {
+// Admin-only update of About Us content (Supports PUT & POST)
+const handleAboutUpdate = async (req, res) => {
   try {
-    const { pageTitle, intro, story, mission, vision, quality, sections, team, whoIsWho } = req.body;
+    const { pageTitle, intro, story, mission, vision, values, quality, owner, sections, team, whoIsWho } = req.body;
     const updates = {
       ...(pageTitle !== undefined && { pageTitle: String(pageTitle).slice(0, 200) }),
       ...(intro !== undefined && { intro: String(intro).slice(0, 5000) }),
       ...(story !== undefined && { story: String(story).slice(0, 5000) }),
       ...(mission !== undefined && { mission: String(mission).slice(0, 5000) }),
       ...(vision !== undefined && { vision: String(vision).slice(0, 5000) }),
+      ...(values !== undefined && { values: String(values).slice(0, 5000) }),
       ...(quality !== undefined && { quality: String(quality).slice(0, 5000) }),
-      ...(Array.isArray(sections) && { sections: sections.slice(0, 20) }),
-      ...(Array.isArray(team) && { team: team.slice(0, 20) }),
-      ...(Array.isArray(whoIsWho) && { whoIsWho: whoIsWho.slice(0, 20) })
+      ...(owner !== undefined && typeof owner === 'object' && { owner }),
+      ...(Array.isArray(sections) && { sections: sections.slice(0, 30) }),
+      ...(Array.isArray(team) && { team: team.slice(0, 50) }),
+      ...(Array.isArray(whoIsWho) && { whoIsWho: whoIsWho.slice(0, 30) })
     };
     const updated = await DB.updateAboutUs(updates);
     res.json({ success: true, about: updated });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-// Team member photo upload — persistent files in /uploads (same system as logo)
+app.put('/api/about', adminAuth, handleAboutUpdate);
+app.post('/api/about', adminAuth, handleAboutUpdate);
+
+// Team/Owner member photo upload — returns data URL for permanent MongoDB storage across Vercel redeploys
 app.post('/api/about/photo', adminAuth, uploadPhoto.single('photo'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No photo uploaded' });
-    res.json({ success: true, photoUrl: `/uploads/${req.file.filename}` });
+    let photoUrl = `/uploads/${req.file.filename}`;
+    try {
+      const buffer = fs.readFileSync(req.file.path);
+      const mime = req.file.mimetype || 'image/jpeg';
+      photoUrl = `data:${mime};base64,${buffer.toString('base64')}`;
+    } catch (e) {}
+    res.json({ success: true, photoUrl });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -773,32 +891,37 @@ app.post('/api/about/photo', adminAuth, uploadPhoto.single('photo'), async (req,
 app.get('/api/products', async (req, res) => {
   try {
     const { category, search, sort, includeHidden } = req.query;
-    let products = await DB.getProducts();
+    const filter = {};
 
     // Storefront does not see hidden products unless explicitly requested by admin
     if (includeHidden !== 'true') {
-      products = products.filter(p => !p.isHidden);
+      filter.isHidden = { $ne: true };
     }
 
     if (category && category !== 'all') {
-      products = products.filter(p => p.category === category.toLowerCase());
+      filter.category = category.toLowerCase().trim();
     }
 
     if (search) {
-      const q = search.toLowerCase().trim();
-      products = products.filter(p =>
-        (p.brand && p.brand.toLowerCase().includes(q)) ||
-        (p.model && p.model.toLowerCase().includes(q)) ||
-        (p.tagline && p.tagline.toLowerCase().includes(q)) ||
-        (p.movement && p.movement.toLowerCase().includes(q))
-      );
+      const q = search.trim();
+      const regex = new RegExp(q, 'i');
+      filter.$or = [
+        { brand: regex },
+        { model: regex },
+        { tagline: regex },
+        { movement: regex }
+      ];
     }
 
-    if (sort === 'price-low')  products.sort((a, b) => a.price - b.price);
-    if (sort === 'price-high') products.sort((a, b) => b.price - a.price);
-    if (sort === 'rating')     products.sort((a, b) => b.rating - a.rating);
-    if (sort === 'newest')     products.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    let queryBuilder = Product.find(filter);
 
+    if (sort === 'price-low') queryBuilder = queryBuilder.sort({ price: 1 });
+    else if (sort === 'price-high') queryBuilder = queryBuilder.sort({ price: -1 });
+    else if (sort === 'rating') queryBuilder = queryBuilder.sort({ rating: -1 });
+    else if (sort === 'newest') queryBuilder = queryBuilder.sort({ createdAt: -1 });
+    else queryBuilder = queryBuilder.sort({ createdAt: -1 });
+
+    const products = await queryBuilder.lean();
     res.json(products);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -946,7 +1069,8 @@ app.post('/api/admin/seed-defaults', adminAuth, async (req, res) => {
 });
 
 // ─── ORDERS & CHECKOUT ───────────────────────────────
-app.get('/api/orders', async (req, res) => {
+// Admin-only: orders may contain GPS delivery coordinates (privacy requirement)
+app.get('/api/orders', adminAuth, async (req, res) => {
   try {
     const orders = await DB.getOrders();
     res.json(orders);
@@ -967,6 +1091,26 @@ app.post('/api/orders', async (req, res) => {
     const coinsEarned = Math.floor(totalAmount / 100) * earnRate;
     const coinsUsed = Number(b.coinsUsed) || 0;
     const coinDiscount = Number(b.coinDiscount) || 0;
+
+    // Optional GPS delivery pinpoint — validated server-side, stored as a snapshot only
+    let deliveryLocation = null;
+    if (b.deliveryLocation && typeof b.deliveryLocation === 'object') {
+      const lat = Number(b.deliveryLocation.latitude);
+      const lng = Number(b.deliveryLocation.longitude);
+      if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+        deliveryLocation = {
+          latitude: lat,
+          longitude: lng,
+          accuracy: b.deliveryLocation.accuracy == null || b.deliveryLocation.accuracy === '' || !Number.isFinite(Number(b.deliveryLocation.accuracy))
+            ? undefined
+            : Number(b.deliveryLocation.accuracy),
+          address: String(b.deliveryLocation.address || '').slice(0, 500),
+          city: String(b.deliveryLocation.city || '').slice(0, 100),
+          state: String(b.deliveryLocation.state || '').slice(0, 100),
+          pincode: String(b.deliveryLocation.pincode || '').slice(0, 10)
+        };
+      }
+    }
 
     const newOrder = {
       orderId,
@@ -1000,6 +1144,12 @@ app.post('/api/orders', async (req, res) => {
       ],
       createdAt: new Date().toISOString()
     };
+
+    if (deliveryLocation) {
+      newOrder.deliveryLocation = deliveryLocation;
+      const captured = b.locationCapturedAt ? new Date(b.locationCapturedAt) : new Date();
+      newOrder.locationCapturedAt = Number.isNaN(captured.getTime()) ? new Date() : captured;
+    }
 
     const saved = await DB.addOrder(newOrder);
 
@@ -1120,7 +1270,12 @@ app.get('/api/customer/orders/:identifier', async (req, res) => {
       const userIdMatch = o.userId && o.userId.toLowerCase() === query;
       return emailMatch || phoneMatch || userIdMatch;
     });
-    res.json(userOrders);
+    // Public tracking never exposes GPS coordinates
+    const safeOrders = userOrders.map(o => {
+      const { deliveryLocation, locationCapturedAt, ...rest } = o;
+      return rest;
+    });
+    res.json(safeOrders);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -1241,7 +1396,7 @@ app.put('/api/customer/profile', async (req, res) => {
 });
 
 // Admin Users List
-app.get('/api/admin/users', async (req, res) => {
+app.get('/api/admin/users', adminAuth, async (req, res) => {
   try {
     const users = await DB.getUsers();
     res.json(users);
@@ -1438,8 +1593,12 @@ app.use((err, req, res, next) => {
 });
 
 async function startServer() {
-  await initMongo();
-  await seedInitialOnce();
+  try {
+    await connectToDatabase();
+    await seedInitialOnce();
+  } catch (e) {
+    console.error('Initial DB bootstrap notice:', e.message);
+  }
 
   app.listen(PORT, () => {
     console.log('\n======================================================');
@@ -1453,9 +1612,6 @@ async function startServer() {
 
 if (require.main === module) {
   startServer();
-} else {
-  // On Vercel serverless functions
-  initMongo().then(() => seedInitialOnce()).catch(console.error);
 }
 
 module.exports = app;
