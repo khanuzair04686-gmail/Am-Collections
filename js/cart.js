@@ -183,7 +183,7 @@ class CartManager {
     drawerContainer.innerHTML = this.items.map(item => `
       <div class="flex items-center gap-3 p-3 bg-[#1A2235] rounded-xl border border-[#2D3748] hover:border-[#C9A96E]/40 shadow-sm transition-all">
         <div class="w-16 h-16 rounded-lg bg-[#0F172A] flex-shrink-0 overflow-hidden border border-[#2D3748] p-1 flex items-center justify-center">
-          <img src="${item.image}" alt="${item.brand} ${item.model}" class="w-full h-full object-contain" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'" />
+          <img src="${item.image}" alt="${item.brand} ${item.model}" class="w-full h-full object-contain" onerror="this.onerror=null;this.src=AMC_IMAGE_PLACEHOLDER" />
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between gap-1">

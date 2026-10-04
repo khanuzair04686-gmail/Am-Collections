@@ -500,7 +500,7 @@ class CheckoutManager {
       itemsList.innerHTML = order.items.map(i => `
         <div class="flex items-center justify-between text-xs py-2 border-b border-[#2D3748]">
           <div class="flex items-center gap-2.5">
-            <img src="${i.image || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=200'}" class="w-10 h-10 object-contain rounded-lg border border-[#2D3748] bg-[#0F172A] p-0.5" />
+            <img src="${i.image || AMC_IMAGE_PLACEHOLDER}" class="w-10 h-10 object-contain rounded-lg border border-[#2D3748] bg-[#0F172A] p-0.5" />
             <div>
               <p class="font-bold text-[#F1F0ED]">${i.brand} ${i.model}</p>
               <p class="text-[11px] text-[#9CA3AF]">Qty: ${i.quantity || 1} • <span class="text-emerald-400">COD Verified</span></p>

@@ -10,7 +10,8 @@
           "about.html",
           "admin.html",
           "css/**",
-          "js/**"
+          "js/**",
+          "uploads/**"
         ]
       }
     }

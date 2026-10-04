@@ -16,7 +16,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="sabrXwatches | Luxury Master Copy Watches India" />
   <meta property="og:description" content="Shop 1:1 master copy luxury watches. Japanese automatic movements, sapphire glass, solid 904L steel. Free Pan-India COD." />
-  <meta property="og:image" content="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop" />
+  <meta property="og:image" content="/uploads/og-sabrxwatches.jpg" />
 
   <!-- Fonts Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -267,22 +267,25 @@
           </div>
         </div>
 
-        <!-- Hero Spotlight Watch Preview -->
+        <!-- Hero Spotlight Watch Preview — slideshow of real MongoDB-backed products -->
         <div class="lg:col-span-5">
-          <div class="mhome-hero-product bg-[#111827]/90 rounded-2xl border border-[#C9A96E]/30 p-3 sm:p-4 shadow-xl hover:border-[#C9A96E] hover:shadow-[0_10px_30px_rgba(201,169,110,0.2)] transition-all flex items-center gap-2.5 sm:gap-4 cursor-pointer w-full rise-in" onclick="openQuickView('amc-01')">
-            <div class="w-20 h-20 sm:w-32 sm:h-32 bg-[#0B0F19] rounded-xl p-1.5 sm:p-2 flex items-center justify-center flex-shrink-0 border border-[#2D3748]">
-              <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop" alt="Rolex Submariner Master" class="w-full h-full object-contain" />
+          <div id="hero-spotlight" class="mhome-hero-product bg-[#111827]/90 rounded-2xl border border-[#C9A96E]/30 p-3 sm:p-4 shadow-xl hover:border-[#C9A96E] hover:shadow-[0_10px_30px_rgba(201,169,110,0.2)] transition-all flex items-center gap-2.5 sm:gap-4 cursor-pointer w-full rise-in hidden">
+            <div class="w-20 h-20 sm:w-32 sm:h-32 bg-[#0B0F19] rounded-xl p-1.5 sm:p-2 flex items-center justify-center flex-shrink-0 border border-[#2D3748] overflow-hidden">
+              <img id="hero-spotlight-img" src="" alt="" class="w-full h-full object-contain" />
             </div>
-            <div class="space-y-1">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-[#1A1207] bg-gradient-to-r from-[#D4B475] to-[#B8943F] px-2 py-0.5 rounded font-mono">BEST SELLER</span>
-              <h3 class="font-heading text-sm sm:text-base font-bold text-[#F1F0ED]">Rolex Submariner 41mm</h3>
-              <p class="text-[11px] text-[#9CA3AF]">1:1 Japanese Automatic Movement</p>
+            <div class="min-w-0 flex-1 space-y-1">
+              <div class="flex items-center gap-2">
+                <span id="hero-spotlight-badge" class="text-[10px] font-bold uppercase tracking-wider text-[#1A1207] bg-gradient-to-r from-[#D4B475] to-[#B8943F] px-2 py-0.5 rounded font-mono">Featured</span>
+                <span id="hero-spotlight-position" class="text-[10px] text-[#6B7280] font-mono"></span>
+              </div>
+              <h3 id="hero-spotlight-name" class="font-heading text-sm sm:text-base font-bold text-[#F1F0ED] truncate"></h3>
+              <p id="hero-spotlight-tagline" class="text-[11px] text-[#9CA3AF] truncate"></p>
               <div class="flex items-baseline gap-2 pt-1">
-                <span class="text-sm sm:text-base font-extrabold text-[#D4B475]">₹4,499</span>
-                <span class="text-xs text-[#6B7280] line-through">₹11,50,000</span>
-                <span class="text-xs font-bold text-[#10B981]">99% OFF</span>
+                <span id="hero-spotlight-price" class="text-sm sm:text-base font-extrabold text-[#D4B475]"></span>
+                <span id="hero-spotlight-original" class="text-xs text-[#6B7280] line-through"></span>
               </div>
               <p class="text-[10px] text-[#10B981] font-semibold">✓ Free Cash on Delivery</p>
+              <div id="hero-spotlight-dots" class="flex items-center gap-1.5 pt-1.5"></div>
             </div>
           </div>
         </div>

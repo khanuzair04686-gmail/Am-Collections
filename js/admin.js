@@ -424,7 +424,7 @@ function renderWatchesTable() {
     <tr class="hover:bg-[#161B25]/40 transition-colors">
       <td class="p-4">
         <div class="flex items-center gap-3">
-          <img src="${w.image}" alt="${w.model}" class="w-12 h-12 rounded-xl object-contain border border-[#1F2632] bg-black flex-shrink-0" onerror="this.src='https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop'" />
+          <img src="${w.image}" alt="${w.model}" class="w-12 h-12 rounded-xl object-contain border border-[#1F2632] bg-black flex-shrink-0" onerror="this.onerror=null;this.src=AMC_ADMIN_PLACEHOLDER" />
           <div>
             <div class="flex items-center gap-1.5 font-bold text-white text-xs">
               ${w.model}

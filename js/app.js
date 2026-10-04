@@ -7,10 +7,6 @@ let currentSort = 'featured';
 let activeQuickViewProduct = null;
 window.pendingCheckoutAction = null;
 
-// Neutral "image unavailable" tile. Deliberately NOT a watch photo: a missing
-// image must never masquerade as another product's picture.
-const AMC_IMAGE_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Crect width='240' height='240' fill='%230F172A'/%3E%3Ccircle cx='120' cy='126' r='52' fill='none' stroke='%23C9A96E' stroke-width='5'/%3E%3Cpath d='M120 96v32l20 12' fill='none' stroke='%23C9A96E' stroke-width='5' stroke-linecap='round'/%3E%3Ctext x='120' y='206' fill='%236B7280' font-family='sans-serif' font-size='13' text-anchor='middle'%3EImage unavailable%3C/text%3E%3C/svg%3E";
-
 // Customer Privilege Authentication State
 let currentCustomer = null;
 try {
@@ -217,7 +213,7 @@ async function fetchProducts() {
         liveProducts = prods;
         renderProducts();
         renderTrendingRail();
-        renderMobilePromo();
+        renderHeroSpotlight();
       } else {
         renderProductsError('Invalid data format received from database.');
       }
@@ -684,18 +680,132 @@ function renderTrendingRail() {
   }).join('');
 }
 
-// ===== MOBILE-FIRST: PROMO SPOTLIGHT (real product data only) =====
+// ===== HERO SPOTLIGHT SLIDESHOW (real MongoDB products only) =====
+// Auto-rotates the store's own featured watches. This is a UI timer only —
+// it never re-queries the API; the catalog is re-read solely on sync events.
+let spotlightSlides = [];
+let spotlightIndex = 0;
+let spotlightTimer = null;
+const SPOTLIGHT_ROTATE_MS = 5000;
+
+function spotlightScore(p) {
+  return (p.isBestSeller ? 3 : 0) + (p.isTrending ? 2 : 0) + (p.isNewArrival ? 1 : 0);
+}
+
+function pickSpotlightSlides() {
+  return [...liveProducts]
+    .filter(p => !p.isHidden && p.image && (typeof p.stock !== 'number' || p.stock > 0))
+    .sort((a, b) => spotlightScore(b) - spotlightScore(a) || (b.rating || 0) - (a.rating || 0) || b.price - a.price)
+    .slice(0, 5);
+}
+
+function paintSpotlight() {
+  const card = document.getElementById('hero-spotlight');
+  if (!card) return;
+  const product = spotlightSlides[spotlightIndex];
+  if (!product) {
+    card.classList.add('hidden');
+    return;
+  }
+
+  const img = document.getElementById('hero-spotlight-img');
+  if (img) {
+    img.src = product.image || AMC_IMAGE_PLACEHOLDER;
+    img.alt = `${product.brand} ${product.model}`;
+  }
+
+  const badge = document.getElementById('hero-spotlight-badge');
+  if (badge) badge.textContent = product.badge || 'Featured';
+
+  const position = document.getElementById('hero-spotlight-position');
+  if (position) position.textContent = `${spotlightIndex + 1} / ${spotlightSlides.length}`;
+
+  const name = document.getElementById('hero-spotlight-name');
+  if (name) name.textContent = `${product.brand} ${product.model}`;
+
+  const tagline = document.getElementById('hero-spotlight-tagline');
+  if (tagline) tagline.textContent = product.tagline || `${product.category} collection`;
+
+  const price = document.getElementById('hero-spotlight-price');
+  if (price) price.textContent = `₹${product.price.toLocaleString('en-IN')}`;
+
+  const original = document.getElementById('hero-spotlight-original');
+  if (original) {
+    const off = product.originalPrice > product.price
+      ? ` - ${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF`
+      : '';
+    original.textContent = product.originalPrice > product.price
+      ? `₹${product.originalPrice.toLocaleString('en-IN')}${off}` : '';
+  }
+
+  const dots = document.getElementById('hero-spotlight-dots');
+  if (dots) {
+    dots.innerHTML = spotlightSlides.map((p, i) => `
+      <button type="button" aria-label="Show watch ${i + 1}" onclick="spotlightSlideTo(${i})"
+        class="w-6 h-1 rounded-full transition-all ${i === spotlightIndex ? 'bg-[#D4B475]' : 'bg-[#2D3748] hover:bg-[#4B5563]'}"></button>
+    `).join('');
+    dots.classList.toggle('hidden', spotlightSlides.length < 2);
+  }
+
+  renderMobilePromo();
+}
+
+function spotlightSlideTo(index) {
+  if (spotlightSlides.length === 0) return;
+  spotlightIndex = ((index % spotlightSlides.length) + spotlightSlides.length) % spotlightSlides.length;
+  paintSpotlight();
+  startSpotlightRotation();
+}
+
+function startSpotlightRotation() {
+  stopSpotlightRotation();
+  if (spotlightSlides.length > 1) {
+    spotlightTimer = setInterval(() => spotlightSlideTo(spotlightIndex + 1), SPOTLIGHT_ROTATE_MS);
+  }
+}
+
+function stopSpotlightRotation() {
+  if (spotlightTimer) { clearInterval(spotlightTimer); spotlightTimer = null; }
+}
+
+function renderHeroSpotlight() {
+  const card = document.getElementById('hero-spotlight');
+  if (!card) return;
+
+  const previousId = spotlightSlides[spotlightIndex] && spotlightSlides[spotlightIndex].id;
+  spotlightSlides = pickSpotlightSlides();
+
+  if (spotlightSlides.length === 0) {
+    card.classList.add('hidden');
+    stopSpotlightRotation();
+    return;
+  }
+
+  const keep = spotlightSlides.findIndex(p => p.id === previousId);
+  if (spotlightIndex >= spotlightSlides.length || keep === -1) spotlightIndex = Math.max(keep, 0);
+
+  card.classList.remove('hidden');
+  if (!card.dataset.wired) {
+    card.dataset.wired = '1';
+    card.addEventListener('click', () => {
+      const current = spotlightSlides[spotlightIndex];
+      if (current) openQuickView(current.id);
+    });
+    card.addEventListener('mouseenter', stopSpotlightRotation);
+    card.addEventListener('mouseleave', startSpotlightRotation);
+  }
+
+  paintSpotlight();
+  startSpotlightRotation();
+}
+
+
 function renderMobilePromo() {
   const card = document.getElementById('promo-spotlight-card');
   if (!card) return;
 
-  const visible = [...liveProducts].filter(p => !p.isHidden);
-  if (visible.length === 0) return; // leave section hidden — no mock data
-
-  const pick = visible.filter(p => p.badge && /best|limited|hot|new/i.test(p.badge))
-    .sort((a, b) => (b.originalPrice - b.price) - (a.originalPrice - a.price))[0]
-    || visible.filter(p => (typeof p.stock !== 'number' || p.stock > 0)).sort((a, b) => b.price - a.price)[0]
-    || visible[0];
+  const pick = spotlightSlides[spotlightIndex];
+  if (!pick) return; // leave section hidden — no mock data
 
   const img = document.getElementById('promo-spotlight-img');
   const name = document.getElementById('promo-spotlight-name');
@@ -704,7 +814,7 @@ function renderMobilePromo() {
   const cta = document.getElementById('promo-spotlight-cta');
 
   if (img) {
-    img.src = pick.image || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop';
+    img.src = pick.image || AMC_IMAGE_PLACEHOLDER;
     img.alt = `${pick.brand} ${pick.model}`;
   }
   if (name) name.textContent = `${pick.brand} ${pick.model}`;
@@ -1711,7 +1821,7 @@ async function openMyOrdersModal() {
           ${(o.items || []).map(it => `
             <div class="flex items-center justify-between text-xs text-neutral-800">
               <div class="flex items-center gap-2">
-                <img src="${it.image || 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=200'}" class="w-8 h-8 rounded object-contain border border-neutral-100" />
+                <img src="${it.image || AMC_IMAGE_PLACEHOLDER}" class="w-8 h-8 rounded object-contain border border-neutral-100" />
                 <span class="font-medium">${it.brand || ''} ${it.model || 'Master Watch'} <span class="text-neutral-400">×${it.quantity || 1}</span></span>
               </div>
               <span class="font-bold text-neutral-900 font-mono">₹${((it.price || 0) * (it.quantity || 1)).toLocaleString('en-IN')}</span>
