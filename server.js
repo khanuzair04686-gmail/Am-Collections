@@ -1,4 +1,4 @@
-// AM COLLECTION - Enterprise Luxury Watch E-Commerce Server
+// sabrXwatches - Enterprise Luxury Watch E-Commerce Server
 // Permanent MongoDB Atlas Database Architecture (Full Mongoose Models + Direct Cloud Persistence)
 
 const express = require('express');
@@ -83,7 +83,7 @@ const uploadPhoto = multer({
 // INITIAL DEFAULTS (Used ONLY on very first initialization)
 // =====================================================
 const INITIAL_SETTINGS = {
-  storeName: 'AM COLLECTION',
+  storeName: 'sabrXwatches',
   tagline: 'Timeless Elegance - Master Copy Watches',
   logoUrl: '',
   faviconUrl: '',
@@ -118,9 +118,9 @@ const INITIAL_CATEGORIES = [
 
 // About Us page — seeded ONLY on very first creation (admin editable afterwards)
 const DEFAULT_ABOUT = {
-  pageTitle: 'About AM COLLECTION',
-  intro: 'AM COLLECTION curates master-grade luxury timepieces — 1:1 super clones of the world\'s most iconic watches, inspected piece by piece and delivered across India with cash on delivery.',
-  story: 'What began as a passion for horology grew into a mission: to make legendary watchmaking accessible without compromise. Every piece in our vault is measured against the original — weight, finish, movement sweep — before it earns the AM COLLECTION name.',
+  pageTitle: 'About sabrXwatches',
+  intro: 'sabrXwatches curates master-grade luxury timepieces — 1:1 super clones of the world\'s most iconic watches, inspected piece by piece and delivered across India with cash on delivery.',
+  story: 'What began as a passion for horology grew into a mission: to make legendary watchmaking accessible without compromise. Every piece in our vault is measured against the original — weight, finish, movement sweep — before it earns the sabrXwatches name.',
   mission: 'To deliver impeccably crafted luxury timepieces with transparent pricing, honest quality checks, and service that treats every customer like a collector.',
   vision: 'To become India\'s most trusted destination for master copy watches — where craftsmanship, trust, and timeless style meet.',
   values: 'Precision Craftsmanship • Absolute Transparency • Collector-Grade 1:1 Perfection • Pan-India Doorstep Trust',
@@ -128,7 +128,7 @@ const DEFAULT_ABOUT = {
     name: 'Founder Name',
     role: 'Founder & CEO',
     bio: 'Drives the brand vision, curates the collection, and sets the quality standard every watch must meet.',
-    longBio: 'With over a decade of horological appreciation, our founder established AM COLLECTION to bring master-grade timepieces to Indian collectors without exorbitant markups.',
+    longBio: 'With over a decade of horological appreciation, our founder established sabrXwatches to bring master-grade timepieces to Indian collectors without exorbitant markups.',
     photoUrl: '',
     enabled: true,
     social: { instagram: '', twitter: '', linkedin: '', email: '', phone: '' }
@@ -149,7 +149,7 @@ const DEFAULT_ABOUT = {
     { key: 'manager',   name: 'Manager Name',   role: 'Operations Manager',  bio: 'Runs day-to-day operations — inventory, dispatch, support, and making sure your order reaches you fast.', photoUrl: '', enabled: true, order: 3, social: { instagram: '', twitter: '', linkedin: '', email: '' } }
   ],
   whoIsWho: [
-    { role: 'founder',   title: 'The Founder',        description: 'The Founder owns the brand and business direction — choosing which timepieces enter the collection, setting pricing and quality policy, and steering AM COLLECTION\'s growth.', enabled: true, order: 1 },
+    { role: 'founder',   title: 'The Founder',        description: 'The Founder owns the brand and business direction — choosing which timepieces enter the collection, setting pricing and quality policy, and steering sabrXwatches\'s growth.', enabled: true, order: 1 },
     { role: 'developer', title: 'The Developer',      description: 'The Developer builds and maintains the software behind the store — the website, shopping cart, secure checkout, order tracking, and the Admin Panel used to manage everything.', enabled: true, order: 2 },
     { role: 'manager',   title: 'The Manager',        description: 'The Manager runs operations — stock and inventory, packing and dispatch, customer support, returns and replacements — so every order is fulfilled smoothly.', enabled: true, order: 3 }
   ],
@@ -174,7 +174,14 @@ const productSchema = new mongoose.Schema({
   dialSize: String,
   glass: String,
   strap: String,
+  dialColor: String,
+  caseColor: String,
+  caseMaterial: String,
+  strapColor: String,
+  dialShape: String,
+  waterResistance: String,
   image: String,
+  additionalImages: [String],
   videoUrl: String,
   description: String,
   features: [String],
@@ -184,14 +191,15 @@ const productSchema = new mongoose.Schema({
   isHidden: { type: Boolean, default: false, index: true },
   stock: { type: Number, default: 20 },
   discount: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now, index: true }
+  createdAt: { type: Date, default: Date.now, index: true },
+  updatedAt: { type: Date, default: Date.now }
 });
 
 productSchema.index({ isHidden: 1, createdAt: -1 });
 productSchema.index({ isHidden: 1, category: 1, createdAt: -1 });
 
 const brandingSchema = new mongoose.Schema({
-  storeName: { type: String, default: 'AM COLLECTION' },
+  storeName: { type: String, default: 'sabrXwatches' },
   tagline: { type: String, default: 'Timeless Elegance - Master Copy Watches' },
   logoUrl: { type: String, default: '' },
   faviconUrl: { type: String, default: '' },
@@ -281,7 +289,8 @@ const userSchema = new mongoose.Schema({
   city: String,
   state: String,
   pincode: String,
-  status: { type: String, default: 'Active' },
+  status: { type: String, default: 'Active', index: true },
+  deletedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
   lastLogin: { type: Date, default: Date.now }
 });
@@ -454,8 +463,13 @@ const DB = {
   async addProduct(doc) {
     return await Product.create(doc);
   },
+  async findByBrandModel(brand, model) {
+    const rx = (v) => new RegExp(`^${String(v || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+    return await Product.findOne({ brand: rx(brand), model: rx(model) }).lean();
+  },
   async updateProduct(id, updates) {
     delete updates._id;
+    updates.updatedAt = new Date();
     return await Product.findOneAndUpdate({ id }, { $set: updates }, { new: true }).lean();
   },
   async deleteProduct(id) {
@@ -530,12 +544,17 @@ const DB = {
     return await User.findOne({ email: clean }).lean();
   },
   async addUser(doc) {
-    return await User.create(doc);
+    const created = await User.create(doc);
+    return created.toObject({ versionKey: false });
   },
   async updateUser(userId, updates) {
     delete updates._id;
     delete updates.password;
     return await User.findOneAndUpdate({ userId }, { $set: updates }, { new: true }).select('-password').lean();
+  },
+  async deleteUser(userId) {
+    const res = await User.deleteOne({ userId });
+    return res.deletedCount > 0;
   },
   async countUsers(q = {}) {
     return await User.countDocuments(q);
@@ -938,39 +957,71 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
+// Specs must never be invented: an empty field stays "Not Specified" instead of a
+// plausible-sounding default that would misdescribe the product.
+const NOT_SPECIFIED = 'Not Specified';
+// Neutral placeholder — never a real watch photo, so a product can never
+// appear to carry another product's image.
+const DEFAULT_IMAGE_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Crect width='240' height='240' fill='%230F172A'/%3E%3Ccircle cx='120' cy='126' r='52' fill='none' stroke='%23C9A96E' stroke-width='5'/%3E%3Cpath d='M120 96v32l20 12' fill='none' stroke='%23C9A96E' stroke-width='5' stroke-linecap='round'/%3E%3Ctext x='120' y='206' fill='%236B7280' font-family='sans-serif' font-size='13' text-anchor='middle'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+const spec = (v) => (v && String(v).trim()) || NOT_SPECIFIED;
+const toImageList = (v) => {
+  if (Array.isArray(v)) return v.filter(Boolean);
+  if (typeof v !== 'string' || !v.trim()) return [];
+  try {
+    const parsed = JSON.parse(v);
+    if (Array.isArray(parsed)) return parsed.filter(Boolean);
+  } catch (e) { /* fall through to line/comma separated */ }
+  return v.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+};
+
 app.post('/api/products', adminAuth, uploadMedia, async (req, res) => {
   try {
     const b = req.body;
     const files = req.files || {};
 
-    // Neutral placeholder — never a real watch photo, so a product can never
-    // appear to carry another product's image.
-    let image = b.imageUrl || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Crect width='240' height='240' fill='%230F172A'/%3E%3Ccircle cx='120' cy='126' r='52' fill='none' stroke='%23C9A96E' stroke-width='5'/%3E%3Cpath d='M120 96v32l20 12' fill='none' stroke='%23C9A96E' stroke-width='5' stroke-linecap='round'/%3E%3Ctext x='120' y='206' fill='%236B7280' font-family='sans-serif' font-size='13' text-anchor='middle'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+    let image = b.imageUrl || DEFAULT_IMAGE_PLACEHOLDER;
     if (files.image && files.image[0]) image = `/uploads/${files.image[0].filename}`;
 
     let videoUrl = b.videoUrl || '';
     if (files.video && files.video[0]) videoUrl = `/uploads/${files.video[0].filename}`;
 
+    const brand = String(b.brand || '').trim() || 'Unbranded';
+    const model = String(b.model || '').trim();
+
+    const duplicate = await DB.findByBrandModel(brand, model);
+    if (duplicate) {
+      return res.status(409).json({
+        error: `"${brand} ${model}" already exists in the catalog (ID ${duplicate.id}). Edit the existing watch or use a different model name — no duplicate was created.`
+      });
+    }
+
     const product = {
       id: `amc-${Date.now().toString().slice(-8)}`,
-      brand: b.brand || 'Rolex',
-      model: b.model || 'Master Edition',
-      tagline: b.tagline || '1:1 Super Clone Master Edition',
+      brand,
+      model: model || 'Untitled Model',
+      tagline: b.tagline || '',
       price: Number(b.price) || 3999,
-      originalPrice: Number(b.originalPrice) || 850000,
+      originalPrice: Number(b.originalPrice) || Number(b.price) || 3999,
       rating: Number(b.rating) || 4.9,
       reviewsCount: Number(b.reviewsCount) || 50,
-      badge: (b.badge || '1:1 MASTER').toUpperCase(),
+      badge: (b.badge || 'NEW ARRIVAL').toUpperCase(),
       category: (b.category || 'other').toLowerCase(),
-      movement: b.movement || 'Japanese Automatic Movement',
-      dialSize: b.dialSize || '41 mm',
-      glass: b.glass || 'Sapphire Crystal (Anti-Reflective)',
-      strap: b.strap || 'Solid 904L Stainless Steel',
-      description: b.description || '1:1 luxury master copy timepiece.',
+      movement: spec(b.movement),
+      dialSize: spec(b.dialSize),
+      glass: spec(b.glass),
+      strap: spec(b.strap),
+      dialColor: spec(b.dialColor),
+      caseColor: spec(b.caseColor),
+      caseMaterial: spec(b.caseMaterial),
+      strapColor: spec(b.strapColor),
+      dialShape: spec(b.dialShape),
+      waterResistance: spec(b.waterResistance),
+      description: b.description || '',
       features: Array.isArray(b.features)
         ? b.features
-        : (b.features ? b.features.split('\n').map(f => f.trim()).filter(Boolean) : ['1:1 exact dimensions & weight']),
+        : (b.features ? b.features.split('\n').map(f => f.trim()).filter(Boolean) : []),
       image,
+      additionalImages: toImageList(b.additionalImages),
       videoUrl,
       isBestSeller: b.isBestSeller === 'true' || b.isBestSeller === true,
       isNewArrival: b.isNewArrival === 'true' || b.isNewArrival === true,
@@ -1014,6 +1065,22 @@ app.put('/api/products/:id', adminAuth, uploadMedia, async (req, res) => {
     if (files.video && files.video[0]) updates.videoUrl = `/uploads/${files.video[0].filename}`;
     else if (b.videoUrl !== undefined) updates.videoUrl = b.videoUrl;
 
+    if (b.additionalImages !== undefined) updates.additionalImages = toImageList(b.additionalImages);
+
+    for (const field of ['movement', 'dialSize', 'glass', 'strap', 'dialColor', 'caseColor', 'caseMaterial', 'strapColor', 'dialShape', 'waterResistance']) {
+      if (updates[field] !== undefined) updates[field] = spec(updates[field]);
+    }
+    if (updates.brand !== undefined) updates.brand = String(updates.brand).trim() || 'Unbranded';
+
+    if (updates.brand && updates.model) {
+      const clash = await DB.findByBrandModel(updates.brand, updates.model);
+      if (clash && clash.id !== id) {
+        return res.status(409).json({
+          error: `"${updates.brand} ${updates.model}" already belongs to another product (ID ${clash.id}). No changes were saved.`
+        });
+      }
+    }
+
     if (typeof updates.features === 'string') {
       updates.features = updates.features.split('\n').map(f => f.trim()).filter(Boolean);
     }
@@ -1050,6 +1117,68 @@ app.patch('/api/products/:id/toggle', adminAuth, async (req, res) => {
     const newVal = !p[field];
     const updated = await DB.updateProduct(req.params.id, { [field]: newVal });
     res.json({ success: true, field, value: newVal, product: updated });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Bulk Catalog Upload — CSV/Excel rows arrive as JSON objects from the admin panel.
+// Existing single-product routes are untouched; duplicates are skipped, never created.
+app.post('/api/products/bulk', adminAuth, async (req, res) => {
+  try {
+    const rows = Array.isArray(req.body.products) ? req.body.products : [];
+    if (!rows.length) return res.status(400).json({ error: 'No product rows received' });
+    if (rows.length > 200) return res.status(400).json({ error: 'Maximum 200 products per bulk upload' });
+
+    const created = [], skipped = [], invalid = [];
+
+    for (const [i, r] of rows.entries()) {
+      const brand = String(r.brandName || r.brand || '').trim() || 'Unbranded';
+      const model = String(r.productName || r.model || r.modelName || '').trim();
+      if (!model) { invalid.push({ row: i + 1, error: 'Missing product name' }); continue; }
+
+      const price = Number(r.sellingPrice || r.price) || 0;
+      if (price <= 0) { invalid.push({ row: i + 1, error: 'Missing or invalid selling price' }); continue; }
+
+      const exists = await DB.findByBrandModel(brand, model);
+      if (exists) { skipped.push({ row: i + 1, brand, model, id: exists.id, reason: 'already in catalog' }); continue; }
+
+      const product = {
+        id: `amc-${Date.now().toString().slice(-8)}-${i}`,
+        brand,
+        model,
+        tagline: String(r.tagline || '').trim(),
+        price,
+        originalPrice: Number(r.referenceMRP || r.originalPrice) || price,
+        rating: 4.9,
+        reviewsCount: 0,
+        badge: String(r.badge || 'NEW ARRIVAL').toUpperCase(),
+        category: (r.category || 'other').toLowerCase().trim(),
+        movement: spec(r.movement),
+        dialSize: spec(r.dialDiameter || r.dialSize),
+        glass: spec(r.glassMaterial || r.glass),
+        strap: spec(r.strapMaterial || r.strap),
+        dialColor: spec(r.dialColor),
+        caseColor: spec(r.caseColor),
+        caseMaterial: spec(r.caseMaterial),
+        strapColor: spec(r.strapColor),
+        dialShape: spec(r.dialShape),
+        waterResistance: spec(r.waterResistance),
+        description: String(r.description || '').trim(),
+        features: Array.isArray(r.keyFeatures) ? r.keyFeatures
+          : String(r.keyFeatures || '').split(/[;|\n]/).map(s => s.trim()).filter(Boolean),
+        image: String(r.image || '').trim() || DEFAULT_IMAGE_PLACEHOLDER,
+        additionalImages: toImageList(r.additionalImages),
+        stock: Number(r.stockCount || r.stock) || 0,
+        discount: 0,
+        createdAt: new Date().toISOString()
+      };
+
+      const saved = await DB.addProduct(product);
+      created.push({ row: i + 1, id: saved.id, brand, model });
+    }
+
+    res.status(201).json({ success: true, created, skipped, invalid, total: rows.length });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -1327,7 +1456,7 @@ app.post('/api/customer/register', async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: `Welcome to AM COLLECTION, ${safe.name}! You earned 50 Welcome Coins! 🌟`,
+      message: `Welcome to sabrXwatches, ${safe.name}! You earned 50 Welcome Coins! 🌟`,
       user: safe
     });
   } catch (e) {
@@ -1345,6 +1474,9 @@ app.post('/api/customer/login', async (req, res) => {
     const user = await DB.getUserByEmail(cleanEmail);
     if (!user || user.password !== password.trim()) {
       return res.status(401).json({ error: 'Invalid email or password. Please try again or create an account.' });
+    }
+    if (user.status === 'Deleted') {
+      return res.status(403).json({ error: 'This account has been closed. Please contact support to reopen it.' });
     }
 
     await DB.updateUser(user.userId, { lastLogin: new Date().toISOString() });
@@ -1398,11 +1530,46 @@ app.put('/api/customer/profile', async (req, res) => {
   }
 });
 
-// Admin Users List
+// Admin Customer List
 app.get('/api/admin/users', adminAuth, async (req, res) => {
   try {
     const users = await DB.getUsers();
     res.json(users);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Delete / deactivate a customer. Order history is never destroyed: an account
+// with past orders is soft-deleted so reports and tracking keep working.
+app.delete('/api/admin/users/:userId', adminAuth, async (req, res) => {
+  try {
+    const user = await DB.getUserById(req.params.userId);
+    if (!user) return res.status(404).json({ error: 'Customer account not found' });
+
+    const history = await DB.countOrders({
+      $or: [{ userId: user.userId }, { customerEmail: user.email }]
+    });
+
+    if (history > 0) {
+      await DB.updateUser(user.userId, { status: 'Deleted', deletedAt: new Date() });
+      return res.json({
+        success: true,
+        mode: 'deactivated',
+        userId: user.userId,
+        ordersPreserved: history,
+        message: `Account deactivated. ${history} historical order(s) remain intact.`
+      });
+    }
+
+    await DB.deleteUser(user.userId);
+    res.json({
+      success: true,
+      mode: 'deleted',
+      userId: user.userId,
+      ordersPreserved: 0,
+      message: 'Customer permanently removed — the account had no orders.'
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -1605,7 +1772,7 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log('\n======================================================');
-    console.log('🌟 AM COLLECTION Luxury Watch Engine Online!');
+    console.log('🌟 sabrXwatches Luxury Watch Engine Online!');
     console.log(`🌐 Storefront:      http://localhost:${PORT}`);
     console.log(`👑 Admin Portal:    http://localhost:${PORT}/admin.html`);
     console.log(`📦 Database:        MongoDB Atlas (Permanent Cloud)`);

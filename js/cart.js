@@ -1,4 +1,4 @@
-// AM COLLECTION - Shopping Cart State & UI Drawer Controller
+// sabrXwatches - Shopping Cart State & UI Drawer Controller
 
 class CartManager {
   constructor() {

@@ -1,4 +1,4 @@
-// AM COLLECTION - Enterprise Admin Management Portal Controller
+// sabrXwatches - Enterprise Admin Management Portal Controller
 // Full MongoDB Atlas synchronization + Permanent CRUD + Customers + Coupons + Orders
 
 let adminWatches = [];
@@ -41,7 +41,7 @@ async function handleAuthSubmit(e) {
       sessionStorage.setItem('amc_admin_passkey', passkey);
       const modal = document.getElementById('auth-modal');
       if (modal) modal.classList.add('hidden');
-      showToast('Admin Access Granted! Welcome to AM COLLECTION Portal. 👑', 'success');
+      showToast('Admin Access Granted! Welcome to sabrXwatches Portal. 👑', 'success');
       loadDashboardData();
     } else {
       showToast('Incorrect Admin Passkey! Please check and retry.', 'error');
@@ -128,6 +128,23 @@ function setupAdminListeners() {
 
   const filterOrderStatus = document.getElementById('admin-filter-order-status');
   if (filterOrderStatus) filterOrderStatus.addEventListener('change', () => renderOrdersTable());
+
+  const searchCustomers = document.getElementById('admin-search-customers');
+  if (searchCustomers) searchCustomers.addEventListener('input', () => renderUsersTable());
+
+  const filterCustomerStatus = document.getElementById('admin-filter-customer-status');
+  if (filterCustomerStatus) filterCustomerStatus.addEventListener('change', () => renderUsersTable());
+
+  const bulkFileInput = document.getElementById('bulk-csv-file');
+  if (bulkFileInput) bulkFileInput.addEventListener('change', () => handleBulkCsvFile(bulkFileInput));
+
+  const bulkTextArea = document.getElementById('bulk-csv-text');
+  if (bulkTextArea) bulkTextArea.addEventListener('input', updateBulkRowCount);
+
+  const bulkTemplateLink = document.getElementById('bulk-csv-template');
+  if (bulkTemplateLink) {
+    bulkTemplateLink.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(BULK_CSV_HEADERS.join(',') + '\r\n');
+  }
 }
 
 // Load All Dashboard Data
@@ -190,7 +207,7 @@ async function loadAdminSettings() {
     const phoneInput = document.getElementById('setting-store-phone');
     const annInput = document.getElementById('setting-announcement');
 
-    if (nameInput) nameInput.value = settings.storeName || 'AM COLLECTION';
+    if (nameInput) nameInput.value = settings.storeName || 'sabrXwatches';
     if (taglineInput) taglineInput.value = settings.tagline || 'Timeless Elegance - Master Copy Watches';
     if (phoneInput) phoneInput.value = settings.storePhone || '919876543210';
     if (annInput) annInput.value = settings.announcementText || '';
@@ -505,10 +522,20 @@ function openAddWatchModal() {
   currentEditingId = null;
   document.getElementById('watch-modal-title').textContent = 'UPLOAD NEW MASTER WATCH';
   document.getElementById('watch-form').reset();
+  ['form-watch-dial-color', 'form-watch-case-color', 'form-watch-case-material', 'form-watch-strap-color',
+    'form-watch-dial-shape', 'form-watch-water-resistance', 'form-watch-additional-images']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('form-watch-id').value = '';
   document.getElementById('form-watch-image-preview').classList.add('hidden');
   document.getElementById('video-preview-container').classList.add('hidden');
   document.getElementById('watch-modal').classList.remove('hidden');
+}
+
+// "Not Specified" is the server's stored placeholder — show it as an empty field so
+// admins see a real gap to fill instead of a value they must delete first.
+function editableSpecValue(value) {
+  const v = (value || '').trim();
+  return v.toLowerCase() === 'not specified' ? '' : v;
 }
 
 function openEditWatchModal(id) {
@@ -519,17 +546,24 @@ function openEditWatchModal(id) {
   document.getElementById('watch-modal-title').textContent = `EDIT ${watch.brand} ${watch.model}`;
 
   document.getElementById('form-watch-id').value = watch.id;
-  document.getElementById('form-watch-brand').value = watch.brand || '';
+  document.getElementById('form-watch-brand').value = watch.brand === 'Unbranded' ? '' : (watch.brand || '');
   document.getElementById('form-watch-category').value = watch.category || 'other';
   document.getElementById('form-watch-model').value = watch.model || '';
   document.getElementById('form-watch-tagline').value = watch.tagline || '';
   document.getElementById('form-watch-price').value = watch.price || '';
   document.getElementById('form-watch-original-price').value = watch.originalPrice || '';
   document.getElementById('form-watch-badge').value = watch.badge || '1:1 MASTER';
-  document.getElementById('form-watch-movement').value = watch.movement || '';
-  document.getElementById('form-watch-dial').value = watch.dialSize || '';
-  document.getElementById('form-watch-glass').value = watch.glass || '';
-  document.getElementById('form-watch-strap').value = watch.strap || '';
+  document.getElementById('form-watch-movement').value = editableSpecValue(watch.movement);
+  document.getElementById('form-watch-dial').value = editableSpecValue(watch.dialSize);
+  document.getElementById('form-watch-glass').value = editableSpecValue(watch.glass);
+  document.getElementById('form-watch-strap').value = editableSpecValue(watch.strap);
+  document.getElementById('form-watch-dial-color').value = editableSpecValue(watch.dialColor);
+  document.getElementById('form-watch-case-color').value = editableSpecValue(watch.caseColor);
+  document.getElementById('form-watch-case-material').value = editableSpecValue(watch.caseMaterial);
+  document.getElementById('form-watch-strap-color').value = editableSpecValue(watch.strapColor);
+  document.getElementById('form-watch-dial-shape').value = editableSpecValue(watch.dialShape);
+  document.getElementById('form-watch-water-resistance').value = editableSpecValue(watch.waterResistance);
+  document.getElementById('form-watch-additional-images').value = Array.isArray(watch.additionalImages) ? watch.additionalImages.join('\n') : '';
   document.getElementById('form-watch-stock').value = watch.stock !== undefined ? watch.stock : 20;
   document.getElementById('form-watch-bestseller').checked = Boolean(watch.isBestSeller);
   document.getElementById('form-watch-newarrival').checked = Boolean(watch.isNewArrival);
@@ -601,7 +635,7 @@ async function imageToEmbeddedDataUrl(file, maxDim = 900, quality = 0.8) {
 async function handleWatchFormSubmit(e) {
   e.preventDefault();
 
-  const brand = document.getElementById('form-watch-brand').value.trim();
+  const brand = document.getElementById('form-watch-brand').value.trim() || 'Unbranded';
   const category = document.getElementById('form-watch-category').value;
   const model = document.getElementById('form-watch-model').value.trim();
   const tagline = document.getElementById('form-watch-tagline').value.trim();
@@ -612,6 +646,13 @@ async function handleWatchFormSubmit(e) {
   const dialSize = document.getElementById('form-watch-dial').value.trim();
   const glass = document.getElementById('form-watch-glass').value.trim();
   const strap = document.getElementById('form-watch-strap').value.trim();
+  const dialColor = document.getElementById('form-watch-dial-color').value.trim();
+  const caseColor = document.getElementById('form-watch-case-color').value.trim();
+  const caseMaterial = document.getElementById('form-watch-case-material').value.trim();
+  const strapColor = document.getElementById('form-watch-strap-color').value.trim();
+  const dialShape = document.getElementById('form-watch-dial-shape').value.trim();
+  const waterResistance = document.getElementById('form-watch-water-resistance').value.trim();
+  const additionalImages = document.getElementById('form-watch-additional-images').value.trim();
   const stock = document.getElementById('form-watch-stock').value.trim();
   const isBestSeller = document.getElementById('form-watch-bestseller').checked;
   const isNewArrival = document.getElementById('form-watch-newarrival').checked;
@@ -635,6 +676,13 @@ async function handleWatchFormSubmit(e) {
   formData.append('dialSize', dialSize);
   formData.append('glass', glass);
   formData.append('strap', strap);
+  formData.append('dialColor', dialColor);
+  formData.append('caseColor', caseColor);
+  formData.append('caseMaterial', caseMaterial);
+  formData.append('strapColor', strapColor);
+  formData.append('dialShape', dialShape);
+  formData.append('waterResistance', waterResistance);
+  formData.append('additionalImages', additionalImages);
   formData.append('stock', stock || 20);
   formData.append('isBestSeller', isBestSeller);
   formData.append('isNewArrival', isNewArrival);
@@ -686,11 +734,176 @@ async function handleWatchFormSubmit(e) {
       await loadAdminWatches();
       broadcastStoreChange('catalog');
     } else {
-      const err = await res.json();
-      showToast(err.error || 'Failed to save watch', 'error');
+      const err = await res.json().catch(() => ({}));
+      // A 409 means brand+model already exists — the server's own wording is the useful part
+      const detail = err && err.error ? err.error : (res.status === 409 ? 'Duplicate brand and model already in catalog' : 'Failed to save watch');
+      showToast(detail, 'error');
     }
   } catch (e) {
     showToast('Network error saving watch', 'error');
+  }
+}
+
+// Bulk Catalog CSV Import
+const BULK_CSV_HEADERS = ['productName', 'brandName', 'category', 'modelName', 'tagline', 'sellingPrice', 'referenceMRP',
+  'badge', 'movement', 'dialColor', 'caseColor', 'caseMaterial', 'strapMaterial', 'strapColor', 'dialShape',
+  'dialDiameter', 'glassMaterial', 'waterResistance', 'stockCount', 'description', 'keyFeatures', 'image'];
+
+const BULK_CSV_KEY_LOOKUP = BULK_CSV_HEADERS.reduce((acc, key) => {
+  acc[normalizeCsvHeader(key)] = key;
+  return acc;
+}, {});
+
+function normalizeCsvHeader(header) {
+  return String(header || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let cells = [];
+  let field = '';
+  let inQuotes = false;
+  const src = String(text == null ? '' : text);
+
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (inQuotes) {
+      if (ch !== '"') { field += ch; continue; }
+      if (src[i + 1] === '"') { field += '"'; i++; }
+      else inQuotes = false;
+      continue;
+    }
+    if (ch === '"' && field === '') { inQuotes = true; continue; }
+    if (ch === ',') { cells.push(field); field = ''; continue; }
+    if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && src[i + 1] === '\n') i++;
+      cells.push(field);
+      field = '';
+      rows.push(cells);
+      cells = [];
+      continue;
+    }
+    field += ch;
+  }
+  if (field !== '' || cells.length) {
+    cells.push(field);
+    rows.push(cells);
+  }
+  return rows;
+}
+
+function extractBulkProducts(text) {
+  const grid = parseCsv(text).filter(cells => cells.some(c => String(c).trim() !== ''));
+  if (grid.length < 2) return [];
+
+  const headers = grid[0].map(normalizeCsvHeader);
+  return grid.slice(1).map(cells => {
+    const row = {};
+    headers.forEach((header, idx) => {
+      const key = BULK_CSV_KEY_LOOKUP[header];
+      if (!key) return;
+      let value = String(cells[idx] == null ? '' : cells[idx]).trim();
+      if (value.toLowerCase() === 'not specified') value = '';
+      if (value !== '') row[key] = value;
+    });
+    return Object.keys(row).length ? row : null;
+  }).filter(Boolean);
+}
+
+function updateBulkRowCount() {
+  const countEl = document.getElementById('bulk-rows-count');
+  if (!countEl) return;
+  const text = document.getElementById('bulk-csv-text')?.value || '';
+  const count = extractBulkProducts(text).length;
+  countEl.textContent = `${count} ${count === 1 ? 'row' : 'rows'} ready`;
+}
+
+async function handleBulkCsvFile(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const textarea = document.getElementById('bulk-csv-text');
+    if (textarea) textarea.value = text;
+    updateBulkRowCount();
+    if (!extractBulkProducts(text).length) {
+      showToast('That CSV has no data rows — a header line plus at least one product row is required.', 'error');
+    }
+  } catch (e) {
+    showToast('Could not read that CSV file', 'error');
+  }
+}
+
+function renderBulkSummary(data) {
+  const box = document.getElementById('bulk-upload-summary');
+  if (!box) return;
+
+  const created = data.created || [];
+  const skipped = data.skipped || [];
+  const invalid = data.invalid || [];
+
+  const chip = (label, count, cls) => `<span class="px-3 py-1.5 rounded-xl border font-bold ${cls}">${escHtml(label)}: ${escHtml(count)}</span>`;
+  const detailLine = (label, list) => list.length === 0 ? '' : `
+    <p class="text-neutral-400 mt-2 break-words">
+      <span class="font-bold text-neutral-200">${escHtml(label)}</span>${escHtml(list.map(item => `#${item.row}${item.model ? ' — ' + item.model : ''}${item.error ? ' (' + item.error + ')' : ''}`).join(', '))}
+    </p>
+  `;
+
+  box.className = 'text-xs rounded-2xl border p-4 bg-[#0B0E13] border-amber-500/30 space-y-1';
+  box.innerHTML = `
+    <p class="font-bold text-white">Bulk import finished — ${escHtml(data.total || 0)} row(s) processed</p>
+    <div class="flex flex-wrap gap-2 pt-1">
+      ${chip('Created', created.length, 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30')}
+      ${chip('Skipped (already in catalog)', skipped.length, 'bg-amber-950/60 text-amber-300 border-amber-500/30')}
+      ${chip('Invalid', invalid.length, 'bg-red-950/60 text-red-300 border-red-500/30')}
+    </div>
+    ${detailLine('Skipped rows:', skipped)}
+    ${detailLine('Invalid rows:', invalid)}
+  `;
+}
+
+async function handleBulkUpload() {
+  const text = document.getElementById('bulk-csv-text')?.value || '';
+  const products = extractBulkProducts(text);
+
+  if (products.length === 0) {
+    showToast('Paste CSV rows or choose a file first — a header line plus at least one product row is required.', 'error');
+    return;
+  }
+  if (products.length > 200) {
+    showToast('Bulk upload is limited to 200 products per run. Split the file and try again.', 'error');
+    return;
+  }
+
+  const uploadBtn = document.getElementById('bulk-upload-btn');
+  if (uploadBtn) uploadBtn.disabled = true;
+
+  try {
+    showToast(`Uploading ${products.length} product(s) to the catalog...`, 'info');
+    const res = await fetch('/api/products/bulk', {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ products })
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.success) {
+      renderBulkSummary(data);
+      showToast(`Bulk upload done — ${(data.created || []).length} created, ${(data.skipped || []).length} skipped, ${(data.invalid || []).length} invalid.`, 'success');
+      const textarea = document.getElementById('bulk-csv-text');
+      if (textarea) textarea.value = '';
+      const fileInput = document.getElementById('bulk-csv-file');
+      if (fileInput) fileInput.value = '';
+      updateBulkRowCount();
+      await loadAdminWatches();
+      broadcastStoreChange('catalog');
+    } else {
+      showToast(data.error || 'Bulk catalog upload failed', 'error');
+    }
+  } catch (e) {
+    showToast('Network error during bulk upload', 'error');
+  } finally {
+    if (uploadBtn) uploadBtn.disabled = false;
   }
 }
 
@@ -898,14 +1111,14 @@ async function handleDeleteOrderPermanently(orderId) {
 
 function chatCustomerWhatsApp(phone, orderId, name) {
   const clean = phone.replace(/[^0-9]/g, '');
-  const msg = encodeURIComponent(`Hello ${name || ''}! This is AM COLLECTION regarding your Cash on Delivery watch order #${orderId}. We are packing your timepiece for dispatch.`);
+  const msg = encodeURIComponent(`Hello ${name || ''}! This is sabrXwatches regarding your Cash on Delivery watch order #${orderId}. We are packing your timepiece for dispatch.`);
   window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
 }
 
 // 5. Customers & Users Management
 async function loadAdminUsers() {
   try {
-    const res = await fetch('/api/admin/users', { headers: adminHeaders(false) });
+    const res = await fetch('/api/admin/users', { headers: adminHeaders(false), cache: 'no-store' });
     if (!res.ok) return;
     adminUsers = await res.json();
 
@@ -918,37 +1131,214 @@ async function loadAdminUsers() {
   }
 }
 
+function fmtAdminDate(value) {
+  if (!value) return '—';
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-IN');
+}
+
+function fmtAdminDateTime(value) {
+  if (!value) return 'Never';
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? 'Never' : d.toLocaleString('en-IN');
+}
+
 function renderUsersTable() {
   const tbody = document.getElementById('admin-users-table-body');
   if (!tbody) return;
 
-  if (adminUsers.length === 0) {
+  const query = (document.getElementById('admin-search-customers')?.value || '').toLowerCase().trim();
+  const statusFilter = document.getElementById('admin-filter-customer-status')?.value || 'all';
+
+  const filtered = adminUsers.filter(u => {
+    const status = (u.status || 'Active').toLowerCase();
+    if (statusFilter === 'active' && status !== 'active') return false;
+    if (statusFilter === 'deleted' && status !== 'deleted') return false;
+    if (!query) return true;
+    return [u.name, u.email, u.phone].some(v => String(v || '').toLowerCase().includes(query));
+  });
+
+  if (filtered.length === 0) {
+    const emptyMsg = adminUsers.length === 0
+      ? 'No registered customer accounts yet. When users create accounts or place orders, they will appear here!'
+      : 'No customers match the current search or status filter.';
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="p-8 text-center text-neutral-500">
-          No registered customer accounts yet. When users create accounts or place orders, they will appear here!
-        </td>
+        <td colspan="8" class="p-8 text-center text-neutral-500">${emptyMsg}</td>
       </tr>
     `;
     return;
   }
 
-  tbody.innerHTML = adminUsers.map(u => `
-    <tr class="hover:bg-[#161B25]/40 transition-colors">
-      <td class="p-4 font-bold text-white flex items-center gap-2">
-        <div class="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xs">
-          ${(u.name || 'U').charAt(0).toUpperCase()}
+  tbody.innerHTML = filtered.map(u => {
+    const isDeleted = (u.status || 'Active').toLowerCase() === 'deleted';
+    return `
+      <tr class="hover:bg-[#161B25]/40 transition-colors">
+        <td class="p-4">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xs flex-shrink-0">
+              ${escHtml((u.name || 'U').charAt(0).toUpperCase())}
+            </div>
+            <span class="font-bold text-white break-words">${escHtml(u.name || 'Valued Member')}</span>
+          </div>
+        </td>
+        <td class="p-4 font-mono text-neutral-300 break-all">${escHtml(u.email || '—')}</td>
+        <td class="p-4 font-mono text-neutral-300">${escHtml(u.phone || '—')}</td>
+        <td class="p-4 text-neutral-400 whitespace-nowrap">${escHtml(fmtAdminDate(u.createdAt))}</td>
+        <td class="p-4 text-neutral-400 whitespace-nowrap">${escHtml(fmtAdminDateTime(u.lastLogin))}</td>
+        <td class="p-4 font-mono text-white">${escHtml(u.totalOrders || 0)}</td>
+        <td class="p-4">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${
+            isDeleted
+              ? 'bg-red-950/60 text-red-300 border-red-500/30'
+              : 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30'
+          }">
+            ${isDeleted ? 'Deleted' : 'Active'}
+          </span>
+        </td>
+        <td class="p-4 text-right">
+          <div class="flex items-center justify-end gap-2">
+            <button onclick="viewAdminCustomer('${escHtml(u.userId)}')" class="px-3 py-1.5 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 hover:text-amber-300 transition-colors" title="View Customer Profile & Orders">
+              View
+            </button>
+            <button onclick="openCustomerDeleteModal('${escHtml(u.userId)}')" class="px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-500/30 transition-colors" title="Delete Customer Account">
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function customerOrdersFor(user) {
+  const email = String(user.email || '').toLowerCase();
+  return adminOrders.filter(o => {
+    if (user.userId && o.userId === user.userId) return true;
+    return Boolean(email) && String(o.customerEmail || '').toLowerCase() === email;
+  });
+}
+
+function viewAdminCustomer(userId) {
+  const user = adminUsers.find(u => u.userId === userId);
+  if (!user) {
+    showToast('Customer account not found. Refresh the list and try again.', 'error');
+    return;
+  }
+
+  const orders = customerOrdersFor(user);
+  const title = document.getElementById('customer-view-title');
+  const body = document.getElementById('customer-view-body');
+  if (title) title.textContent = `${user.name || user.email || 'Customer'} — Profile`;
+  if (!body) return;
+
+  const field = (label, value) => `
+    <div>
+      <p class="text-[10px] uppercase tracking-wider text-neutral-500 font-bold">${escHtml(label)}</p>
+      <p class="text-white font-semibold mt-0.5 break-words">${escHtml(value === '' || value == null ? '—' : value)}</p>
+    </div>
+  `;
+
+  const savedAddress = [user.address, user.landmark, user.city, user.state, user.pincode].filter(Boolean).join(', ');
+
+  const ordersBlock = orders.length === 0
+    ? `<p class="text-neutral-500">No orders recorded for this customer yet.</p>`
+    : orders.map(o => `
+        <div class="p-3 rounded-xl bg-[#0B0E13] border border-[#1F2632] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div class="min-w-0">
+            <span class="font-mono font-bold text-amber-400">#${escHtml(o.orderId)}</span>
+            <p class="text-neutral-400 mt-0.5 break-words">${escHtml((o.items || []).map(i => `${i.brand} ${i.model} (×${i.quantity || 1})`).join(', ') || 'No item details')}</p>
+            <p class="text-neutral-500 text-[10px]">${escHtml(fmtAdminDate(o.createdAt))} • ${escHtml(o.city || '')}</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <span class="px-2 py-0.5 rounded bg-[#1B222C] text-neutral-300 text-[10px] font-bold">${escHtml(o.status || 'Pending')}</span>
+            <span class="font-mono font-extrabold text-white">₹${escHtml(Number(o.total || 0).toLocaleString('en-IN'))}</span>
+          </div>
         </div>
-        <span>${u.name || 'Valued Member'}</span>
-      </td>
-      <td class="p-4 font-mono text-neutral-300">${u.email}</td>
-      <td class="p-4 font-mono text-neutral-300">${u.phone || '-'}</td>
-      <td class="p-4 font-mono font-bold text-amber-400">🪙 ${u.coinBalance || 0}</td>
-      <td class="p-4 font-mono text-white">${u.totalOrders || 0}</td>
-      <td class="p-4 font-mono text-emerald-400 font-semibold">₹${Number(u.totalSpent || 0).toLocaleString('en-IN')}</td>
-      <td class="p-4 text-neutral-500 text-[11px]">${new Date(u.createdAt || Date.now()).toLocaleDateString('en-IN')}</td>
-    </tr>
-  `).join('');
+      `).join('');
+
+  body.innerHTML = `
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      ${field('Name', user.name)}
+      ${field('Email', user.email)}
+      ${field('Phone', user.phone)}
+      ${field('Account ID', user.userId)}
+      ${field('Registered', fmtAdminDate(user.createdAt))}
+      ${field('Last Login', fmtAdminDateTime(user.lastLogin))}
+      ${field('Account Status', user.status || 'Active')}
+      ${field('Deleted On', user.deletedAt ? fmtAdminDateTime(user.deletedAt) : '')}
+      ${field('AM Coins Balance', `🪙 ${user.coinBalance || 0}`)}
+      ${field('Total Orders', user.totalOrders || 0)}
+      ${field('Total Spent', `₹${Number(user.totalSpent || 0).toLocaleString('en-IN')}`)}
+      ${field('Saved Address', savedAddress)}
+    </div>
+    <div class="space-y-3 pt-2 border-t border-[#1F2632]">
+      <p class="font-heading text-sm font-bold text-white tracking-wide">Order History (${orders.length})</p>
+      <div class="space-y-2.5">${ordersBlock}</div>
+    </div>
+  `;
+
+  const modal = document.getElementById('customer-view-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeCustomerViewModal() {
+  const modal = document.getElementById('customer-view-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+let pendingCustomerDeleteId = null;
+
+function openCustomerDeleteModal(userId) {
+  const user = adminUsers.find(u => u.userId === userId);
+  if (!user) {
+    showToast('Customer account not found. Refresh the list and try again.', 'error');
+    return;
+  }
+  pendingCustomerDeleteId = userId;
+  const detail = document.getElementById('customer-delete-detail');
+  if (detail) {
+    const orders = customerOrdersFor(user);
+    detail.textContent = orders.length > 0
+      ? `${user.name || user.email} has ${orders.length} order(s) — the account will be deactivated and the history kept.`
+      : `${user.name || user.email} has no orders — the account will be removed permanently.`;
+  }
+  const modal = document.getElementById('customer-delete-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeCustomerDeleteModal() {
+  pendingCustomerDeleteId = null;
+  const modal = document.getElementById('customer-delete-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function confirmCustomerDelete() {
+  const userId = pendingCustomerDeleteId;
+  if (!userId) return;
+
+  const confirmBtn = document.getElementById('customer-delete-confirm-btn');
+  if (confirmBtn) confirmBtn.disabled = true;
+
+  try {
+    const res = await fetch(`/api/admin/users/${encodeURIComponent(userId)}`, {
+      method: 'DELETE',
+      headers: adminHeaders(false)
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.success) {
+      closeCustomerDeleteModal();
+      await loadAdminUsers();
+      showToast(data.message || 'Customer account removed.', 'success');
+    } else {
+      showToast(data.error || 'Failed to delete customer account', 'error');
+      if (confirmBtn) confirmBtn.disabled = false;
+    }
+  } catch (e) {
+    showToast('Network error deleting customer account', 'error');
+    if (confirmBtn) confirmBtn.disabled = false;
+  }
 }
 
 // 6. Coupons Management
@@ -1247,7 +1637,7 @@ function fillAboutForm(about) {
   const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = v !== false; };
 
   // 1. General Content
-  setVal('about-page-title', about.pageTitle || 'About AM COLLECTION');
+  setVal('about-page-title', about.pageTitle || 'About sabrXwatches');
   setVal('about-intro', about.intro || '');
   setVal('about-story', about.story || '');
   setVal('about-mission', about.mission || '');

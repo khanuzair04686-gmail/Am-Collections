@@ -1,4 +1,4 @@
-// AM COLLECTION - Products Configuration
+// sabrXwatches - Products Configuration
 // Hardcoded dummy data removed. All products are dynamically loaded from MongoDB backend.
 const PRODUCTS_DATA = [];
 

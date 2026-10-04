@@ -1,4 +1,4 @@
-// AM COLLECTION - Enterprise Checkout & Flipkart-Style Order Experience
+// sabrXwatches - Enterprise Checkout & Flipkart-Style Order Experience
 // Completely removes alert() popups, handles AM Coins, Coupons, Real-Time DB sync
 
 class CheckoutManager {
@@ -598,7 +598,7 @@ class CheckoutManager {
       year: 'numeric'
     });
 
-    let message = `🌟 *NEW LUXURY WATCH COD ORDER - AM COLLECTION* 🌟\n`;
+    let message = `🌟 *NEW LUXURY WATCH COD ORDER - sabrXwatches* 🌟\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
     message += `🧾 *Order ID:* #${orderId}\n`;
     message += `📅 *Date:* ${currentDate}\n\n`;
@@ -631,7 +631,7 @@ class CheckoutManager {
     }
 
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    message += `✨ *AM COLLECTION* • Timeless Elegance - Master Copy Watches`;
+    message += `✨ *sabrXwatches* • Timeless Elegance - Master Copy Watches`;
 
     return message;
   }

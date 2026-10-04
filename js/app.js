@@ -1,4 +1,4 @@
-// AM COLLECTION - Main Application Controller (Production Indian E-Commerce)
+// sabrXwatches - Main Application Controller (Production Indian E-Commerce)
 
 let liveProducts = (typeof PRODUCTS_DATA !== 'undefined') ? [...PRODUCTS_DATA] : [];
 let activeCategory = 'all';
@@ -814,6 +814,65 @@ function directWhatsAppBuy(productId) {
   checkoutManager.quickBuyWhatsApp(product);
 }
 
+function hasDisplayableSpec(value) {
+  return typeof value === 'string' && value.trim() !== '' && value.trim().toLowerCase() !== 'not specified';
+}
+
+function setQuickViewMainImage(url) {
+  const imgEl = document.getElementById('qv-image');
+  if (!imgEl) return;
+  imgEl.onerror = () => {
+    imgEl.onerror = null;
+    imgEl.src = AMC_IMAGE_PLACEHOLDER;
+  };
+  imgEl.src = url;
+}
+
+function renderQuickViewGallery(product) {
+  const thumbsEl = document.getElementById('qv-thumbnails');
+  if (!thumbsEl) return;
+
+  thumbsEl.innerHTML = '';
+  const extras = Array.isArray(product.additionalImages)
+    ? product.additionalImages.filter(u => typeof u === 'string' && u.trim() !== '')
+    : [];
+
+  if (extras.length === 0) {
+    thumbsEl.classList.add('hidden');
+    return;
+  }
+
+  thumbsEl.classList.remove('hidden');
+  [product.image, ...extras].forEach((url, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-[#0F172A] border p-1 flex items-center justify-center overflow-hidden transition-colors ${idx === 0 ? 'border-[#C9A96E]' : 'border-[#2D3748]'}`;
+    btn.setAttribute('aria-label', `View image ${idx + 1}`);
+
+    const timg = document.createElement('img');
+    timg.src = url;
+    timg.alt = `${product.brand} ${product.model} view ${idx + 1}`;
+    timg.className = 'w-full h-full object-contain';
+    timg.onerror = () => {
+      timg.onerror = null;
+      timg.src = AMC_IMAGE_PLACEHOLDER;
+    };
+
+    btn.onclick = () => {
+      thumbsEl.querySelectorAll('button').forEach(b => {
+        b.classList.remove('border-[#C9A96E]');
+        b.classList.add('border-[#2D3748]');
+      });
+      btn.classList.remove('border-[#2D3748]');
+      btn.classList.add('border-[#C9A96E]');
+      setQuickViewMainImage(url);
+    };
+
+    btn.appendChild(timg);
+    thumbsEl.appendChild(btn);
+  });
+}
+
 // Quick View / Full Inspection Modal Open
 function openQuickView(productId) {
   const product = liveProducts.find(p => p.id === productId);
@@ -827,10 +886,9 @@ function openQuickView(productId) {
 
   // Bind Data
   const imgEl = document.getElementById('qv-image');
-  if (imgEl) {
-    imgEl.src = product.image;
-    imgEl.alt = `${product.brand} ${product.model}`;
-  }
+  if (imgEl) imgEl.alt = `${product.brand} ${product.model}`;
+  setQuickViewMainImage(product.image);
+  renderQuickViewGallery(product);
 
   const brandEl = document.getElementById('qv-brand');
   if (brandEl) brandEl.textContent = product.brand.toUpperCase();
@@ -857,23 +915,60 @@ function openQuickView(productId) {
   if (ratingValEl) ratingValEl.textContent = `${product.rating} (${product.reviewsCount} verified reviews)`;
 
   const savingsBadgeEl = document.getElementById('qv-savings-badge');
-  if (savingsBadgeEl) savingsBadgeEl.textContent = `Save ${savingsPercent}% (₹${(product.originalPrice - product.price).toLocaleString('en-IN')})`;
+  if (savingsBadgeEl) {
+    const saved = Math.max(0, (product.originalPrice || 0) - (product.price || 0));
+    if (saved > 0) {
+      savingsBadgeEl.textContent = `Save ${savingsPercent}% (₹${saved.toLocaleString('en-IN')})`;
+      savingsBadgeEl.classList.remove('hidden');
+    } else {
+      savingsBadgeEl.classList.add('hidden');
+    }
+  }
 
-  // Specs Table
-  const movementEl = document.getElementById('qv-spec-movement');
-  if (movementEl) movementEl.textContent = product.movement || 'Japanese Automatic Caliber';
+  // Specs Table — an unverified spec hides its whole box rather than showing a
+  // made-up value or the words "Not Specified" to a customer.
+  [
+    ['qv-spec-movement', product.movement],
+    ['qv-spec-dial', product.dialSize],
+    ['qv-spec-glass', product.glass],
+    ['qv-spec-strap', product.strap]
+  ].forEach(([id, value]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const box = el.closest('div');
+    if (hasDisplayableSpec(value)) {
+      el.textContent = value.trim();
+      if (box) box.classList.remove('hidden');
+    } else if (box) {
+      box.classList.add('hidden');
+    }
+  });
 
-  const dialEl = document.getElementById('qv-spec-dial');
-  if (dialEl) dialEl.textContent = product.dialSize || '40-41 mm Standard';
-
-  const glassEl = document.getElementById('qv-spec-glass');
-  if (glassEl) glassEl.textContent = product.glass || 'Sapphire Coated Scratch-Resistant';
-
-  const strapEl = document.getElementById('qv-spec-strap');
-  if (strapEl) strapEl.textContent = product.strap || '904L Solid Stainless Steel';
-
-  const waterEl = document.getElementById('qv-spec-water');
-  if (waterEl) waterEl.textContent = product.waterResistance || 'Daily Splash & Rain Proof';
+  const extraSpecsEl = document.getElementById('qv-spec-extra');
+  if (extraSpecsEl) {
+    extraSpecsEl.innerHTML = '';
+    [
+      ['Dial Colour:', product.dialColor],
+      ['Case Colour:', product.caseColor],
+      ['Case Material:', product.caseMaterial],
+      ['Strap Colour:', product.strapColor],
+      ['Dial Shape:', product.dialShape],
+      ['Water Resistance:', product.waterResistance]
+    ].forEach(([label, value]) => {
+      if (!hasDisplayableSpec(value)) return;
+      const box = document.createElement('div');
+      box.className = 'p-2 rounded bg-[#1A2235] border border-[#2D3748]';
+      const labelEl = document.createElement('span');
+      labelEl.className = 'text-[#9CA3AF] block';
+      labelEl.textContent = label;
+      const valueEl = document.createElement('span');
+      valueEl.className = 'font-semibold text-[#F1F0ED]';
+      valueEl.textContent = value.trim();
+      box.appendChild(labelEl);
+      box.appendChild(valueEl);
+      extraSpecsEl.appendChild(box);
+    });
+  }
 
   const claspEl = document.getElementById('qv-spec-clasp');
   if (claspEl) claspEl.textContent = product.clasp || 'Authentic Double Folding Lock';
@@ -1638,7 +1733,7 @@ async function openMyOrdersModal() {
 
         <!-- WhatsApp Support Link -->
         <div class="pt-1">
-          <button onclick="checkoutManager.sendToWhatsApp('Hello AM COLLECTION! I am inquiring about my watch order #${o.orderId}.')" class="w-full py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors">
+          <button onclick="checkoutManager.sendToWhatsApp('Hello sabrXwatches! I am inquiring about my watch order #${o.orderId}.')" class="w-full py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors">
             <span>💬</span>
             <span>Chat regarding Order #${o.orderId}</span>
           </button>
