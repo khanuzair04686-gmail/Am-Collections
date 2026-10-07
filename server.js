@@ -30,6 +30,21 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 app.use(cors());
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+
+// Guards that must run before express.static, because the lambda directory doubles as
+// the web root: without these, server.js and package.json are downloadable from the site.
+const PRIVATE_PATHS = /^\/(server\.js|package\.json|package-lock\.json|\.env\w*|\.git\w*|data|scripts|vibe_images)(\/|$)/i;
+
+app.use((req, res, next) => {
+  if (req.path === '/admin' || req.path === '/admin/' || req.path === '/admin.html') {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive', true);
+  }
+  if (PRIVATE_PATHS.test(req.path)) {
+    return res.status(404).sendFile(path.join(__dirname, '404.html'));
+  }
+  next();
+});
+
 app.use('/uploads', express.static(UPLOADS_DIR));
 app.use(express.static(__dirname));
 
@@ -877,12 +892,20 @@ app.post('/api/settings', adminAuth, async (req, res) => {
 });
 
 // Logo Upload
-app.post('/api/settings/logo', adminAuth, upload.single('logo'), async (req, res) => {
+// The logo arrives as a data URL and is stored inside the settings document. Files on
+// disk would live in /tmp/uploads, which Vercel wipes between invocations — the URL
+// would survive in MongoDB while the image behind it disappeared.
+const LOGO_DATA_URL_RE = /^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/;
+const LOGO_MAX_BYTES = 1500000;
+
+app.post('/api/settings/logo', adminAuth, async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    const logoUrl = `/uploads/${req.file.filename}`;
-    await DB.updateBranding({ logoUrl });
-    res.json({ success: true, logoUrl });
+    const logo = typeof req.body?.logo === 'string' ? req.body.logo.trim() : '';
+    if (!logo) return res.status(400).json({ error: 'No logo image provided' });
+    if (logo.length > LOGO_MAX_BYTES) return res.status(413).json({ error: 'Logo image is too large (max ~1.1 MB)' });
+    if (!LOGO_DATA_URL_RE.test(logo)) return res.status(400).json({ error: 'Logo must be a base64 image data URL (PNG, JPG, WEBP, GIF or SVG)' });
+    await DB.updateBranding({ logoUrl: logo });
+    res.json({ success: true, logoUrl: logo });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -1875,10 +1898,18 @@ app.get('*', (req, res) => {
     return res.status(404).json({ error: `API endpoint ${req.path} not found` });
   }
   if (req.path === '/admin' || req.path === '/admin/' || req.path === '/admin.html') {
-    res.sendFile(path.join(__dirname, 'admin.html'));
-  } else {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    // Belt-and-braces with the meta tag and robots.txt: the console must never be indexed.
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive', true);
+    return res.sendFile(path.join(__dirname, 'admin.html'));
   }
+  if (req.path === '/about') return res.redirect(301, '/about.html');
+  if (req.path === '/' || req.path === '/index.html') {
+    return res.sendFile(path.join(__dirname, 'index.html'));
+  }
+  if (req.path === '/about.html') return res.sendFile(path.join(__dirname, 'about.html'));
+  // Unknown addresses answer with a real 404 status. Returning the homepage with a 200
+  // reads to Google as a soft 404, which gets those URLs dropped instead of indexed.
+  res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
 
 // =====================================================

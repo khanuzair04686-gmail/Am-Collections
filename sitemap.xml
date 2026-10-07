@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Only real, crawlable public pages. The admin console is disallowed in robots.txt
+     and noindexed in its own meta tag, so it is deliberately absent here. Individual
+     watches open in the catalogue modal and have no separate URL, so they are listed
+     through ItemList/Product structured data on the home page instead. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://sabrxwatches.vercel.app/</loc>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://sabrxwatches.vercel.app/about.html</loc>
+    <lastmod>2026-10-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

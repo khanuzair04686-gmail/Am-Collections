@@ -758,7 +758,9 @@ img, video, iframe {
 
   /* ============ 3. HERO — dark premium stage ============ */
   #mhome-hero {
-    background: linear-gradient(180deg, #111827 0%, #0B0F19 100%) !important;
+    background:
+      radial-gradient(560px 300px at 84% -14%, rgba(201, 169, 110, 0.18), transparent 68%),
+      linear-gradient(180deg, #111827 0%, #0B0F19 100%) !important;
     border-bottom: 1px solid rgba(201, 169, 110, 0.28) !important;
     padding-top: 18px !important;
     padding-bottom: 18px !important;
@@ -886,5 +888,116 @@ img, video, iframe {
     left: 12px !important;
     right: 12px !important;
     max-width: none !important;
+  }
+}
+
+/* ============ THEME: AMBIENT GOLD LIGHT ============ */
+/* Depth without restructuring: the sections keep their own flat ink backgrounds and
+   pick up a warm glow, so the page reads as lit rather than as a list of boxes. */
+#mhome-hero {
+  background-image:
+    radial-gradient(820px 420px at 82% -12%, rgba(201, 169, 110, 0.16), transparent 68%),
+    radial-gradient(680px 380px at 4% 116%, rgba(201, 169, 110, 0.08), transparent 66%);
+}
+#trust-section {
+  background-image: radial-gradient(760px 340px at 50% 0%, rgba(201, 169, 110, 0.07), transparent 70%);
+}
+#faq {
+  background-image: radial-gradient(680px 320px at 12% 100%, rgba(201, 169, 110, 0.07), transparent 70%);
+}
+
+footer {
+  background-image: linear-gradient(180deg, rgba(201, 169, 110, 0.05), transparent 140px);
+}
+
+/* Section titles carry a short gold hairline */
+section h2.font-heading::after {
+  content: "";
+  display: block;
+  width: 46px;
+  height: 2px;
+  margin-top: 9px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold-400), rgba(201, 169, 110, 0));
+}
+
+/* Hero headline: champagne metal, guarded so unsupported browsers keep the flat colour */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  #mhome-hero h1 {
+    background-image: linear-gradient(168deg, #FBF7EE 0%, #EFE0BE 46%, #C9A96E 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+
+/* ============ THEME: MATERIAL & MOTION ============ */
+/* Buttons get a single sheen sweep instead of a flat colour change */
+.btn-primary,
+.btn-gold {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.28) inset;
+}
+.btn-primary::after,
+.btn-gold::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -60%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transform: skewX(-14deg);
+  opacity: 0;
+  transition: transform 0.55s ease, opacity 0.3s ease;
+  pointer-events: none;
+}
+.btn-primary:hover::after,
+.btn-gold:hover::after {
+  opacity: 1;
+  transform: skewX(-14deg) translateX(320%);
+}
+
+/* Cards read as brushed metal: light from the top edge, gold ring on hover */
+.product-card {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 34%);
+}
+.product-card:hover {
+  border-color: rgba(201, 169, 110, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(201, 169, 110, 0.16),
+    0 20px 44px -16px rgba(201, 169, 110, 0.28);
+}
+.product-image-container {
+  background-image: radial-gradient(120% 90% at 50% 0%, #16203A 0%, #0F172A 70%);
+}
+
+/* Sticky header: crisper hairline and a deeper drop as content passes under it */
+#mhome-header {
+  border-bottom-color: rgba(201, 169, 110, 0.28);
+  box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.9);
+}
+
+/* Softer scrollbar: the solid gold thumb was the loudest thing on the page */
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 110, 0.42);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 169, 110, 0.68);
+}
+
+::selection {
+  background: rgba(201, 169, 110, 0.3);
+  color: #F1F0ED;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

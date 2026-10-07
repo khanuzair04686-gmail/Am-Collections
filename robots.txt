@@ -1,6 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 Disallow: /admin.html
 Disallow: /api/
+
+# The customer console and every API route above stay out of the index; the
+# storefront, About page, images and /uploads media are all crawlable.
 
 Sitemap: https://sabrxwatches.vercel.app/sitemap.xml

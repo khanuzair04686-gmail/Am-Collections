@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page Not Found | sabrXwatches</title>
+  <!-- A missing page must never be indexed, and must never look like the homepage. -->
+  <meta name="robots" content="noindex, follow" />
+
+  <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#0B0F19" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { brand: { black: '#0B0F19', charcoal: '#111827', border: '#2D3748', gold: '#C9A96E' } } } }
+    };
+  </script>
+  <link rel="stylesheet" href="/css/styles.css?v=20261007d" />
+  <style>
+    body { background: #0B0F19; color: #F1F0ED; font-family: 'Inter', system-ui, sans-serif; }
+    .font-heading { font-family: 'Cormorant Garamond', Georgia, serif; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-5 py-16">
+  <main class="w-full max-w-md text-center">
+    <img src="/icons/icon-192.png" alt="sabrXwatches watch icon" width="72" height="72" class="mx-auto mb-6 h-18 w-18 rounded-2xl" style="width:72px;height:72px" />
+
+    <p class="text-[11px] uppercase tracking-[0.3em] text-[#C9A96E] font-semibold">Error 404</p>
+    <h1 class="font-heading text-3xl sm:text-4xl font-extrabold mt-3 leading-tight">This page isn't on the wrist</h1>
+    <p class="text-sm text-[#9CA3AF] mt-4 leading-relaxed">
+      The address you followed doesn't exist or has moved. Your cart and orders are unaffected —
+      pick up again from the collection below.
+    </p>
+
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="/" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#C9A96E] text-[#1A1207] font-bold text-sm hover:bg-[#E2CFA5] transition-colors">
+        Back to the collection
+      </a>
+      <a href="/about.html" class="w-full sm:w-auto px-6 py-3 rounded-xl border border-[#2D3748] text-[#F1F0ED] font-semibold text-sm hover:border-[#C9A96E] transition-colors">
+        About sabrXwatches
+      </a>
+    </div>
+
+    <nav aria-label="Quick links" class="mt-10 pt-6 border-t border-[#1F2632]">
+      <p class="text-[10px] uppercase tracking-widest text-[#9CA3AF] mb-3">Popular sections</p>
+      <ul class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#9CA3AF]">
+        <li><a href="/#catalog" class="hover:text-[#C9A96E] transition-colors">All watches</a></li>
+        <li><a href="/#reviews" class="hover:text-[#C9A96E] transition-colors">Ordering &amp; COD</a></li>
+        <li><a href="/#faq" class="hover:text-[#C9A96E] transition-colors">FAQs</a></li>
+      </ul>
+    </nav>
+  </main>
+</body>
+</html>

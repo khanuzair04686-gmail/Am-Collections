@@ -214,6 +214,7 @@ async function fetchProducts() {
         renderProducts();
         renderTrendingRail();
         renderHeroSpotlight();
+        renderProductStructuredData(prods);
       } else {
         renderProductsError('Invalid data format received from database.');
       }
@@ -228,6 +229,67 @@ async function fetchProducts() {
   } catch (e) {
     renderProductsError('Network error connecting to MongoDB Atlas backend.');
   }
+}
+
+// ─── STRUCTURED DATA (Google Search) ─────────────────
+// Built from the live MongoDB catalogue, so every price, name and stock figure in
+// the markup is the same one the page shows. Ratings and reviews are deliberately
+// omitted: with no verified review data, publishing them would be a fake rich-result
+// violation rather than an optimisation.
+function absoluteImageUrl(src) {
+  if (typeof src !== 'string' || !src.trim()) return null;
+  if (src.startsWith('data:')) return null; // Google needs a fetchable URL, not base64
+  return src.startsWith('http') ? src : `${location.origin}${src.startsWith('/') ? '' : '/'}${src}`;
+}
+
+function renderProductStructuredData(products) {
+  if (!document.getElementById('catalog')) return; // home page only
+
+  const items = (products || [])
+    .filter(p => p && Number(p.price) > 0)
+    .map((p, i) => {
+      const stock = Number(p.stock) || 0;
+      const image = absoluteImageUrl(p.image);
+      const product = {
+        '@type': 'Product',
+        '@id': `${location.origin}/#product-${p.id}`,
+        name: `${p.brand} ${p.model}`.trim(),
+        category: p.category || 'Watches',
+        brand: { '@type': 'Brand', name: p.brand || 'sabrXwatches' },
+        description: p.tagline || p.description || `${p.brand} ${p.model} — luxury-styled automatic watch available from sabrXwatches.`,
+        sku: p.id,
+        offers: {
+          '@type': 'Offer',
+          url: `${location.origin}/#catalog`,
+          priceCurrency: 'INR',
+          price: Number(p.price).toFixed(2),
+          availability: stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          itemCondition: 'https://schema.org/NewCondition'
+        }
+      };
+      if (image) product.image = image;
+      return { '@type': 'ListItem', position: i + 1, item: product };
+    });
+
+  if (!items.length) return;
+
+  const graph = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'sabrXwatches watch collection',
+    itemListUrl: `${location.origin}/#catalog`,
+    numberOfItems: items.length,
+    itemListElement: items
+  };
+
+  let script = document.getElementById('product-schema');
+  if (!script) {
+    script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'product-schema';
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(graph);
 }
 
 async function fetchSettings() {
@@ -293,7 +355,11 @@ function applyBrandingSettings(settings) {
   if (settings.storeName) {
     const el = document.getElementById('header-store-name');
     if (el) el.textContent = settings.storeName;
-    document.title = `${settings.storeName} | ${settings.tagline || 'Master Copy Watches'}`;
+    // Only the brand half of the title follows the store name — the descriptive half
+    // is page-specific and lives in <meta name="seo-title">. Overwriting the whole
+    // <title> gave every page the same one and undid the per-page SEO titles.
+    const seoTitle = document.querySelector('meta[name="seo-title"]');
+    if (seoTitle && seoTitle.content) document.title = `${settings.storeName} | ${seoTitle.content}`;
   }
   if (settings.tagline) {
     const el = document.getElementById('header-store-tagline');
@@ -308,17 +374,22 @@ function applyBrandingSettings(settings) {
   }
   const img = document.getElementById('header-logo-img');
   const monogram = document.getElementById('header-logo-monogram');
-  if (settings.logoUrl) {
-    if (img && monogram) {
+  if (img && monogram) {
+    const showBuiltInMark = () => {
+      img.removeAttribute('src');
+      img.classList.add('hidden');
+      monogram.classList.remove('hidden');
+    };
+    // A logo uploaded to Vercel's ephemeral disk 404s once that instance is recycled,
+    // which used to leave a broken image box in the header. Fall back to the built-in
+    // mark instead. Logos uploaded from now on are embedded in MongoDB and survive.
+    img.onerror = showBuiltInMark;
+    if (settings.logoUrl) {
       img.src = settings.logoUrl;
       img.classList.remove('hidden');
       monogram.classList.add('hidden');
-    }
-  } else {
-    if (img && monogram) {
-      img.src = '';
-      img.classList.add('hidden');
-      monogram.classList.remove('hidden');
+    } else {
+      showBuiltInMark();
     }
   }
 }

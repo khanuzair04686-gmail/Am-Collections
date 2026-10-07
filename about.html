@@ -3,27 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About Us | sabrXwatches</title>
-  
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⌚</text></svg>" />
+  <title>About Us | sabrXwatches — How We Source, Inspect & Deliver Watches</title>
+
+  <!-- Favicon & app icons -->
+  <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#0B0F19" />
+  <meta name="msapplication-TileColor" content="#0B0F19" />
 
   <!-- SEO Meta -->
-  <meta name="description" content="Who we are: how sabrXwatches sources, inspects and ships luxury-styled automatic watches across India, and how Cash on Delivery and the 7-day replacement policy work." />
-  <meta name="keywords" content="about sabrXwatches, automatic watches India, cash on delivery watches, watch quality inspection" />
+  <meta name="description" content="Who we are: how sabrXwatches sources and inspects luxury-styled automatic watches, how Cash on Delivery works on eligible pincodes, and what the 7-day replacement policy covers." />
+  <meta name="keywords" content="about sabrXwatches, watch quality inspection India, cash on delivery watches, automatic watch supplier" />
+  <meta name="seo-title" content="About Us — How We Source, Inspect & Deliver Watches" />
   <link rel="canonical" href="https://sabrxwatches.vercel.app/about.html" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
 
   <!-- Open Graph -->
-  <meta property="og:type" content="article" />
+  <meta property="og:type" content="website" />
   <meta property="og:site_name" content="sabrXwatches" />
+  <meta property="og:locale" content="en_IN" />
   <meta property="og:url" content="https://sabrxwatches.vercel.app/about.html" />
   <meta property="og:title" content="About Us | sabrXwatches" />
   <meta property="og:description" content="How sabrXwatches sources, inspects and delivers luxury-styled automatic watches across India." />
   <meta property="og:image" content="https://sabrxwatches.vercel.app/uploads/og-sabrxwatches.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="sabrXwatches skeleton-dial automatic watch on a dark background" />
+
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="About Us | sabrXwatches" />
+  <meta name="twitter:description" content="How sabrXwatches sources, inspects and delivers luxury-styled automatic watches across India." />
   <meta name="twitter:image" content="https://sabrxwatches.vercel.app/uploads/og-sabrxwatches.jpg" />
+  <meta name="twitter:image:alt" content="sabrXwatches skeleton-dial automatic watch" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "AboutPage",
+        "@id": "https://sabrxwatches.vercel.app/about.html#webpage",
+        "url": "https://sabrxwatches.vercel.app/about.html",
+        "name": "About sabrXwatches",
+        "inLanguage": "en-IN",
+        "isPartOf": { "@id": "https://sabrxwatches.vercel.app/#website" },
+        "about": { "@id": "https://sabrxwatches.vercel.app/#organization" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sabrxwatches.vercel.app/" },
+          { "@type": "ListItem", "position": 2, "name": "About Us", "item": "https://sabrxwatches.vercel.app/about.html" }
+        ]
+      }
+    ]
+  }
+  </script>
 
   <!-- Fonts Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -57,7 +96,7 @@
   </script>
 
   <!-- Production Custom Stylesheet -->
-  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css?v=20261007d" />
 </head>
 <body class="bg-[#0B0F19] text-[#F1F0ED] antialiased selection:bg-[#C9A96E] selection:text-[#0B0F19]">
 
@@ -80,8 +119,22 @@
         <!-- Left: Brand Logo -->
         <a href="/" class="header-logo flex items-center gap-2 sm:gap-2.5 flex-shrink-0 group focus:outline-none">
           <div id="header-logo-container" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#1A2235] to-[#0B0F19] ring-1 ring-[#C9A96E]/60 text-white flex items-center justify-center font-bold text-xs sm:text-sm tracking-wider overflow-hidden">
-            <img id="header-logo-img" src="" alt="Logo" class="w-full h-full object-contain hidden" />
-            <span id="header-logo-monogram" class="font-heading font-black text-[#E8D5AE]">AM</span>
+            <img id="header-logo-img" alt="sabrXwatches logo" class="w-full h-full object-contain hidden" />
+            <span id="header-logo-monogram" class="flex items-center justify-center w-full h-full" aria-hidden="true">
+              <svg viewBox="0 0 512 512" class="w-[80%] h-[80%]" fill="none" stroke="#E8D5AE" stroke-linecap="round">
+                <circle cx="240" cy="256" r="174" stroke-width="30" />
+                <line x1="240" y1="256" x2="157" y2="208" stroke-width="24" />
+                <line x1="240" y1="256" x2="323" y2="208" stroke-width="16" />
+                <g fill="#E8D5AE" stroke="none">
+                  <circle cx="240" cy="256" r="26" />
+                  <circle cx="240" cy="120" r="15" />
+                  <circle cx="240" cy="392" r="15" />
+                  <circle cx="104" cy="256" r="15" />
+                  <circle cx="376" cy="256" r="15" />
+                  <rect x="418" y="228" width="26" height="56" rx="9" />
+                </g>
+              </svg>
+            </span>
           </div>
           <div class="flex flex-col">
             <span id="header-store-name" class="font-heading text-sm sm:text-base font-extrabold tracking-wider text-[#F1F0ED]">
@@ -795,7 +848,7 @@
           
           <!-- Image Showcase -->
           <div class="bg-[#0F172A] rounded-xl border border-[#2D3748] p-4 flex items-center justify-center aspect-square">
-            <img id="qv-image" src="" alt="Watch Preview" class="w-full h-full object-contain" />
+            <img id="qv-image" alt="Watch preview" decoding="async" class="w-full h-full object-contain" />
           </div>
 
           <!-- Watch Specs & Details -->
@@ -1165,10 +1218,10 @@
   <div id="toast-container" class="fixed bottom-6 left-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
   <!-- JavaScript Scripts -->
-  <script src="/js/products.js?v=20261007"></script>
-  <script src="/js/cart.js?v=20261007"></script>
-  <script src="/js/checkout.js?v=20261007"></script>
-  <script src="/js/app.js?v=20261007"></script>
+  <script src="/js/products.js?v=20261007d"></script>
+  <script src="/js/cart.js?v=20261007d"></script>
+  <script src="/js/checkout.js?v=20261007d"></script>
+  <script src="/js/app.js?v=20261007d"></script>
 
 </body>
 </html>

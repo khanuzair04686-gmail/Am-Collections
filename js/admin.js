@@ -270,15 +270,17 @@ async function handleLogoUpload(e) {
     return;
   }
 
-  const formData = new FormData();
-  formData.append('logo', fileInput.files[0]);
-
   try {
-    showToast('Uploading new logo...', 'info');
+    showToast('Embedding logo into the database...', 'info');
+    // Stored as a data URL inside the settings document rather than as a file on disk:
+    // Vercel's /tmp/uploads is wiped on every cold start, which used to leave the header
+    // pointing at a logo that no longer existed.
+    const logo = await logoToEmbeddedDataUrl(fileInput.files[0]);
+
     const res = await fetch('/api/settings/logo', {
       method: 'POST',
-      headers: adminHeaders(false),
-      body: formData
+      headers: adminHeaders(true),
+      body: JSON.stringify({ logo })
     });
 
     if (res.ok) {
@@ -292,11 +294,32 @@ async function handleLogoUpload(e) {
       showToast('Logo updated successfully! ✨', 'success');
       broadcastStoreChange('settings');
     } else {
-      showToast('Failed to upload logo image', 'error');
+      const err = await res.json().catch(() => ({}));
+      showToast(err.error || 'Failed to upload logo image', 'error');
     }
   } catch (e) {
     showToast('Upload error', 'error');
   }
+}
+
+const LOGO_MAX_DATA_URL_BYTES = 1500000;
+
+async function logoToEmbeddedDataUrl(file) {
+  // PNG keeps transparency, which matters for a logo sitting on the dark header tile.
+  const embedded = await imageToEmbeddedDataUrl(file, 320, 0.92, 'image/png');
+  const dataUrl = embedded || await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+  if (!dataUrl || !dataUrl.startsWith('data:image/')) {
+    throw new Error('That file could not be read as an image.');
+  }
+  if (dataUrl.length > LOGO_MAX_DATA_URL_BYTES) {
+    throw new Error('Logo is too large — upload a smaller image (ideally under 300 KB).');
+  }
+  return dataUrl;
 }
 
 async function handleRemoveLogo() {
@@ -306,7 +329,7 @@ async function handleRemoveLogo() {
     if (res.ok) {
       const preview = document.getElementById('branding-logo-preview');
       const placeholder = document.getElementById('branding-logo-placeholder');
-      preview.src = '';
+      preview.removeAttribute('src');
       preview.classList.add('hidden');
       placeholder.classList.remove('hidden');
       showToast('Logo removed permanently.', 'success');
@@ -796,7 +819,7 @@ function previewWatchVideo(input) {
 // Serverless disk is ephemeral, so an uploaded file can vanish while its URL stays
 // in the database. Downsizing the image and storing it inside the product document
 // keeps MongoDB the only source of truth for the picture too.
-async function imageToEmbeddedDataUrl(file, maxDim = 900, quality = 0.8) {
+async function imageToEmbeddedDataUrl(file, maxDim = 900, quality = 0.8, mimeType = 'image/jpeg') {
   if (!file || !file.type.startsWith('image/')) return null;
   const objectUrl = URL.createObjectURL(file);
   try {
@@ -811,10 +834,13 @@ async function imageToEmbeddedDataUrl(file, maxDim = 900, quality = 0.8) {
     canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
     canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // JPEG has no alpha channel, so it needs an opaque backdrop; PNG keeps one.
+    if (mimeType === 'image/jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg', quality);
+    return canvas.toDataURL(mimeType, quality);
   } catch (err) {
     return null;
   } finally {
