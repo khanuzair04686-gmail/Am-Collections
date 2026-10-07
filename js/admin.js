@@ -459,7 +459,7 @@ function renderWatchesTable() {
           <button onclick="openEditWatchModal('${w.id}')" class="px-3 py-1.5 rounded-lg bg-[#1B222C] hover:bg-[#252E3B] text-neutral-200 hover:text-amber-300 transition-colors" title="Edit Watch Details">
             Edit
           </button>
-          <button onclick="handleDeleteWatchPermanently('${w.id}', '${w.brand} ${w.model}')" class="px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-500/30 transition-colors" title="Permanently Delete">
+          <button onclick="openWatchDeleteModal('${w.id}')" class="px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-500/30 transition-colors" title="Permanently Delete">
             Delete
           </button>
         </div>
@@ -468,24 +468,66 @@ function renderWatchesTable() {
   `).join('');
 }
 
-// Permanently Delete Watch
-async function handleDeleteWatchPermanently(id, title) {
-  if (!confirm(`Are you sure you want to PERMANENTLY remove "${title}" from the database?\nThis watch will NEVER come back after refresh or redeploy.`)) {
+// Permanently Delete Watch.
+// The old button inlined "Brand Model" into the onclick string, so any product whose
+// name contains an apostrophe ("Men's Skeleton Watch") produced a JS syntax error and
+// the button silently did nothing. Only the id crosses into the handler now.
+let watchDeleteTargetId = null;
+let watchDeleteInFlight = false;
+
+function openWatchDeleteModal(id) {
+  const watch = adminWatches.find((w) => w.id === id);
+  if (!watch) {
+    showToast('That watch is no longer in the loaded list — refreshing the table.', 'info');
+    loadAdminWatches();
     return;
   }
+  watchDeleteTargetId = watch.id;
+  const detail = document.getElementById('watch-delete-detail');
+  if (detail) detail.textContent = `${watch.brand} ${watch.model} — ID ${watch.id} · ₹${Number(watch.price).toLocaleString('en-IN')}`;
+  const btn = document.getElementById('watch-delete-confirm-btn');
+  if (btn) { btn.disabled = false; btn.textContent = 'Delete Watch'; }
+  const modal = document.getElementById('watch-delete-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeWatchDeleteModal() {
+  watchDeleteTargetId = null;
+  const modal = document.getElementById('watch-delete-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function confirmWatchDelete() {
+  if (watchDeleteInFlight || !watchDeleteTargetId) return;
+  const id = watchDeleteTargetId;
+  const btn = document.getElementById('watch-delete-confirm-btn');
+  watchDeleteInFlight = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
 
   try {
-    showToast('Deleting watch permanently...', 'info');
-    const res = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: adminHeaders(false) });
-    if (res.ok) {
-      showToast(`"${title}" permanently removed from database! 🗑️`, 'success');
-      await loadAdminWatches();
-      broadcastStoreChange('catalog');
-    } else {
-      showToast('Failed to delete watch', 'error');
+    const res = await fetch(`/api/products/${encodeURIComponent(id)}`, { method: 'DELETE', headers: adminHeaders(false) });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Delete Watch'; }
+      watchDeleteInFlight = false;
+      showToast(data.error || `Could not delete this watch (HTTP ${res.status}).`, 'error');
+      return;
     }
+
+    await loadAdminWatches();
+    watchDeleteInFlight = false;
+    if (adminWatches.some((w) => w.id === id)) {
+      showToast('The server confirmed the delete but the watch is still listed — refresh the page and try again.', 'error');
+      return;
+    }
+    showToast(`"${data.message || 'Watch'}" removed from the database.`, 'success');
+    closeWatchDeleteModal();
+    broadcastStoreChange('catalog');
   } catch (e) {
-    showToast('Error deleting watch', 'error');
+    watchDeleteInFlight = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Delete Watch'; }
+    showToast('Network error while deleting the watch.', 'error');
   }
 }
 
@@ -644,6 +686,14 @@ async function handleWatchFormSubmit(e) {
   const tagline = document.getElementById('form-watch-tagline').value.trim();
   const price = document.getElementById('form-watch-price').value.trim();
   const originalPrice = document.getElementById('form-watch-original-price').value.trim();
+  if (!(Number(price) > 0)) {
+    showToast('Enter a selling price above ₹0 — the watch was not saved.', 'error');
+    return;
+  }
+  if (originalPrice && !(Number(originalPrice) > 0)) {
+    showToast('Reference MRP must be above ₹0, or leave it blank to match the selling price.', 'error');
+    return;
+  }
   const badge = document.getElementById('form-watch-badge').value;
   const movement = document.getElementById('form-watch-movement').value.trim();
   const dialSize = document.getElementById('form-watch-dial').value.trim();

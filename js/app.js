@@ -91,7 +91,7 @@ function openWishlistModal() {
             <div>
               <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-500">${p.brand}</span>
               <h4 class="text-xs font-semibold text-neutral-900 line-clamp-1">${p.model}</h4>
-              <div class="text-xs font-bold text-neutral-900 mt-1">₹${p.price.toLocaleString('en-IN')}</div>
+              <div class="text-xs font-bold text-neutral-900 mt-1">${formatINR(p.price)}</div>
             </div>
             <div class="flex items-center gap-2 mt-3 pt-2 border-t border-neutral-100">
               <button onclick="addToCart('${p.id}'); closeWishlistModal(); openCartDrawer();" class="flex-1 btn-primary py-1.5 text-[11px]">
@@ -601,7 +601,7 @@ function renderProducts() {
 
             <!-- Price Block -->
             <div class="mt-1 flex flex-wrap items-baseline gap-1">
-              <span class="text-xs sm:text-sm font-bold text-[#E2CFA5]">₹${product.price.toLocaleString('en-IN')}</span>
+              <span class="text-xs sm:text-sm font-bold text-[#E2CFA5]">${formatINR(product.price)}</span>
               <span class="text-[9px] sm:text-[10px] text-neutral-500 line-through">₹${product.originalPrice.toLocaleString('en-IN')}</span>
               <span class="text-[9px] sm:text-[10px] font-bold text-emerald-400">${savingsPercent}% OFF</span>
             </div>
@@ -670,7 +670,7 @@ function renderTrendingRail() {
           <span class="trending-brand">${p.brand}</span>
           <h3 class="trending-model" onclick="openQuickView('${p.id}')">${p.model}</h3>
           <div class="trending-price-row">
-            <span class="trending-price">₹${p.price.toLocaleString('en-IN')}</span>
+            <span class="trending-price">${formatINR(p.price)}</span>
             ${off > 0 ? `<span class="trending-compare">₹${p.originalPrice.toLocaleString('en-IN')}</span>` : ''}
           </div>
           <button type="button" class="trending-add" onclick="addToCart('${p.id}'); openCartDrawer();">+ Add to Bag</button>
@@ -727,7 +727,7 @@ function paintSpotlight() {
   if (tagline) tagline.textContent = product.tagline || `${product.category} collection`;
 
   const price = document.getElementById('hero-spotlight-price');
-  if (price) price.textContent = `₹${product.price.toLocaleString('en-IN')}`;
+  if (price) price.textContent = `${formatINR(product.price)}`;
 
   const original = document.getElementById('hero-spotlight-original');
   if (original) {
@@ -818,7 +818,7 @@ function renderMobilePromo() {
     img.alt = `${pick.brand} ${pick.model}`;
   }
   if (name) name.textContent = `${pick.brand} ${pick.model}`;
-  if (price) price.textContent = `₹${pick.price.toLocaleString('en-IN')}`;
+  if (price) price.textContent = `${formatINR(pick.price)}`;
   if (original) {
     original.textContent = pick.originalPrice > pick.price ? `₹${pick.originalPrice.toLocaleString('en-IN')}` : '';
   }
@@ -1010,7 +1010,7 @@ function openQuickView(productId) {
   if (taglineEl) taglineEl.textContent = product.tagline || '1:1 Master Copy Horology Clone';
 
   const priceEl = document.getElementById('qv-price');
-  if (priceEl) priceEl.textContent = `₹${product.price.toLocaleString('en-IN')}`;
+  if (priceEl) priceEl.textContent = `${formatINR(product.price)}`;
 
   const origPriceEl = document.getElementById('qv-original-price');
   if (origPriceEl) origPriceEl.textContent = `₹${product.originalPrice.toLocaleString('en-IN')}`;

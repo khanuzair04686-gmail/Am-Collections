@@ -10,3 +10,10 @@ var AMC_IMAGE_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 function getWatchImage(url) {
   return url || AMC_IMAGE_PLACEHOLDER;
 }
+
+// Money helper — a missing or zero price must never be shown as ₹0, because that
+// reads as a real (free) price. Legacy rows can still have a blank price.
+function formatINR(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? `₹${n.toLocaleString('en-IN')}` : 'Price on request';
+}

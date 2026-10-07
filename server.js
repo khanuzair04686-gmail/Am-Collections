@@ -998,15 +998,22 @@ app.post('/api/products', adminAuth, uploadMedia, async (req, res) => {
       });
     }
 
+    const price = Number(b.price);
+    if (!Number.isFinite(price) || price <= 0) {
+      return res.status(400).json({ error: 'A selling price above ₹0 is required — the watch was not created. Enter the real price instead of leaving it blank.' });
+    }
+    const originalPrice = Number(b.originalPrice);
+
     const product = {
       id: `amc-${Date.now().toString().slice(-8)}`,
       brand,
       model: model || 'Untitled Model',
       tagline: b.tagline || '',
-      price: Number(b.price) || 3999,
-      originalPrice: Number(b.originalPrice) || Number(b.price) || 3999,
-      rating: Number(b.rating) || 4.9,
-      reviewsCount: Number(b.reviewsCount) || 50,
+      price,
+      // A blank reference price means "same as selling price", never an invented MRP
+      originalPrice: Number.isFinite(originalPrice) && originalPrice > 0 ? originalPrice : price,
+      rating: Number(b.rating) || 0,
+      reviewsCount: Number(b.reviewsCount) || 0,
       badge: (b.badge || 'NEW ARRIVAL').toUpperCase(),
       category: (b.category || 'other').toLowerCase(),
       movement: spec(b.movement),
@@ -1049,8 +1056,16 @@ app.put('/api/products/:id', adminAuth, uploadMedia, async (req, res) => {
     const files = req.files || {};
     const updates = { ...b };
 
-    if (updates.price) updates.price = Number(updates.price);
-    if (updates.originalPrice) updates.originalPrice = Number(updates.originalPrice);
+    // An empty or non-numeric price used to be written straight through, which is how
+    // products ended up showing ₹0 / blank after an edit. Reject it and keep the old value.
+    for (const field of ['price', 'originalPrice']) {
+      if (b[field] === undefined) continue;
+      const value = Number(b[field]);
+      if (!Number.isFinite(value) || value <= 0) {
+        return res.status(400).json({ error: `"${field}" must be a number above ₹0. The existing price was left unchanged.` });
+      }
+      updates[field] = value;
+    }
     if (updates.rating) updates.rating = Number(updates.rating);
     if (updates.reviewsCount) updates.reviewsCount = Number(updates.reviewsCount);
     if (updates.stock !== undefined) updates.stock = Number(updates.stock);

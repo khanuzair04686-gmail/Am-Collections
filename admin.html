@@ -917,11 +917,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Selling Price (₹) *</label>
-            <input type="number" id="form-watch-price" required placeholder="e.g. 4499" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500 font-bold" />
+            <input type="number" id="form-watch-price" required min="1" step="1" placeholder="e.g. 4499" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500 font-bold" />
           </div>
           <div>
-            <label class="block font-semibold text-neutral-300 mb-1">Original Reference MRP (₹) *</label>
-            <input type="number" id="form-watch-original-price" required placeholder="e.g. 1150000" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
+            <label class="block font-semibold text-neutral-300 mb-1">Original Reference MRP (₹) <span class="text-neutral-500 font-normal">- optional</span></label>
+            <input type="number" id="form-watch-original-price" min="1" step="1" placeholder="Leave blank to match the selling price" class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500" />
           </div>
           <div>
             <label class="block font-semibold text-neutral-300 mb-1">Badge Tag</label>
@@ -1140,11 +1140,33 @@
     </div>
   </div>
 
+  <!-- Watch Permanent Delete Confirmation -->
+  <div id="watch-delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-backdrop overflow-y-auto bg-black/85 backdrop-blur-md">
+    <div class="bg-[#0B0E13] border border-red-500/40 rounded-3xl w-full max-w-md shadow-2xl my-8 relative p-6 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path></svg>
+        </div>
+        <h3 class="font-heading text-lg font-bold text-white">Delete this watch?</h3>
+      </div>
+      <p class="text-xs text-neutral-300">Please confirm before continuing. It is removed from MongoDB permanently — a hidden listing can be un-hidden instead.</p>
+      <p id="watch-delete-detail" class="text-[11px] text-neutral-500 font-mono break-all"></p>
+      <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+        <button onclick="closeWatchDeleteModal()" class="px-5 py-2.5 rounded-xl bg-[#1B222C] hover:bg-[#252E3B] text-neutral-300 transition-colors">
+          Cancel
+        </button>
+        <button id="watch-delete-confirm-btn" onclick="confirmWatchDelete()" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black uppercase tracking-wider transition-colors">
+          Delete Watch
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-6 left-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
   <!-- Admin JavaScript Controller -->
-  <script src="/js/admin.js?v=20261001"></script>
+  <script src="/js/admin.js?v=20261007"></script>
 
 </body>
 </html>
