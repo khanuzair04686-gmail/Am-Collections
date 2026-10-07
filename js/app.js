@@ -1022,7 +1022,7 @@ function openQuickView(productId) {
   if (badgeEl) badgeEl.textContent = product.badge || 'MASTER EDITION';
 
   const ratingValEl = document.getElementById('qv-rating-val');
-  if (ratingValEl) ratingValEl.textContent = `${product.rating} (${product.reviewsCount} verified reviews)`;
+  if (ratingValEl) ratingValEl.textContent = Number(product.rating) > 0 ? `${product.rating} ★` : 'New arrival';
 
   const savingsBadgeEl = document.getElementById('qv-savings-badge');
   if (savingsBadgeEl) {
@@ -1729,34 +1729,40 @@ async function openMyOrdersModal() {
     </div>
   `;
 
-  let orders = [];
+  let orders = null;
+  let fetchFailed = false;
   try {
     const identifier = currentCustomer.email || currentCustomer.phone || currentCustomer.userId || '';
-    const res = await fetch(`/api/customer/orders/${encodeURIComponent(identifier)}`);
+    const res = await fetch(`/api/customer/orders/${encodeURIComponent(identifier)}`, { cache: 'no-store' });
     if (res.ok) {
       orders = await res.json();
+    } else {
+      fetchFailed = true;
     }
   } catch (err) {
-    // Fallback to local storage history
-    try {
-      orders = JSON.parse(localStorage.getItem('AMC_ORDERS_HISTORY') || '[]');
-    } catch (e) {
-      orders = [];
-    }
+    fetchFailed = true;
   }
 
-  if (!Array.isArray(orders) || orders.length === 0) {
-    try {
-      orders = JSON.parse(localStorage.getItem('AMC_ORDERS_HISTORY') || '[]');
-    } catch (e) {}
+  // MongoDB is the only source for order history — a browser-cached copy would show
+  // stale statuses and delivery dates that the admin has since changed.
+  if (fetchFailed || !Array.isArray(orders)) {
+    container.innerHTML = `
+      <div class="p-8 text-center space-y-3">
+        <div class="text-4xl">⚠️</div>
+        <p class="text-sm font-bold text-neutral-800">We couldn't load your orders right now</p>
+        <p class="text-xs text-neutral-500">Please check your connection and try again.</p>
+        <button onclick="openMyOrdersModal()" class="btn-primary mt-2 px-5 py-2 text-xs">Try Again</button>
+      </div>
+    `;
+    return;
   }
 
-  if (!Array.isArray(orders) || orders.length === 0) {
+  if (orders.length === 0) {
     container.innerHTML = `
       <div class="p-8 text-center text-neutral-500 space-y-2">
         <div class="text-4xl">📦</div>
         <p class="text-sm font-bold text-neutral-800">No Orders Placed Yet</p>
-        <p class="text-xs text-neutral-500">Discover our Master Copy watches and place your first Cash on Delivery order!</p>
+        <p class="text-xs text-neutral-500">Browse the collection and place your first Cash on Delivery order!</p>
         <button onclick="closeMyOrdersModal(); window.location.href='#catalog';" class="btn-primary mt-4 px-5 py-2 text-xs">
           Explore Collection
         </button>
@@ -1765,13 +1771,17 @@ async function openMyOrdersModal() {
     return;
   }
 
-  const steps = ['Confirmed', 'Packed', 'Shipped', 'Delivered'];
+  const steps = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
 
   container.innerHTML = orders.map(o => {
-    const currentStatus = o.status || 'Confirmed';
-    const isCancelled = currentStatus.toLowerCase().includes('cancel');
+    const currentStatus = o.status || 'Pending';
+    const isCancelled = /cancel|return/i.test(currentStatus);
     let activeIdx = steps.findIndex(s => currentStatus.toLowerCase().includes(s.toLowerCase()));
     if (activeIdx === -1) activeIdx = 0;
+    const expectedDate = /^\d{4}-\d{2}-\d{2}$/.test(o.expectedDeliveryDate || '') ? o.expectedDeliveryDate : '';
+    const expectedLabel = expectedDate
+      ? (() => { const [y, m, d] = expectedDate.split('-').map(Number); const mo = ['January','February','March','April','May','June','July','August','September','October','November','December']; return `${d} ${mo[m - 1]} ${y}`; })()
+      : '';
 
     return `
       <div class="p-4 rounded-2xl bg-white border border-neutral-200 space-y-3 shadow-xs">
@@ -1810,11 +1820,20 @@ async function openMyOrdersModal() {
               `).join('')}
             </div>
           </div>
+        ` : isCancelled && currentStatus.toLowerCase().includes('return') ? `
+          <div class="p-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 font-semibold text-center">
+            This order was returned.
+          </div>
         ` : `
           <div class="p-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 font-semibold text-center">
             This order was cancelled.
           </div>
         `}
+
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-neutral-600 border-t border-neutral-100 pt-2">
+          <span><span class="text-neutral-400">Payment:</span> <span class="font-semibold text-neutral-800">${o.paymentMethod || 'Cash on Delivery (COD)'}</span></span>
+          <span><span class="text-neutral-400">Expected delivery:</span> <span class="font-semibold text-neutral-800">${expectedLabel ? `📅 ${expectedLabel}` : 'To be confirmed'}</span></span>
+        </div>
 
         <!-- Items in Order -->
         <div class="border-t border-neutral-100 pt-2 space-y-1.5">

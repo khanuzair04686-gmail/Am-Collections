@@ -88,7 +88,7 @@ const INITIAL_SETTINGS = {
   logoUrl: '',
   faviconUrl: '',
   storePhone: '919876543210',
-  announcementText: '✨ FREE Pan-India Cash on Delivery • 7-Day Hassle-Free Replacement • 100% Inspected',
+  announcementText: '✨ Cash on Delivery available on eligible serviceable pincodes',
   coinEarnRate: 1, // 1 coin per ₹100 spent
   coinRedeemRate: 1, // 1 coin = ₹1 discount
   adminPasskey: ADMIN_PASSKEY,
@@ -230,6 +230,28 @@ const heroBannerSchema = new mongoose.Schema({
   active: { type: Boolean, default: true }
 });
 
+// Admin-manageable order lifecycle.
+const ORDER_STATUSES = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'];
+
+// Delivery dates are stored as a plain calendar string (YYYY-MM-DD), never as a Date:
+// a UTC-anchored Date renders as the previous day for IST users, which shifted dates by one.
+function normalizeCalendarDate(value) {
+  if (typeof value !== 'string') return null;
+  const s = value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const [y, m, d] = s.split('-').map(Number);
+  if (y < 2000 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const probe = new Date(Date.UTC(y, m - 1, d));
+  return probe.getUTCMonth() === m - 1 && probe.getUTCDate() === d ? s : null;
+}
+
+function calendarDateFromToday(daysAhead) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysAhead);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 const orderSchema = new mongoose.Schema({
   orderId: { type: String, required: true, unique: true },
   userId: String,
@@ -261,8 +283,11 @@ const orderSchema = new mongoose.Schema({
   coinDiscount: { type: Number, default: 0 },
   coinsEarned: { type: Number, default: 0 },
   total: Number,
+  shippingCharge: { type: Number, default: 0 },
   paymentMethod: { type: String, default: 'Cash on Delivery (COD)' },
-  status: { type: String, default: 'Confirmed' },
+  status: { type: String, default: 'Pending', index: true },
+  // Calendar string (YYYY-MM-DD) so the customer and the admin always read the same day.
+  expectedDeliveryDate: { type: String, default: '' },
   trackingTimeline: [
     {
       status: String,
@@ -270,7 +295,8 @@ const orderSchema = new mongoose.Schema({
       message: String
     }
   ],
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
 const userSchema = new mongoose.Schema({
@@ -521,9 +547,26 @@ const DB = {
     return await Order.findOneAndUpdate(
       { orderId },
       {
-        $set: { status },
+        $set: { status, updatedAt: new Date() },
         $push: { trackingTimeline: trackingEntry }
       },
+      { new: true }
+    ).lean();
+  },
+  // Expected delivery date is stored as a plain calendar string (YYYY-MM-DD) so that no
+  // timezone conversion can shift it by a day, and so orders created before this field
+  // existed keep working — an empty string simply means "not promised yet".
+  async updateOrderDeliveryDate(orderId, expectedDeliveryDate) {
+    return await Order.findOneAndUpdate(
+      { orderId },
+      { $set: { expectedDeliveryDate, updatedAt: new Date() } },
+      { new: true }
+    ).lean();
+  },
+  async appendOrderEvent(orderId, entry) {
+    return await Order.findOneAndUpdate(
+      { orderId },
+      { $push: { trackingTimeline: entry } },
       { new: true }
     ).lean();
   },
@@ -1233,73 +1276,103 @@ app.post('/api/orders', async (req, res) => {
   try {
     const b = req.body;
     const orderId = b.orderId || `AMC-${Math.floor(10000 + Math.random() * 90000)}`;
-    const totalAmount = Number(b.total) || 0;
+    const clean = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
+
+    const customerName = clean(b.customerName || (b.customer && b.customer.fullName), 120);
+    const phone = clean(b.phone || (b.customer && b.customer.phone), 20);
+    const address = clean(b.address || (b.customer && b.customer.address), 500);
+    const city = clean(b.city || (b.customer && b.customer.city), 100);
+    const state = clean(b.state || (b.customer && b.customer.state), 100);
+    const pincode = clean(b.pincode || (b.customer && b.customer.pincode), 10);
+
+    // A courier only needs a deliverable address, so the address block is mandatory.
+    const missing = [];
+    if (!customerName) missing.push('full name');
+    if (!/^\d{10}$/.test(phone.replace(/\D/g, ''))) missing.push('a valid 10-digit mobile number');
+    if (!address) missing.push('address');
+    if (!city) missing.push('city');
+    if (!state) missing.push('state');
+    if (!/^\d{6}$/.test(pincode)) missing.push('a valid 6-digit pincode');
+    if (missing.length) {
+      return res.status(400).json({ error: `Please complete the delivery details: ${missing.join(', ')}.` });
+    }
+
+    // Line items are rebuilt from MongoDB so an order always records the real catalogue
+    // name and selling price at purchase time — never a browser-supplied ₹0.
+    const rawItems = Array.isArray(b.items) ? b.items : [];
+    if (rawItems.length === 0) return res.status(400).json({ error: 'Your cart is empty — there is nothing to order.' });
+    const items = [];
+    for (const it of rawItems) {
+      const product = await DB.getProductById(clean(it.id, 80));
+      if (!product || product.isHidden) {
+        return res.status(400).json({ error: 'One of the watches in your cart is no longer available. Please refresh the page and try again.' });
+      }
+      const unitPrice = Number(product.price);
+      if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
+        return res.status(400).json({ error: `${product.brand} ${product.model} does not have a valid price yet. Please contact us before ordering.` });
+      }
+      items.push({
+        id: product.id,
+        brand: product.brand,
+        model: product.model,
+        name: `${product.brand} ${product.model}`,
+        price: unitPrice,
+        // Catalogue images are often embedded base64 blobs — copying those into every order
+        // would bloat the record. Store a URL when there is one; the UI falls back to the
+        // live catalog by product id, then to a placeholder.
+        image: typeof product.image === 'string' && !product.image.startsWith('data:') ? product.image.slice(0, 300) : '',
+        quantity: Math.min(50, Math.max(1, Math.floor(Number(it.quantity) || 1)))
+      });
+    }
+
+    const subtotal = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
+    const discount = Math.max(0, Number(b.discount) || 0);
+    const couponDiscount = Math.max(0, Number(b.couponDiscount) || 0);
+    const coinDiscount = Math.max(0, Number(b.coinDiscount) || 0);
+    const coinsUsed = Math.max(0, Math.floor(Number(b.coinsUsed) || 0));
+    const shippingCharge = Math.max(0, Number(b.shippingCharge) || 0);
+    const totalAmount = Math.max(0, subtotal - discount - couponDiscount - coinDiscount + shippingCharge);
+    if (!(totalAmount > 0)) return res.status(400).json({ error: 'The order total must be above ₹0.' });
+
     const branding = await DB.getBranding();
     const earnRate = branding.coinEarnRate || 1; // 1 coin per 100 spent
-
-    // Calculate AM Coins earned: 1 coin per ₹100 spent
     const coinsEarned = Math.floor(totalAmount / 100) * earnRate;
-    const coinsUsed = Number(b.coinsUsed) || 0;
-    const coinDiscount = Number(b.coinDiscount) || 0;
-
-    // Optional GPS delivery pinpoint — validated server-side, stored as a snapshot only
-    let deliveryLocation = null;
-    if (b.deliveryLocation && typeof b.deliveryLocation === 'object') {
-      const lat = Number(b.deliveryLocation.latitude);
-      const lng = Number(b.deliveryLocation.longitude);
-      if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
-        deliveryLocation = {
-          latitude: lat,
-          longitude: lng,
-          accuracy: b.deliveryLocation.accuracy == null || b.deliveryLocation.accuracy === '' || !Number.isFinite(Number(b.deliveryLocation.accuracy))
-            ? undefined
-            : Number(b.deliveryLocation.accuracy),
-          address: String(b.deliveryLocation.address || '').slice(0, 500),
-          city: String(b.deliveryLocation.city || '').slice(0, 100),
-          state: String(b.deliveryLocation.state || '').slice(0, 100),
-          pincode: String(b.deliveryLocation.pincode || '').slice(0, 10)
-        };
-      }
-    }
 
     const newOrder = {
       orderId,
-      userId: b.userId || (b.customer && b.customer.userId) || '',
-      customerName: b.customerName || (b.customer && b.customer.fullName) || 'Valued Patron',
-      customerEmail: (b.customerEmail || (b.customer && b.customer.customerEmail) || '').toLowerCase().trim(),
-      phone: b.phone || (b.customer && b.customer.phone) || '',
-      altPhone: b.altPhone || (b.customer && b.customer.altPhone) || '',
-      address: b.address || (b.customer && b.customer.address) || '',
-      landmark: b.landmark || (b.customer && b.customer.landmark) || '',
-      city: b.city || (b.customer && b.customer.city) || '',
-      state: b.state || (b.customer && b.customer.state) || '',
-      pincode: b.pincode || (b.customer && b.customer.pincode) || '',
-      items: b.items || [],
-      subtotal: Number(b.subtotal) || totalAmount,
-      discount: Number(b.discount) || 0,
-      couponDiscount: Number(b.couponDiscount) || 0,
-      couponCode: b.couponCode || '',
+      userId: clean(b.userId || (b.customer && b.customer.userId), 60),
+      customerName,
+      customerEmail: clean(b.customerEmail || (b.customer && b.customer.customerEmail), 160).toLowerCase(),
+      phone,
+      altPhone: clean(b.altPhone || (b.customer && b.customer.altPhone), 20),
+      address,
+      landmark: clean(b.landmark || (b.customer && b.customer.landmark), 240),
+      city,
+      state,
+      pincode,
+      items,
+      subtotal,
+      discount,
+      couponDiscount,
+      couponCode: clean(b.couponCode, 60),
       coinsUsed,
       coinDiscount,
       coinsEarned,
       total: totalAmount,
-      paymentMethod: b.paymentMethod || 'Cash on Delivery (COD)',
-      status: 'Confirmed',
+      shippingCharge: Number(b.shippingCharge) || 0,
+      paymentMethod: 'Cash on Delivery (COD)',
+      status: 'Pending',
+      expectedDeliveryDate: normalizeCalendarDate(b.expectedDeliveryDate) || calendarDateFromToday(7),
       trackingTimeline: [
         {
-          status: 'Confirmed',
+          status: 'Pending',
           timestamp: new Date().toISOString(),
-          message: 'Order verified & confirmed for Cash on Delivery dispatch.'
+          message: 'Order received. Our team will confirm your Cash on Delivery order before dispatch.'
         }
       ],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
-
-    if (deliveryLocation) {
-      newOrder.deliveryLocation = deliveryLocation;
-      const captured = b.locationCapturedAt ? new Date(b.locationCapturedAt) : new Date();
-      newOrder.locationCapturedAt = Number.isNaN(captured.getTime()) ? new Date() : captured;
-    }
 
     const saved = await DB.addOrder(newOrder);
 
@@ -1350,7 +1423,7 @@ app.post('/api/orders', async (req, res) => {
         await DB.addNotification({
           id: `notif-${Date.now()}`,
           userId: user.userId,
-          title: '🎉 Order Confirmed!',
+          title: '🎉 Order Received!',
           message: `Order #${orderId} for ₹${totalAmount.toLocaleString('en-IN')} has been placed. You earned +${coinsEarned} AM Coins!`,
           type: 'order',
           createdAt: new Date().toISOString()
@@ -1362,35 +1435,74 @@ app.post('/api/orders', async (req, res) => {
       success: true,
       order: saved,
       coinsEarned,
-      message: 'Order placed successfully! Cash on Delivery confirmed.'
+      message: 'Cash on Delivery order received. We will confirm it with you shortly.'
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
+async function notifyOrderCustomer(order, title, message) {
+  if (!order) return;
+  try {
+    const user = order.userId ? await DB.getUserById(order.userId) : null;
+    const target = user || (order.customerEmail ? await DB.getUserByEmail(order.customerEmail) : null);
+    if (!target) return;
+    await DB.addNotification({
+      id: `notif-${Date.now()}`,
+      userId: target.userId,
+      title,
+      message,
+      type: 'order',
+      createdAt: new Date().toISOString()
+    });
+  } catch (e) {
+    console.error('Order notification failed:', e.message);
+  }
+}
+
 // Update Order Status (Admin)
 app.patch('/api/orders/:id/status', adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { status, message } = req.body;
+    if (!ORDER_STATUSES.includes(status)) {
+      return res.status(400).json({ error: `Invalid order status. Use one of: ${ORDER_STATUSES.join(', ')}` });
+    }
     const updated = await DB.updateOrderStatus(id, status, message);
     if (!updated) return res.status(404).json({ error: 'Order not found' });
 
-    // Send notification to customer
-    if (updated.userId || updated.customerEmail) {
-      const user = updated.userId ? await DB.getUserById(updated.userId) : await DB.getUserByEmail(updated.customerEmail);
-      if (user) {
-        await DB.addNotification({
-          id: `notif-${Date.now()}`,
-          userId: user.userId,
-          title: `Order #${id} Updated`,
-          message: `Your order status is now: ${status}`,
-          type: 'order',
-          createdAt: new Date().toISOString()
-        });
-      }
+    await notifyOrderCustomer(
+      updated,
+      `Order #${id} Updated`,
+      `Your order status is now: ${status}.` + (updated.expectedDeliveryDate ? ` Expected delivery: ${updated.expectedDeliveryDate}.` : '')
+    );
+
+    res.json({ success: true, order: updated });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Update Expected Delivery Date (Admin). Deliberately separate from the status route so
+// that changing a date can never move an order to "Delivered" on its own.
+app.patch('/api/orders/:id/delivery-date', adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cleaned = normalizeCalendarDate(req.body.expectedDeliveryDate);
+    if (!cleaned) {
+      return res.status(400).json({ error: 'Expected delivery date must be a real date in YYYY-MM-DD format.' });
     }
+    const updated = await DB.updateOrderDeliveryDate(id, cleaned);
+    if (!updated) return res.status(404).json({ error: 'Order not found' });
+
+    await DB.appendOrderEvent(id, {
+      status: updated.status,
+      message: `Expected delivery date set to ${cleaned}`,
+      timestamp: new Date().toISOString()
+    });
+
+    await notifyOrderCustomer(updated, `Delivery Date Updated for Order #${id}`, `Your order is now expected to arrive on ${cleaned}.`);
 
     res.json({ success: true, order: updated });
   } catch (e) {
@@ -1726,7 +1838,8 @@ app.delete('/api/categories/:id', adminAuth, async (req, res) => {
 });
 
 // ─── ADMIN DASHBOARD STATS ───────────────────────────
-app.get('/api/admin/stats', async (req, res) => {
+// Business metrics are admin-only — the payload exposes revenue, order and customer counts.
+app.get('/api/admin/stats', adminAuth, async (req, res) => {
   try {
     const products = await DB.getProducts({ includeHidden: 'true' });
     const orders = await DB.getOrders();

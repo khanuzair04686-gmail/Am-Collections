@@ -5,15 +5,8 @@ class CheckoutManager {
   constructor() {
     this.defaultPhone = '919876543210';
     this.storagePhoneKey = 'AMC_STORE_PHONE';
-    this.ordersKey = 'AMC_ORDERS_HISTORY';
     this.isUsingCoins = false;
     this.appliedCoupon = null; // { code, discount }
-    this.deliveryLocation = null;
-    this.locationCapturedAt = null;
-    this.pendingAccuracy = null;
-    this.geocodedAddress = '';
-    this.leafletMap = null;
-    this.leafletMarker = null;
   }
 
   getStorePhone() {
@@ -174,156 +167,10 @@ class CheckoutManager {
     }
   }
 
-  // ===== PRECISE DELIVERY PINPOINT (Geolocation + Leaflet; permission only on click) =====
-  requestCurrentLocation() {
-    const container = document.getElementById('cod-map-container');
-    const loading = document.getElementById('cod-map-loading');
-    if (!container) return;
-    container.classList.remove('hidden');
-    if (this.leafletMap) {
-      setTimeout(() => this.leafletMap.invalidateSize(), 60);
-    }
-    if (!navigator.geolocation) {
-      this.showManualMapFallback('Geolocation is not supported on this device — tap the map to place your delivery pin.');
-      return;
-    }
-    if (loading) loading.classList.remove('hidden');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        if (loading) loading.classList.add('hidden');
-        const { latitude, longitude, accuracy } = pos.coords;
-        this.pendingAccuracy = accuracy || null;
-        this.initDeliveryMap(latitude, longitude, true);
-        this.updateLocationCoordsText(latitude, longitude, accuracy);
-        this.reverseGeocode(latitude, longitude);
-      },
-      (err) => {
-        if (loading) loading.classList.add('hidden');
-        this.showManualMapFallback(
-          err && err.code === 1
-            ? 'Location permission denied — tap the map to place your delivery pin manually.'
-            : 'Could not fetch GPS location — tap the map to place your delivery pin manually.'
-        );
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  }
-
-  showManualMapFallback(message) {
-    showToast(message, 'error');
-    const btnText = document.getElementById('cod-use-location-text');
-    if (btnText) btnText.textContent = '📍 Place Pin Manually on Map';
-    this.initDeliveryMap(20.5937, 78.9629, false, 5);
-  }
-
-  initDeliveryMap(lat, lng, withMarker = true, zoom = 16) {
-    if (typeof L === 'undefined') {
-      showToast('Map library failed to load. You can still checkout with the manual address.', 'error');
-      return;
-    }
-    if (!this.leafletMap) {
-      this.leafletMap = L.map('cod-leaflet-map', { zoomControl: true, scrollWheelZoom: false });
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(this.leafletMap);
-      this.leafletMap.on('click', (e) => {
-        this.setDeliveryMarker(e.latlng.lat, e.latlng.lng);
-        this.reverseGeocode(e.latlng.lat, e.latlng.lng);
-      });
-    }
-    this.leafletMap.setView([lat, lng], zoom);
-    setTimeout(() => this.leafletMap.invalidateSize(), 80);
-    if (withMarker) this.setDeliveryMarker(lat, lng);
-  }
-
-  setDeliveryMarker(lat, lng) {
-    if (!this.leafletMap) return;
-    if (this.leafletMarker) {
-      this.leafletMarker.setLatLng([lat, lng]);
-    } else {
-      this.leafletMarker = L.marker([lat, lng], { draggable: true }).addTo(this.leafletMap);
-      this.leafletMarker.on('dragend', () => {
-        const p = this.leafletMarker.getLatLng();
-        this.updateLocationCoordsText(p.lat, p.lng, this.pendingAccuracy);
-        this.reverseGeocode(p.lat, p.lng);
-      });
-    }
-    this.updateLocationCoordsText(lat, lng, this.pendingAccuracy);
-  }
-
-  updateLocationCoordsText(lat, lng, accuracy) {
-    const el = document.getElementById('cod-location-coords');
-    if (el) {
-      el.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}${accuracy ? ` (±${Math.round(accuracy)}m)` : ''}`;
-    }
-  }
-
-  async reverseGeocode(lat, lng) {
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) return;
-      const data = await res.json();
-      const a = data.address || {};
-      const setIfEmpty = (id, val) => {
-        const el = document.getElementById(id);
-        if (el && val && !el.value.trim()) el.value = val;
-      };
-      setIfEmpty('cod-address', data.display_name ? String(data.display_name).slice(0, 120) : '');
-      setIfEmpty('cod-city', a.city || a.town || a.village || a.county || '');
-      setIfEmpty('cod-state', a.state || '');
-      setIfEmpty('cod-pincode', a.postcode || '');
-      this.geocodedAddress = String(data.display_name || '').slice(0, 500);
-    } catch (e) {
-      // Reverse geocoding is optional — manual address fields remain authoritative
-    }
-  }
-
-  confirmLocationSelection() {
-    if (!this.leafletMarker) {
-      showToast('Please place the delivery pin on the map first.', 'error');
-      return;
-    }
-    const p = this.leafletMarker.getLatLng();
-    const val = (id) => {
-      const el = document.getElementById(id);
-      return el ? el.value.trim() : '';
-    };
-    this.deliveryLocation = {
-      latitude: Number(p.lat.toFixed(6)),
-      longitude: Number(p.lng.toFixed(6)),
-      accuracy: this.pendingAccuracy || null,
-      address: this.geocodedAddress || val('cod-address'),
-      city: val('cod-city'),
-      state: val('cod-state'),
-      pincode: val('cod-pincode')
-    };
-    this.locationCapturedAt = new Date().toISOString();
-    const badge = document.getElementById('cod-location-badge');
-    if (badge) badge.classList.remove('hidden');
-    const btnText = document.getElementById('cod-use-location-text');
-    if (btnText) btnText.textContent = '📍 Delivery location selected';
-    showToast('📍 Delivery location selected — precise pinpoint will be saved with your order.', 'success');
-  }
-
-  resetDeliveryLocationUI() {
-    this.deliveryLocation = null;
-    this.locationCapturedAt = null;
-    this.pendingAccuracy = null;
-    this.geocodedAddress = '';
-    if (this.leafletMarker && this.leafletMap) {
-      this.leafletMap.removeLayer(this.leafletMarker);
-      this.leafletMarker = null;
-    }
-    const badge = document.getElementById('cod-location-badge');
-    if (badge) badge.classList.add('hidden');
-    const btnText = document.getElementById('cod-use-location-text');
-    if (btnText) btnText.textContent = 'Use My Current Location';
-    const container = document.getElementById('cod-map-container');
-    if (container) container.classList.add('hidden');
-    const coords = document.getElementById('cod-location-coords');
-    if (coords) coords.textContent = '';
-  }
+  // ===== PRECISE DELIVERY PINPOINT =====
+  // Removed deliberately: a normal courier delivery needs name, phone, address, city,
+  // state and pincode only. Collecting GPS coordinates was unnecessary and is a privacy
+  // risk, so the checkout never asks for location permission anymore.
 
   // Process Cash on Delivery Order (Production Flow)
   async processCodOrder(formData, submitBtn = null) {
@@ -362,18 +209,6 @@ class CheckoutManager {
       city: formData.city || '',
       state: formData.state || '',
       pincode: formData.pincode || '',
-      ...(this.deliveryLocation ? {
-        deliveryLocation: {
-          latitude: this.deliveryLocation.latitude,
-          longitude: this.deliveryLocation.longitude,
-          accuracy: this.deliveryLocation.accuracy,
-          address: this.deliveryLocation.address || formData.address || '',
-          city: this.deliveryLocation.city || formData.city || '',
-          state: this.deliveryLocation.state || formData.state || '',
-          pincode: this.deliveryLocation.pincode || formData.pincode || ''
-        },
-        locationCapturedAt: this.locationCapturedAt || new Date().toISOString()
-      } : {}),
       items,
       subtotal: totals.subtotal,
       discount: totals.regularDiscount,
@@ -397,21 +232,33 @@ class CheckoutManager {
 
       let responseData = null;
       if (res.ok) {
-        responseData = await res.json();
+        responseData = await res.json().catch(() => null);
       }
 
-      // 2. Update local order history
-      try {
-        const history = JSON.parse(localStorage.getItem(this.ordersKey) || '[]');
-        history.unshift(orderRecord);
-        localStorage.setItem(this.ordersKey, JSON.stringify(history));
-      } catch (e) {}
+      // A failed save must never look like a placed order — the cart stays intact so the
+      // customer can fix the address and try again.
+      if (!res.ok || !responseData || !responseData.order) {
+        let reason = 'We could not place your order. Please check your details and try again.';
+        try {
+          const errBody = await res.json();
+          if (errBody && errBody.error) reason = errBody.error;
+        } catch (e) {}
+        if (res.status !== 0) showToast(reason, 'error');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Confirm Cash on Delivery Order';
+        }
+        return false;
+      }
 
-      // 3. Update local customer coins state
+      const savedOrder = responseData.order;
+      const coinsEarned = responseData.coinsEarned || 0;
+
+      // 2. Refresh the signed-in customer's coin balance from the server copy
       if (typeof currentCustomer !== 'undefined' && currentCustomer) {
         let bal = Number(currentCustomer.coinBalance || 0);
         bal = Math.max(0, bal - totals.coinsUsed);
-        bal += totals.coinsEarned;
+        bal += coinsEarned;
         currentCustomer.coinBalance = bal;
         currentCustomer.totalSpent = (currentCustomer.totalSpent || 0) + totals.finalTotal;
         currentCustomer.totalOrders = (currentCustomer.totalOrders || 0) + 1;
@@ -421,25 +268,24 @@ class CheckoutManager {
         if (typeof updateCustomerHeaderUI === 'function') updateCustomerHeaderUI();
       }
 
-      // 4. Mobile Haptic Vibration
+      // 3. Mobile Haptic Vibration
       if (navigator.vibrate) {
         try { navigator.vibrate([100, 50, 100]); } catch (e) {}
       }
 
-      // 5. Clear Cart ONLY after successful write
+      // 4. Clear Cart ONLY after the order is confirmed saved in MongoDB
       cartManager.clearCart();
-      this.resetDeliveryLocationUI();
 
       // Reset coupon & coins state
       this.isUsingCoins = false;
       this.appliedCoupon = null;
 
-      // 6. Close checkout & cart modals
+      // 5. Close checkout & cart modals
       if (typeof closeCheckoutModal === 'function') closeCheckoutModal();
       if (typeof closeCartDrawer === 'function') closeCartDrawer();
 
-      // 7. Show Flipkart-style Success Screen
-      this.showOrderSuccessScreen(orderRecord, totals.coinsEarned);
+      // 6. Show success screen from the saved MongoDB record (status + delivery date included)
+      this.showOrderSuccessScreen(savedOrder, coinsEarned);
       return true;
 
     } catch (err) {
@@ -475,15 +321,17 @@ class CheckoutManager {
       addressEl.textContent = `${order.address}, ${order.city}, ${order.state} - ${order.pincode}`;
     }
 
-    // Estimated Delivery: 3 to 5 business days from now
+    // The expected delivery date comes straight from the saved MongoDB order record —
+    // never guessed in the browser, so the admin and the customer always see the same day.
     if (dateEl) {
-      const delDate = new Date();
-      delDate.setDate(delDate.getDate() + 4);
-      dateEl.textContent = delDate.toLocaleDateString('en-IN', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short'
-      });
+      const iso = /^\d{4}-\d{2}-\d{2}$/.test(order.expectedDeliveryDate || '') ? order.expectedDeliveryDate : '';
+      if (iso) {
+        const [y, m, d] = iso.split('-').map(Number);
+        const day = new Date(y, m - 1, d).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+        dateEl.textContent = day;
+      } else {
+        dateEl.textContent = 'To be confirmed';
+      }
     }
 
     // AM Coins Awarded Banner
@@ -503,7 +351,7 @@ class CheckoutManager {
             <img src="${i.image || AMC_IMAGE_PLACEHOLDER}" class="w-10 h-10 object-contain rounded-lg border border-[#2D3748] bg-[#0F172A] p-0.5" />
             <div>
               <p class="font-bold text-[#F1F0ED]">${i.brand} ${i.model}</p>
-              <p class="text-[11px] text-[#9CA3AF]">Qty: ${i.quantity || 1} • <span class="text-emerald-400">COD Verified</span></p>
+              <p class="text-[11px] text-[#9CA3AF]">Qty: ${i.quantity || 1} • <span class="text-emerald-400">Cash on Delivery</span></p>
             </div>
           </div>
           <span class="font-bold text-[#E2CFA5] font-mono">₹${((i.price) * (i.quantity || 1)).toLocaleString('en-IN')}</span>
@@ -620,7 +468,7 @@ class CheckoutManager {
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
     message += `💰 *AMOUNT PAYABLE:* *₹${finalTotal.toLocaleString('en-IN')}*\n`;
     message += `📦 *PAYMENT MODE:* Cash on Delivery (COD)\n`;
-    message += `🚚 *SHIPPING:* FREE Pan-India Express Delivery\n\n`;
+    message += `🚚 *SHIPPING:* Express delivery on eligible COD pincodes\n\n`;
 
     if (orderDetails?.customer) {
       const c = orderDetails.customer;

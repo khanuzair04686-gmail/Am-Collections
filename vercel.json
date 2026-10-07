@@ -9,6 +9,8 @@
           "index.html",
           "about.html",
           "admin.html",
+          "robots.txt",
+          "sitemap.xml",
           "css/**",
           "js/**",
           "uploads/**"

@@ -961,6 +961,86 @@ async function handleBulkUpload() {
 }
 
 // 4. Orders Management
+const ORDER_STATUSES = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'];
+
+// A calendar string (YYYY-MM-DD) is what the database stores, and it is displayed verbatim:
+// formatting it through Date/timezones is what used to shift the date by one day.
+function orderDateLabel(value) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return '';
+  const [y, m, d] = value.split('-').map(Number);
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return `${d} ${months[m - 1]} ${y}`;
+}
+
+function formatOrderINR(value) {
+  const n = Number(value) || 0;
+  return `${n < 0 ? '−' : ''}₹${Math.abs(n).toLocaleString('en-IN')}`;
+}
+
+function statusOptions(current) {
+  const list = ORDER_STATUSES.includes(current) ? ORDER_STATUSES : [current, ...ORDER_STATUSES];
+  return list.map((s) => `<option value="${escHtml(s)}" ${s === current ? 'selected' : ''}>${escHtml(s)}</option>`).join('');
+}
+
+function deliveryDateCell(o) {
+  const label = orderDateLabel(o.expectedDeliveryDate);
+  return `
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-[11px] font-semibold ${label ? 'text-neutral-200' : 'text-neutral-500 italic'}">${escHtml(label || 'Not set')}</span>
+      <button onclick="openDeliveryDateEditor('${escHtml(o.orderId)}')" class="p-1.5 rounded-lg bg-[#161B25] text-neutral-300 border border-[#1F2632] hover:border-amber-400 hover:text-amber-300 transition-colors" title="Edit expected delivery date">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+      </button>
+    </div>
+  `;
+}
+
+function openDeliveryDateEditor(orderId) {
+  const cell = document.getElementById(`delivery-cell-${orderId}`);
+  const order = adminOrders.find((o) => o.orderId === orderId);
+  if (!cell || !order) return;
+  cell.innerHTML = `
+    <div class="flex flex-col gap-1.5">
+      <input type="date" id="delivery-input-${orderId}" value="${escHtml(order.expectedDeliveryDate || '')}" min="2000-01-01" max="2100-12-31"
+        class="bg-[#0B0E13] border border-[#1F2632] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-amber-500" />
+      <div class="flex items-center gap-1.5">
+        <button id="delivery-save-${orderId}" onclick="saveDeliveryDate('${orderId}')" class="px-2 py-1 rounded-lg bg-amber-500 text-black text-[10px] font-bold hover:bg-amber-400 disabled:opacity-50">Save</button>
+        <button onclick="renderOrdersTable()" class="px-2 py-1 rounded-lg bg-[#161B25] border border-[#1F2632] text-neutral-300 text-[10px] font-bold hover:border-neutral-400">Cancel</button>
+      </div>
+    </div>
+  `;
+  const input = document.getElementById(`delivery-input-${orderId}`);
+  if (input) input.focus();
+}
+
+async function saveDeliveryDate(orderId) {
+  const input = document.getElementById(`delivery-input-${orderId}`);
+  const btn = document.getElementById(`delivery-save-${orderId}`);
+  const value = (input?.value || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    showToast('Select a valid date first.', 'error');
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}/delivery-date`, {
+      method: 'PATCH',
+      headers: adminHeaders(),
+      body: JSON.stringify({ expectedDeliveryDate: value })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+      showToast(data.error || `Could not update the delivery date (HTTP ${res.status}).`, 'error');
+      return;
+    }
+    showToast(`Order #${orderId} is now expected on ${orderDateLabel(value)}.`, 'success');
+    await loadAdminOrders();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+    showToast('Could not update the delivery date. Check your connection and try again.', 'error');
+  }
+}
+
 async function loadAdminOrders() {
   try {
     const res = await fetch('/api/orders', { headers: adminHeaders(false) });
@@ -1007,7 +1087,7 @@ function renderOrdersTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" class="p-8 text-center text-neutral-500">
+        <td colspan="10" class="p-8 text-center text-neutral-500">
           No customer orders matching current filter.
         </td>
       </tr>
@@ -1019,31 +1099,71 @@ function renderOrdersTable() {
     const itemsSummary = (o.items || []).map(i => `${i.brand} ${i.model} (×${i.quantity || 1})`).join(', ');
     const hasLoc = o.deliveryLocation && Number.isFinite(o.deliveryLocation.latitude) && Number.isFinite(o.deliveryLocation.longitude);
 
+    const lineItems = (o.items || []).map((it) => `
+      <div class="flex items-center justify-between gap-2 text-[11px]">
+        <span class="text-neutral-300 truncate">${escHtml(it.brand || '')} ${escHtml(it.model || 'Watch')} <span class="text-neutral-500">×${escHtml(it.quantity || 1)}</span></span>
+        <span class="font-mono text-white">${formatOrderINR(it.price)}</span>
+      </div>
+    `).join('');
+
+    const billLines = [
+      ['Subtotal', o.subtotal],
+      ['Discount', -(Number(o.discount) || 0)],
+      ['Coupon', -(Number(o.couponDiscount) || 0)],
+      ['AM Coins', -(Number(o.coinDiscount) || 0)],
+      ['Shipping', Number(o.shippingCharge) || 0]
+    ].filter(([, v]) => Number(v) !== 0).map(([label, v]) => `
+      <div class="flex items-center justify-between text-[11px] text-neutral-400">
+        <span>${escHtml(label)}</span><span class="font-mono">${formatOrderINR(v)}</span>
+      </div>
+    `).join('');
+
     const detailRow = `
       <tr id="order-detail-row-${o.orderId}" class="hidden">
-        <td colspan="9" class="p-0 bg-[#0A0D12] border-b border-[#1F2632]">
-          <div class="p-4 grid md:grid-cols-2 gap-4 text-xs">
+        <td colspan="10" class="p-0 bg-[#0A0D12] border-b border-[#1F2632]">
+          <div class="p-4 grid md:grid-cols-3 gap-4 text-xs">
             <div class="space-y-1">
               <p class="font-bold text-[#E2CFA5] uppercase tracking-wider text-[10px] mb-2">Customer Address</p>
               <p class="text-white font-semibold">${escHtml(o.customerName)}</p>
               <p class="text-neutral-300 font-mono">${escHtml(o.phone)}${o.altPhone ? ` / ${escHtml(o.altPhone)}` : ''}</p>
+              ${o.customerEmail ? `<p class="text-neutral-400">${escHtml(o.customerEmail)}</p>` : ''}
               <p class="text-neutral-400 leading-relaxed">${escHtml(o.address)}${o.landmark ? `, ${escHtml(o.landmark)}` : ''}</p>
               <p class="text-neutral-400">${escHtml(o.city)}, ${escHtml(o.state)}${o.pincode ? ` — ${escHtml(o.pincode)}` : ''}</p>
+              ${hasLoc ? `
+                <p class="font-bold text-[#E2CFA5] uppercase tracking-wider text-[10px] pt-3 pb-1">📍 Saved Pinpoint (this order only)</p>
+                <div id="order-map-${o.orderId}" class="w-full h-48 rounded-xl overflow-hidden border border-[#1F2632] bg-[#0B0E13]"></div>
+                <p class="font-mono text-neutral-300">${o.deliveryLocation.latitude}, ${o.deliveryLocation.longitude}${o.deliveryLocation.accuracy ? ` (±${Math.round(o.deliveryLocation.accuracy)}m)` : ''}</p>
+                ${o.locationCapturedAt ? `<p class="text-neutral-500 text-[10px]">Captured: ${new Date(o.locationCapturedAt).toLocaleString('en-IN')}</p>` : ''}
+                <a href="https://www.google.com/maps?q=${o.deliveryLocation.latitude},${o.deliveryLocation.longitude}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161B25] border border-[#C9A96E]/40 text-[#E2CFA5] font-bold hover:border-[#C9A96E] transition-colors">
+                  Open in Maps ↗
+                </a>
+              ` : ''}
             </div>
-            ${hasLoc ? `
-            <div class="space-y-2">
-              <p class="font-bold text-[#E2CFA5] uppercase tracking-wider text-[10px]">📍 Delivery Location</p>
-              <div id="order-map-${o.orderId}" class="w-full h-48 rounded-xl overflow-hidden border border-[#1F2632] bg-[#0B0E13]"></div>
-              <p class="font-mono text-neutral-300">${o.deliveryLocation.latitude}, ${o.deliveryLocation.longitude}${o.deliveryLocation.accuracy ? ` (±${Math.round(o.deliveryLocation.accuracy)}m)` : ''}</p>
-              ${o.deliveryLocation.address ? `<p class="text-neutral-400 leading-relaxed">${escHtml(o.deliveryLocation.address)}</p>` : ''}
-              ${o.locationCapturedAt ? `<p class="text-neutral-500 text-[10px]">Captured: ${new Date(o.locationCapturedAt).toLocaleString('en-IN')}</p>` : ''}
-              <a href="https://www.google.com/maps?q=${o.deliveryLocation.latitude},${o.deliveryLocation.longitude}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161B25] border border-[#C9A96E]/40 text-[#E2CFA5] font-bold hover:border-[#C9A96E] transition-colors">
-                Open in Maps ↗
-              </a>
-            </div>` : `
-            <div class="flex items-center justify-center min-h-[8rem] rounded-xl border border-dashed border-[#1F2632] text-neutral-500 font-semibold">
-              📍 Location not provided
-            </div>`}
+            <div class="space-y-1.5">
+              <p class="font-bold text-[#E2CFA5] uppercase tracking-wider text-[10px] mb-2">Timepieces Ordered</p>
+              ${lineItems || '<p class="text-neutral-500">No item snapshot recorded for this order.</p>'}
+            </div>
+            <div class="space-y-1.5">
+              <p class="font-bold text-[#E2CFA5] uppercase tracking-wider text-[10px] mb-2">Payment &amp; Delivery</p>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-neutral-400">Payment method</span>
+                <span class="font-bold text-emerald-300">${escHtml(o.paymentMethod || 'Cash on Delivery (COD)')}</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-neutral-400">Status</span>
+                <span class="font-bold text-amber-300">${escHtml(o.status || 'Pending')}</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-neutral-400">Expected delivery</span>
+                <span class="font-bold text-white">${escHtml(orderDateLabel(o.expectedDeliveryDate) || 'Not set')}</span>
+              </div>
+              ${billLines}
+              <div class="flex items-center justify-between pt-1.5 mt-1 border-t border-[#1F2632]">
+                <span class="text-[11px] font-bold text-neutral-300">Total payable (COD)</span>
+                <span class="font-mono font-extrabold text-white">${formatOrderINR(o.total)}</span>
+              </div>
+              <p class="text-[10px] text-neutral-500 pt-1">Cash is collected by the courier on delivery — payment is not confirmed until the shipment is received.</p>
+            </div>
           </div>
         </td>
       </tr>
@@ -1066,25 +1186,22 @@ function renderOrdersTable() {
         <td class="p-4 font-extrabold text-white font-mono">₹${Number(o.total || 0).toLocaleString('en-IN')}</td>
         <td class="p-4 font-mono text-amber-400 text-xs">+${o.coinsEarned || 0}</td>
         <td class="p-4">
-          <select onchange="handleOrderStatusChange('${o.orderId}', this.value)" class="bg-[#0B0E13] border border-[#1F2632] rounded-lg px-2.5 py-1 text-[11px] font-semibold text-amber-300 focus:outline-none">
-            <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-            <option value="Packed" ${o.status === 'Packed' ? 'selected' : ''}>Packed</option>
-            <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-            <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-            <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+          <select onchange="handleOrderStatusChange('${escHtml(o.orderId)}', this.value)" class="bg-[#0B0E13] border border-[#1F2632] rounded-lg px-2.5 py-1 text-[11px] font-semibold text-amber-300 focus:outline-none">
+            ${statusOptions(o.status || 'Pending')}
           </select>
         </td>
+        <td class="p-4" id="delivery-cell-${escHtml(o.orderId)}">${deliveryDateCell(o)}</td>
         <td class="p-4 text-right">
           <div class="flex items-center justify-end gap-2">
-            <button onclick="toggleOrderDetails('${o.orderId}')" class="p-1.5 rounded-lg ${hasLoc ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30 hover:border-emerald-400' : 'bg-[#161B25] text-neutral-500 border border-[#1F2632] hover:border-neutral-400'}" title="${hasLoc ? 'View saved delivery location map' : 'Order details'}">
+            <button onclick="toggleOrderDetails('${escHtml(o.orderId)}')" class="p-1.5 rounded-lg ${hasLoc ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30 hover:border-emerald-400' : 'bg-[#161B25] text-neutral-500 border border-[#1F2632] hover:border-neutral-400'}" title="${hasLoc ? 'View saved delivery location map' : 'Order details'}">
               📍
             </button>
             ${o.phone ? `
-              <button onclick="chatCustomerWhatsApp('${o.phone}', '${o.orderId}', '${o.customerName}')" class="p-1.5 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-500/30 hover:border-emerald-400" title="Chat on WhatsApp">
+              <button onclick="chatCustomerWhatsApp('${escHtml(o.orderId)}')" class="p-1.5 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-500/30 hover:border-emerald-400" title="Chat on WhatsApp">
                 <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.288.043.088.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.861.174.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/></svg>
               </button>
             ` : ''}
-            <button onclick="handleDeleteOrderPermanently('${o.orderId}')" class="p-1.5 rounded-lg bg-red-950/60 text-red-400 border border-red-500/30 hover:border-red-400" title="Delete Order">
+            <button onclick="handleDeleteOrderPermanently('${escHtml(o.orderId)}')" class="p-1.5 rounded-lg bg-red-950/60 text-red-400 border border-red-500/30 hover:border-red-400" title="Delete Order">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
           </div>
@@ -1134,18 +1251,26 @@ function initOrderMap(order) {
 }
 
 async function handleOrderStatusChange(orderId, newStatus) {
+  const select = document.querySelector(`select[onchange^="handleOrderStatusChange('${orderId}'"]`);
+  if (select) select.disabled = true;
   try {
-    const res = await fetch(`/api/orders/${orderId}/status`, {
+    const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}/status`, {
       method: 'PATCH',
       headers: adminHeaders(),
       body: JSON.stringify({ status: newStatus })
     });
-    if (res.ok) {
-      showToast(`Order #${orderId} status set to ${newStatus}`, 'success');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      showToast(data.error || `Could not update the order status (HTTP ${res.status}).`, 'error');
+      if (select) select.disabled = false;
       await loadAdminOrders();
+      return;
     }
+    showToast(`Order #${orderId} is now “${newStatus}”.`, 'success');
+    await loadAdminOrders();
   } catch (e) {
-    showToast('Failed to update order status', 'error');
+    showToast('Could not update the order status. Check your connection and try again.', 'error');
+    if (select) select.disabled = false;
   }
 }
 
@@ -1162,9 +1287,11 @@ async function handleDeleteOrderPermanently(orderId) {
   }
 }
 
-function chatCustomerWhatsApp(phone, orderId, name) {
-  const clean = phone.replace(/[^0-9]/g, '');
-  const msg = encodeURIComponent(`Hello ${name || ''}! This is sabrXwatches regarding your Cash on Delivery watch order #${orderId}. We are packing your timepiece for dispatch.`);
+function chatCustomerWhatsApp(orderId) {
+  const order = adminOrders.find((o) => o.orderId === orderId);
+  if (!order || !order.phone) return;
+  const clean = String(order.phone).replace(/[^0-9]/g, '');
+  const msg = encodeURIComponent(`Hello ${order.customerName || ''}! This is sabrXwatches regarding your Cash on Delivery watch order #${order.orderId}. We are packing your timepiece for dispatch.`);
   window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
 }
 
@@ -1695,7 +1822,7 @@ function fillAboutForm(about) {
   setVal('about-story', about.story || '');
   setVal('about-mission', about.mission || '');
   setVal('about-vision', about.vision || '');
-  setVal('about-values', about.values || 'Precision Craftsmanship • Absolute Transparency • Collector-Grade 1:1 Perfection • Pan-India Doorstep Trust');
+  setVal('about-values', about.values || 'Precision Craftsmanship • Absolute Transparency • Collector-Grade 1:1 Perfection • Doorstep Trust');
   setVal('about-quality', about.quality || '');
 
   // 2. Founder / Owner Profile

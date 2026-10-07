@@ -22,3 +22,6 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Raw AI image generations (final assets live in uploads/)
+vibe_images/

@@ -1,7 +1,7 @@
 {
-  "name": "am-collection-backend",
+  "name": "sabrxwatches",
   "version": "1.0.0",
-  "description": "AM COLLECTION - Luxury Master Copy Watch Store Backend & Admin System",
+  "description": "sabrXwatches - luxury-styled watch storefront, admin portal and COD order backend (Express + MongoDB)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -15,7 +15,7 @@
     "express",
     "admin-panel"
   ],
-  "author": "AM COLLECTION",
+  "author": "sabrXwatches",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
