@@ -1020,9 +1020,20 @@
         </div>
 
         <div class="p-4 rounded-2xl bg-[#10131A]/80 border border-[#1F2632] space-y-2">
-          <label for="form-watch-additional-images" class="block font-semibold text-amber-400 uppercase tracking-wider">🖼️ Additional Showcase Images (One URL Per Line)</label>
+          <label for="form-watch-additional-images" class="block font-semibold text-amber-400 uppercase tracking-wider">🖼️ Additional Showcase Images</label>
           <textarea id="form-watch-additional-images" rows="3" placeholder="https://...&#10;https://..." class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500"></textarea>
-          <p class="text-[10px] text-neutral-500">Leave blank if the piece has only the main showcase photo.</p>
+          <p class="text-[10px] text-neutral-500">One image URL per line — or use the paste box below. Leave blank if the piece has only the main showcase photo.</p>
+          <div id="watch-gallery-paste" tabindex="0" role="button" aria-label="Paste or drop additional watch images"
+               class="rounded-xl border border-dashed border-[#2D3748] bg-[#0B0E13]/60 px-3 py-2.5 text-[11px] text-neutral-400 cursor-pointer hover:border-amber-500/60 focus:outline-none focus:border-amber-500">
+            <span class="text-neutral-300 font-semibold">Copy + Paste or Upload</span> — click here and press
+            <kbd class="px-1 rounded bg-[#1B222C] text-amber-300">Ctrl</kbd>+<kbd class="px-1 rounded bg-[#1B222C] text-amber-300">V</kbd>,
+            drag pictures in, or
+            <label class="inline cursor-pointer text-amber-300 underline">browse
+              <input type="file" id="form-watch-gallery-file" accept="image/*" multiple class="hidden" />
+            </label>.
+            <span id="watch-gallery-paste-name" class="block mt-1 text-emerald-400 font-semibold"></span>
+          </div>
+          <div id="watch-gallery-thumbs" class="grid grid-cols-3 sm:grid-cols-5 gap-2"></div>
         </div>
 
         <!-- Stock, Best Seller, New Arrival, Trending Toggles -->
@@ -1045,7 +1056,7 @@
           </div>
         </div>
 
-        <!-- Image Upload OR URL -->
+        <!-- Image Upload OR URL OR Paste -->
         <div class="p-4 rounded-2xl bg-[#10131A]/80 border border-[#1F2632] space-y-3">
           <label class="block font-semibold text-amber-400 uppercase tracking-wider">📷 Watch Showcase Image</label>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1058,6 +1069,13 @@
               <span class="text-neutral-400 block mb-1">Option B: Direct Image URL</span>
               <input type="url" id="form-watch-image-url" placeholder="https://..." class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500" />
             </div>
+          </div>
+          <div id="watch-image-paste" tabindex="0" role="button" aria-label="Paste or drop the main watch image"
+               class="rounded-xl border border-dashed border-[#2D3748] bg-[#0B0E13]/60 px-3 py-2.5 text-[11px] text-neutral-400 cursor-pointer hover:border-amber-500/60 focus:outline-none focus:border-amber-500">
+            <span class="text-neutral-300 font-semibold">Option C: Copy + Paste</span> — copy an image from any website
+            (right-click → <em>Copy image</em>, or a screenshot), click this box and press <kbd class="px-1 rounded bg-[#1B222C] text-amber-300">Ctrl</kbd>+<kbd class="px-1 rounded bg-[#1B222C] text-amber-300">V</kbd>.
+            You can also drag the picture in. No need to save it into the uploads folder — it is stored inside the product record.
+            <span id="watch-image-paste-name" class="block mt-1 text-emerald-400 font-semibold"></span>
           </div>
         </div>
 
@@ -1171,7 +1189,7 @@
   <div id="toast-container" class="fixed bottom-6 left-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
   <!-- Admin JavaScript Controller -->
-  <script src="/js/admin.js?v=20261007"></script>
+  <script src="/js/admin.js?v=20261007b"></script>
 
 </body>
 </html>

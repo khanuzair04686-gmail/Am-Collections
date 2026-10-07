@@ -145,6 +145,15 @@ function setupAdminListeners() {
   if (bulkTemplateLink) {
     bulkTemplateLink.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(BULK_CSV_HEADERS.join(',') + '\r\n');
   }
+
+  wireImagePasteZone('watch-image-paste', (files) => applyPastedMainImage(files));
+  wireImagePasteZone('watch-gallery-paste', (files) => addGalleryImages(files));
+
+  const galleryFileInput = document.getElementById('form-watch-gallery-file');
+  if (galleryFileInput) galleryFileInput.addEventListener('change', () => {
+    addGalleryImages(galleryFileInput.files);
+    galleryFileInput.value = '';
+  });
 }
 
 // Load All Dashboard Data
@@ -573,6 +582,7 @@ function openAddWatchModal() {
   document.getElementById('form-watch-id').value = '';
   document.getElementById('form-watch-image-preview').classList.add('hidden');
   document.getElementById('video-preview-container').classList.add('hidden');
+  resetWatchImageInputs();
   document.getElementById('watch-modal').classList.remove('hidden');
 }
 
@@ -608,7 +618,13 @@ function openEditWatchModal(id) {
   document.getElementById('form-watch-strap-color').value = editableSpecValue(watch.strapColor);
   document.getElementById('form-watch-dial-shape').value = editableSpecValue(watch.dialShape);
   document.getElementById('form-watch-water-resistance').value = editableSpecValue(watch.waterResistance);
-  document.getElementById('form-watch-additional-images').value = Array.isArray(watch.additionalImages) ? watch.additionalImages.join('\n') : '';
+  // Plain URLs stay editable as text; pasted shots are data URLs and are shown as
+  // thumbnails instead of a wall of base64 in the textarea.
+  const gallery = Array.isArray(watch.additionalImages) ? watch.additionalImages : [];
+  document.getElementById('form-watch-additional-images').value = gallery.filter(s => !s.startsWith('data:')).join('\n');
+  resetWatchImageInputs();
+  watchGalleryImages = gallery.filter(s => s.startsWith('data:'));
+  renderGalleryThumbs();
   document.getElementById('form-watch-stock').value = watch.stock !== undefined ? watch.stock : 20;
   document.getElementById('form-watch-bestseller').checked = Boolean(watch.isBestSeller);
   document.getElementById('form-watch-newarrival').checked = Boolean(watch.isNewArrival);
@@ -635,6 +651,135 @@ function previewWatchImage(input) {
   } else {
     img.classList.add('hidden');
   }
+}
+
+// ===== COPY + PASTE IMAGES (no need to save a file into uploads/ first) =====
+// Ctrl+V works wherever the box has focus, and a picture can be dragged straight in.
+function wireImagePasteZone(elId, onFiles) {
+  const zone = document.getElementById(elId);
+  if (!zone) return;
+
+  const handle = (files) => {
+    const images = Array.from(files || []).filter(f => f.type.startsWith('image/'));
+    if (!images.length) return;
+    onFiles(images);
+    zone.classList.remove('border-amber-500');
+  };
+
+  zone.addEventListener('paste', (e) => handle(e.clipboardData && e.clipboardData.files));
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('border-amber-500'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('border-amber-500'));
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    handle(e.dataTransfer && e.dataTransfer.files);
+  });
+  // Clicking must focus the box, otherwise Ctrl+V goes to the page and is lost.
+  zone.addEventListener('click', () => zone.focus());
+}
+
+// A clipboard image is turned into a real File so the existing upload path handles it.
+function filesFromClipboard(clipboardFiles) {
+  return Array.from(clipboardFiles || []).filter(f => f.type.startsWith('image/'));
+}
+
+let pastedMainImageFile = null;
+
+function applyPastedMainImage(files) {
+  const file = files[0];
+  if (!file) return;
+  pastedMainImageFile = file;
+
+  const input = document.getElementById('form-watch-file');
+  if (input) {
+    // Assigning .files keeps one single submit path for picked and pasted images.
+    try {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+    } catch (e) { /* the fallback variable below still carries the image */ }
+    previewWatchImage(input);
+  }
+
+  const label = document.getElementById('watch-image-paste-name');
+  if (label) label.textContent = `✓ Pasted: ${file.name || 'clipboard image'}`;
+  showToast('Image pasted — it will be stored inside the product record.', 'success');
+}
+
+function getMainImageFile() {
+  const input = document.getElementById('form-watch-file');
+  return (input && input.files && input.files[0]) || pastedMainImageFile;
+}
+
+// Extra gallery shots live as embedded data URLs, because Vercel's disk is ephemeral —
+// a /uploads/ path can outlive the file that produced it.
+let watchGalleryImages = [];
+
+async function embedOrReadFile(file) {
+  const embedded = await imageToEmbeddedDataUrl(file);
+  if (embedded) return embedded;
+  return await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function addGalleryImages(files) {
+  const images = filesFromClipboard(files);
+  if (!images.length) return;
+  const nameEl = document.getElementById('watch-gallery-paste-name');
+  if (nameEl) nameEl.textContent = 'Embedding image(s)…';
+  for (const file of images) {
+    const dataUrl = await embedOrReadFile(file);
+    if (dataUrl) watchGalleryImages.push(dataUrl);
+  }
+  if (nameEl) nameEl.textContent = `✓ ${watchGalleryImages.length} pasted image${watchGalleryImages.length === 1 ? '' : 's'} ready`;
+  renderGalleryThumbs();
+}
+
+function renderGalleryThumbs() {
+  const strip = document.getElementById('watch-gallery-thumbs');
+  if (!strip) return;
+  strip.innerHTML = watchGalleryImages.map((src, i) => `
+    <div class="relative group">
+      <img src="${src}" alt="Showcase ${i + 1}" class="w-full h-20 object-cover rounded-lg border border-[#2D3748]" />
+      <button type="button" onclick="removeGalleryImage(${i})" title="Remove this image"
+              class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-bold leading-none opacity-90 hover:opacity-100">×</button>
+    </div>
+  `).join('');
+}
+
+function removeGalleryImage(index) {
+  watchGalleryImages.splice(index, 1);
+  const nameEl = document.getElementById('watch-gallery-paste-name');
+  if (nameEl) nameEl.textContent = watchGalleryImages.length ? `✓ ${watchGalleryImages.length} pasted image${watchGalleryImages.length === 1 ? '' : 's'} ready` : '';
+  renderGalleryThumbs();
+}
+
+function resetWatchImageInputs() {
+  pastedMainImageFile = null;
+  watchGalleryImages = [];
+  // A file left over in the picker from a cancelled "Add" would silently overwrite
+  // the picture of whichever watch is edited next.
+  const fileInput = document.getElementById('form-watch-file');
+  if (fileInput) fileInput.value = '';
+  const preview = document.getElementById('form-watch-image-preview');
+  if (preview) preview.classList.add('hidden');
+  const nameEl = document.getElementById('watch-image-paste-name');
+  if (nameEl) nameEl.textContent = '';
+  const galleryName = document.getElementById('watch-gallery-paste-name');
+  if (galleryName) galleryName.textContent = '';
+  renderGalleryThumbs();
+}
+
+// Textarea holds human-readable URLs; pasted shots are data URLs, which contain commas
+// and would be shredded by the server's line/comma splitter — so they travel as JSON.
+function buildAdditionalImagesPayload() {
+  const textUrls = (document.getElementById('form-watch-additional-images').value || '')
+    .split('\n').map(s => s.trim()).filter(Boolean);
+  const all = [...textUrls, ...watchGalleryImages];
+  return all.length ? JSON.stringify(all) : '';
 }
 
 function previewWatchVideo(input) {
@@ -705,7 +850,7 @@ async function handleWatchFormSubmit(e) {
   const strapColor = document.getElementById('form-watch-strap-color').value.trim();
   const dialShape = document.getElementById('form-watch-dial-shape').value.trim();
   const waterResistance = document.getElementById('form-watch-water-resistance').value.trim();
-  const additionalImages = document.getElementById('form-watch-additional-images').value.trim();
+  const additionalImages = buildAdditionalImagesPayload();
   const stock = document.getElementById('form-watch-stock').value.trim();
   const isBestSeller = document.getElementById('form-watch-bestseller').checked;
   const isNewArrival = document.getElementById('form-watch-newarrival').checked;
@@ -713,7 +858,6 @@ async function handleWatchFormSubmit(e) {
   const imageUrl = document.getElementById('form-watch-image-url').value.trim();
   const description = document.getElementById('form-watch-desc').value.trim();
   const features = document.getElementById('form-watch-features').value;
-  const fileInput = document.getElementById('form-watch-file');
   const videoInput = document.getElementById('form-watch-video');
   const videoUrl = document.getElementById('form-watch-video-url').value.trim();
 
@@ -744,13 +888,14 @@ async function handleWatchFormSubmit(e) {
   formData.append('features', features);
 
   let embeddedImage = imageUrl;
-  if (fileInput && fileInput.files[0]) {
-    const dataUrl = await imageToEmbeddedDataUrl(fileInput.files[0]);
+  const mainImageFile = getMainImageFile();
+  if (mainImageFile) {
+    const dataUrl = await imageToEmbeddedDataUrl(mainImageFile);
     if (dataUrl) {
       embeddedImage = dataUrl;
     } else {
       // Formats canvas can't re-encode (gif/svg/…) still go through as a file
-      formData.append('image', fileInput.files[0]);
+      formData.append('image', mainImageFile);
       embeddedImage = '';
     }
   }
