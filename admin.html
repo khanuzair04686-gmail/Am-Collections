@@ -62,7 +62,8 @@
           type="password" 
           id="auth-passkey" 
           required 
-          placeholder="Enter Passkey (Default: admin123)" 
+          autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
+          placeholder="Enter Admin Passkey" 
           class="w-full bg-[#12161F] border border-[#1F2632] rounded-xl px-4 py-3 text-center text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500 tracking-wider font-mono"
         />
         <button type="submit" class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black text-xs font-black uppercase tracking-widest shadow-xl transition-all">
@@ -495,6 +496,7 @@
               type="password" 
               id="passkey-current" 
               required 
+              autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
               class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
             />
           </div>
@@ -505,6 +507,7 @@
               id="passkey-new" 
               required 
               minlength="4"
+              autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false"
               class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
             />
           </div>
@@ -515,6 +518,7 @@
               id="passkey-confirm" 
               required 
               minlength="4"
+              autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false"
               class="w-full bg-[#0B0E13] border border-[#1F2632] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
             />
           </div>

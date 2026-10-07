@@ -327,6 +327,9 @@ async function handleChangePasskey(e) {
     });
     const data = await res.json();
     if (res.ok && data.success) {
+      // This tab is still holding the old passkey — switch it over, otherwise every
+      // later admin save from here would silently come back 401.
+      sessionStorage.setItem('amc_admin_passkey', newPasskey);
       showToast(data.message || 'Passkey updated! 🔒', 'success');
       document.getElementById('change-passkey-form').reset();
     } else {

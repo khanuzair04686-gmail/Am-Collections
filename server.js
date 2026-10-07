@@ -481,8 +481,11 @@ const DB = {
   },
 
   // Branding / Settings
+  // Pinned to the earliest document: the collection has more than one branding row,
+  // and an unsorted findOne() can hand back a different one on each call — which made
+  // settings (and the admin passkey) look like they changed at random.
   async getBranding() {
-    let b = await Branding.findOne().lean();
+    let b = await Branding.findOne().sort({ _id: 1 }).lean();
     if (!b) {
       b = await Branding.create(INITIAL_SETTINGS);
     }
@@ -490,7 +493,7 @@ const DB = {
   },
   async updateBranding(updates) {
     delete updates._id;
-    let b = await Branding.findOne();
+    let b = await Branding.findOne().sort({ _id: 1 });
     if (!b) {
       return await Branding.create({ ...INITIAL_SETTINGS, ...updates });
     }
@@ -736,25 +739,32 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Admin Passkey Helper
-// ENV VAR always takes priority as master override (Vercel production safety)
-async function getAdminPasskey() {
-  if (process.env.ADMIN_PASSKEY) return process.env.ADMIN_PASSKEY;
-  const b = await DB.getBranding();
-  return (b && b.adminPasskey) ? b.adminPasskey : ADMIN_PASSKEY;
+// Admin Passkey Helpers
+// The passkey stored in MongoDB is what the "Change Passkey" form updates, so it
+// must be honoured. The ENV var stays as a master override so production can never
+// be locked out by a bad DB value. Whichever of the two the admin typed is trimmed
+// before comparing — a stray trailing space used to read as "incorrect".
+async function getAdminPasskeys() {
+  const keys = new Set();
+  try {
+    const b = await DB.getBranding();
+    if (b && b.adminPasskey) keys.add(String(b.adminPasskey).trim());
+  } catch (e) { /* fall back to env */ }
+  if (process.env.ADMIN_PASSKEY) keys.add(String(process.env.ADMIN_PASSKEY).trim());
+  if (keys.size === 0) keys.add(ADMIN_PASSKEY);
+  keys.delete('');
+  return keys;
+}
+
+function isAdminPasskey(key) {
+  if (!key) return Promise.resolve(false);
+  return getAdminPasskeys().then((keys) => keys.has(String(key).trim()));
 }
 
 // Admin route protection — mutating admin endpoints require a valid passkey header
 async function adminAuth(req, res, next) {
   try {
-    const key = req.headers['x-admin-passkey'];
-    if (!key) {
-      return res.status(401).json({ error: 'Unauthorized: admin credentials required' });
-    }
-    const currentKey = await getAdminPasskey();
-    if (key === currentKey || key === ADMIN_PASSKEY) {
-      return next();
-    }
+    if (await isAdminPasskey(req.headers['x-admin-passkey'])) return next();
     return res.status(401).json({ error: 'Unauthorized: invalid admin credentials' });
   } catch (e) {
     return res.status(500).json({ error: e.message });
@@ -765,16 +775,8 @@ async function adminAuth(req, res, next) {
 app.post('/api/auth/verify', async (req, res) => {
   try {
     const { passkey } = req.body;
-    // Always allow ENV VAR passkey as master override
-    if (passkey && process.env.ADMIN_PASSKEY && passkey === process.env.ADMIN_PASSKEY) {
-      return res.json({ success: true });
-    }
-    const currentKey = await getAdminPasskey();
-    if (passkey === currentKey) {
-      res.json({ success: true });
-    } else {
-      res.status(401).json({ success: false, error: 'Invalid admin passkey' });
-    }
+    if (await isAdminPasskey(passkey)) return res.json({ success: true });
+    res.status(401).json({ success: false, error: 'Invalid admin passkey' });
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
   }
@@ -784,14 +786,15 @@ app.post('/api/auth/verify', async (req, res) => {
 app.post('/api/auth/change-passkey', adminAuth, async (req, res) => {
   try {
     const { currentPasskey, newPasskey } = req.body;
-    if (!newPasskey || newPasskey.trim().length < 4) {
+    const next = (newPasskey || '').trim();
+    if (next.length < 4) {
       return res.status(400).json({ error: 'New passkey must be at least 4 characters long.' });
     }
-    const currentKey = await getAdminPasskey();
-    if (currentPasskey !== currentKey) {
+    const keys = await getAdminPasskeys();
+    if (!keys.has((currentPasskey || '').trim())) {
       return res.status(401).json({ error: 'Current passkey is incorrect.' });
     }
-    await DB.updateBranding({ adminPasskey: newPasskey.trim() });
+    await DB.updateBranding({ adminPasskey: next });
     res.json({ success: true, message: 'Admin passkey updated permanently! 🔒' });
   } catch (e) {
     res.status(500).json({ error: e.message });
