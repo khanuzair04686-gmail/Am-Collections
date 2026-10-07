@@ -1,7 +1,7 @@
 {
   "name": "sabrxwatches",
   "version": "1.0.0",
-  "description": "sabrXwatches - luxury-styled watch storefront, admin portal and COD order backend (Express + MongoDB)",
+  "description": "SABR Watches - luxury-styled watch storefront, admin portal and COD order backend (Express + MongoDB)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -15,7 +15,7 @@
     "express",
     "admin-panel"
   ],
-  "author": "sabrXwatches",
+  "author": "SABR Watches",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",

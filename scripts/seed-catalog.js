@@ -1,4 +1,4 @@
-// Seeds the sabrXwatches premium catalog through the bulk API.
+// Seeds the SABR Watches premium catalog through the bulk API.
 // Brand is "Unbranded" and unverified specifications are intentionally left blank so the
 // server stores "Not Specified" — nothing here invents a brand, a movement or a water rating.
 // Each row carries its own generated placeholder artwork; the admin replaces it with the
@@ -21,7 +21,7 @@ const artwork = (label, body, accent) => {
 <circle cx="200" cy="200" r="78" fill="none" stroke="${accent}" stroke-width="2" opacity="0.5"/>
 <path d="M200 150v50l32 20" fill="none" stroke="${accent}" stroke-width="7" stroke-linecap="round"/>
 <text x="200" y="342" fill="#C9A96E" font-family="Georgia,serif" font-size="19" letter-spacing="1" text-anchor="middle">${label}</text>
-<text x="200" y="368" fill="#6B7280" font-family="sans-serif" font-size="13" text-anchor="middle">sabrXwatches preview - replace with product photo</text>
+<text x="200" y="368" fill="#6B7280" font-family="sans-serif" font-size="13" text-anchor="middle">SABR Watches preview - replace with product photo</text>
 </svg>`;
   return 'data:image/svg+xml,' + encodeURIComponent(svg.replace(/\n/g, ''));
 };

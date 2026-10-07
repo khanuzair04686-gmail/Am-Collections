@@ -26,7 +26,7 @@ const req = async (method, path, body, admin = false) => {
 };
 
 (async () => {
-  console.log(`\n=== sabrXwatches E2E audit test === target ${BASE}\n`);
+  console.log(`\n=== SABR Watches E2E audit test === target ${BASE}\n`);
 
   const health = await req('GET', '/api/health');
   ok('MongoDB connected', health.status === 200 && /connected/i.test(JSON.stringify(health.data)), JSON.stringify(health.data).slice(0, 90));

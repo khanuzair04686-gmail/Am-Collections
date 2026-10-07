@@ -1,4 +1,4 @@
-// sabrXwatches - Enterprise Admin Management Portal Controller
+// SABR Watches - Enterprise Admin Management Portal Controller
 // Full MongoDB Atlas synchronization + Permanent CRUD + Customers + Coupons + Orders
 
 let adminWatches = [];
@@ -41,7 +41,7 @@ async function handleAuthSubmit(e) {
       sessionStorage.setItem('amc_admin_passkey', passkey);
       const modal = document.getElementById('auth-modal');
       if (modal) modal.classList.add('hidden');
-      showToast('Admin Access Granted! Welcome to sabrXwatches Portal. 👑', 'success');
+      showToast('Admin Access Granted! Welcome to SABR Watches Portal. 👑', 'success');
       loadDashboardData();
     } else {
       showToast('Incorrect Admin Passkey! Please check and retry.', 'error');
@@ -216,7 +216,7 @@ async function loadAdminSettings() {
     const phoneInput = document.getElementById('setting-store-phone');
     const annInput = document.getElementById('setting-announcement');
 
-    if (nameInput) nameInput.value = settings.storeName || 'sabrXwatches';
+    if (nameInput) nameInput.value = settings.storeName || 'SABR Watches';
     if (taglineInput) taglineInput.value = settings.tagline || 'Timeless Elegance - Master Copy Watches';
     if (phoneInput) phoneInput.value = settings.storePhone || '919876543210';
     if (annInput) annInput.value = settings.announcementText || '';
@@ -1462,7 +1462,7 @@ function chatCustomerWhatsApp(orderId) {
   const order = adminOrders.find((o) => o.orderId === orderId);
   if (!order || !order.phone) return;
   const clean = String(order.phone).replace(/[^0-9]/g, '');
-  const msg = encodeURIComponent(`Hello ${order.customerName || ''}! This is sabrXwatches regarding your Cash on Delivery watch order #${order.orderId}. We are packing your timepiece for dispatch.`);
+  const msg = encodeURIComponent(`Hello ${order.customerName || ''}! This is SABR Watches regarding your Cash on Delivery watch order #${order.orderId}. We are packing your timepiece for dispatch.`);
   window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
 }
 
@@ -1988,7 +1988,7 @@ function fillAboutForm(about) {
   const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = v !== false; };
 
   // 1. General Content
-  setVal('about-page-title', about.pageTitle || 'About sabrXwatches');
+  setVal('about-page-title', about.pageTitle || 'About SABR Watches');
   setVal('about-intro', about.intro || '');
   setVal('about-story', about.story || '');
   setVal('about-mission', about.mission || '');

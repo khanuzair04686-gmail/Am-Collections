@@ -1,4 +1,4 @@
-// sabrXwatches - Main Application Controller (Production Indian E-Commerce)
+// SABR Watches - Main Application Controller (Production Indian E-Commerce)
 
 let liveProducts = (typeof PRODUCTS_DATA !== 'undefined') ? [...PRODUCTS_DATA] : [];
 let activeCategory = 'all';
@@ -255,8 +255,8 @@ function renderProductStructuredData(products) {
         '@id': `${location.origin}/#product-${p.id}`,
         name: `${p.brand} ${p.model}`.trim(),
         category: p.category || 'Watches',
-        brand: { '@type': 'Brand', name: p.brand || 'sabrXwatches' },
-        description: p.tagline || p.description || `${p.brand} ${p.model} — luxury-styled automatic watch available from sabrXwatches.`,
+        brand: { '@type': 'Brand', name: p.brand || 'SABR Watches' },
+        description: p.tagline || p.description || `${p.brand} ${p.model} — luxury-styled automatic watch available from SABR Watches.`,
         sku: p.id,
         offers: {
           '@type': 'Offer',
@@ -276,7 +276,7 @@ function renderProductStructuredData(products) {
   const graph = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'sabrXwatches watch collection',
+    name: 'SABR Watches watch collection',
     itemListUrl: `${location.origin}/#catalog`,
     numberOfItems: items.length,
     itemListElement: items
@@ -371,6 +371,14 @@ function applyBrandingSettings(settings) {
   }
   if (settings.storePhone) {
     checkoutManager.setStorePhone(settings.storePhone);
+    // The concierge button shipped with a placeholder number in the markup; point it at
+    // whatever the admin panel has saved so it can never message a stranger.
+    const waLink = document.getElementById('floating-whatsapp');
+    if (waLink) {
+      const digits = String(settings.storePhone).replace(/\D/g, '');
+      const text = encodeURIComponent('Hi SABR Watches, I am interested in ordering a watch via Cash on Delivery.');
+      waLink.href = `https://wa.me/${digits}?text=${text}`;
+    }
   }
   const img = document.getElementById('header-logo-img');
   const monogram = document.getElementById('header-logo-monogram');
@@ -1933,7 +1941,7 @@ async function openMyOrdersModal() {
 
         <!-- WhatsApp Support Link -->
         <div class="pt-1">
-          <button onclick="checkoutManager.sendToWhatsApp('Hello sabrXwatches! I am inquiring about my watch order #${o.orderId}.')" class="w-full py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors">
+          <button onclick="checkoutManager.sendToWhatsApp('Hello SABR Watches! I am inquiring about my watch order #${o.orderId}.')" class="w-full py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors">
             <span>💬</span>
             <span>Chat regarding Order #${o.orderId}</span>
           </button>

@@ -1,4 +1,4 @@
-// sabrXwatches - Shopping Cart State & UI Drawer Controller
+// SABR Watches - Shopping Cart State & UI Drawer Controller
 
 class CartManager {
   constructor() {

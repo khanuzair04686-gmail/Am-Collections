@@ -1,4 +1,4 @@
-// sabrXwatches - Enterprise Luxury Watch E-Commerce Server
+// SABR Watches - Enterprise Luxury Watch E-Commerce Server
 // Permanent MongoDB Atlas Database Architecture (Full Mongoose Models + Direct Cloud Persistence)
 
 const express = require('express');
@@ -98,7 +98,7 @@ const uploadPhoto = multer({
 // INITIAL DEFAULTS (Used ONLY on very first initialization)
 // =====================================================
 const INITIAL_SETTINGS = {
-  storeName: 'sabrXwatches',
+  storeName: 'SABR Watches',
   tagline: 'Timeless Elegance - Master Copy Watches',
   logoUrl: '',
   faviconUrl: '',
@@ -133,9 +133,9 @@ const INITIAL_CATEGORIES = [
 
 // About Us page — seeded ONLY on very first creation (admin editable afterwards)
 const DEFAULT_ABOUT = {
-  pageTitle: 'About sabrXwatches',
-  intro: 'sabrXwatches curates master-grade luxury timepieces — 1:1 super clones of the world\'s most iconic watches, inspected piece by piece and delivered across India with cash on delivery.',
-  story: 'What began as a passion for horology grew into a mission: to make legendary watchmaking accessible without compromise. Every piece in our vault is measured against the original — weight, finish, movement sweep — before it earns the sabrXwatches name.',
+  pageTitle: 'About SABR Watches',
+  intro: 'SABR Watches curates master-grade luxury timepieces — 1:1 super clones of the world\'s most iconic watches, inspected piece by piece and delivered across India with cash on delivery.',
+  story: 'What began as a passion for horology grew into a mission: to make legendary watchmaking accessible without compromise. Every piece in our vault is measured against the original — weight, finish, movement sweep — before it earns the SABR Watches name.',
   mission: 'To deliver impeccably crafted luxury timepieces with transparent pricing, honest quality checks, and service that treats every customer like a collector.',
   vision: 'To become India\'s most trusted destination for master copy watches — where craftsmanship, trust, and timeless style meet.',
   values: 'Precision Craftsmanship • Absolute Transparency • Collector-Grade 1:1 Perfection • Pan-India Doorstep Trust',
@@ -143,7 +143,7 @@ const DEFAULT_ABOUT = {
     name: 'Founder Name',
     role: 'Founder & CEO',
     bio: 'Drives the brand vision, curates the collection, and sets the quality standard every watch must meet.',
-    longBio: 'With over a decade of horological appreciation, our founder established sabrXwatches to bring master-grade timepieces to Indian collectors without exorbitant markups.',
+    longBio: 'With over a decade of horological appreciation, our founder established SABR Watches to bring master-grade timepieces to Indian collectors without exorbitant markups.',
     photoUrl: '',
     enabled: true,
     social: { instagram: '', twitter: '', linkedin: '', email: '', phone: '' }
@@ -164,7 +164,7 @@ const DEFAULT_ABOUT = {
     { key: 'manager',   name: 'Manager Name',   role: 'Operations Manager',  bio: 'Runs day-to-day operations — inventory, dispatch, support, and making sure your order reaches you fast.', photoUrl: '', enabled: true, order: 3, social: { instagram: '', twitter: '', linkedin: '', email: '' } }
   ],
   whoIsWho: [
-    { role: 'founder',   title: 'The Founder',        description: 'The Founder owns the brand and business direction — choosing which timepieces enter the collection, setting pricing and quality policy, and steering sabrXwatches\'s growth.', enabled: true, order: 1 },
+    { role: 'founder',   title: 'The Founder',        description: 'The Founder owns the brand and business direction — choosing which timepieces enter the collection, setting pricing and quality policy, and steering SABR Watches\'s growth.', enabled: true, order: 1 },
     { role: 'developer', title: 'The Developer',      description: 'The Developer builds and maintains the software behind the store — the website, shopping cart, secure checkout, order tracking, and the Admin Panel used to manage everything.', enabled: true, order: 2 },
     { role: 'manager',   title: 'The Manager',        description: 'The Manager runs operations — stock and inventory, packing and dispatch, customer support, returns and replacements — so every order is fulfilled smoothly.', enabled: true, order: 3 }
   ],
@@ -214,7 +214,7 @@ productSchema.index({ isHidden: 1, createdAt: -1 });
 productSchema.index({ isHidden: 1, category: 1, createdAt: -1 });
 
 const brandingSchema = new mongoose.Schema({
-  storeName: { type: String, default: 'sabrXwatches' },
+  storeName: { type: String, default: 'SABR Watches' },
   tagline: { type: String, default: 'Timeless Elegance - Master Copy Watches' },
   logoUrl: { type: String, default: '' },
   faviconUrl: { type: String, default: '' },
@@ -1609,7 +1609,7 @@ app.post('/api/customer/register', async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: `Welcome to sabrXwatches, ${safe.name}! You earned 50 Welcome Coins! 🌟`,
+      message: `Welcome to SABR Watches, ${safe.name}! You earned 50 Welcome Coins! 🌟`,
       user: safe
     });
   } catch (e) {
@@ -1934,7 +1934,7 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log('\n======================================================');
-    console.log('🌟 sabrXwatches Luxury Watch Engine Online!');
+    console.log('🌟 SABR Watches Luxury Watch Engine Online!');
     console.log(`🌐 Storefront:      http://localhost:${PORT}`);
     console.log(`👑 Admin Portal:    http://localhost:${PORT}/admin.html`);
     console.log(`📦 Database:        MongoDB Atlas (Permanent Cloud)`);

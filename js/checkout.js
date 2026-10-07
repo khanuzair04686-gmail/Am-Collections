@@ -1,4 +1,4 @@
-// sabrXwatches - Enterprise Checkout & Flipkart-Style Order Experience
+// SABR Watches - Enterprise Checkout & Flipkart-Style Order Experience
 // Completely removes alert() popups, handles AM Coins, Coupons, Real-Time DB sync
 
 class CheckoutManager {
@@ -446,7 +446,7 @@ class CheckoutManager {
       year: 'numeric'
     });
 
-    let message = `🌟 *NEW LUXURY WATCH COD ORDER - sabrXwatches* 🌟\n`;
+    let message = `🌟 *NEW LUXURY WATCH COD ORDER - SABR Watches* 🌟\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
     message += `🧾 *Order ID:* #${orderId}\n`;
     message += `📅 *Date:* ${currentDate}\n\n`;
@@ -479,7 +479,7 @@ class CheckoutManager {
     }
 
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    message += `✨ *sabrXwatches* • Timeless Elegance - Master Copy Watches`;
+    message += `✨ *SABR Watches* • Timeless Elegance - Master Copy Watches`;
 
     return message;
   }
